@@ -397,3 +397,19 @@ Mỗi lần chạy hiện nhật ký trực tiếp và có nút Dừng. Tool ch�
 - Các dòng 251–254 giữ nguyên. Id ghi ở các đợt trên là id cũ.
 - **Database đang chạy thật:** chạy `python tools/migrate_option_ids.py --db <tên_db>`. Script đổi luôn chỉ số trong đồ người chơi, ký gửi, danh hiệu và thẻ radar.
 - `vsItem` tăng lên 15.
+
+## Đợt 12: `tools/NroResTool.exe`, tool tải res chạy thẳng trên Windows
+- Một file exe duy nhất, không cần cài Python hay Java. Bấm đúp là tool tự mở giao diện trên trình duyệt; tắt bằng cách đóng cửa sổ đen.
+- Tab **Tải res**: điền host/port của server, chọn:
+  - icon (id)
+  - toàn bộ part (ghi ra `Nr_Part.sql`)
+  - mount (id)
+  - aura (id)
+  - ảnh khác theo tên
+  - effect (id, cần tài khoản để vào game)
+  - file res (`data/res`)
+- Ô "Server TeaMobi chính thức" bật thêm định dạng gói của server gốc. Nếu bị server chặn vì tải nhanh, chỉnh mục "Nâng cao" (số yêu cầu mỗi đợt, thời gian chờ).
+- Tab **Xem**: duyệt icon, mount/aura, effect vừa tải.
+- Kết quả lưu vào thư mục `res_out` cạnh file exe, cùng cấu trúc với `data/` của server: `icon/x4`, `img_by_name/x4`, `effect/x4`, `effdata`, `res/x4`, `Nr_Part.sql`, `img_by_name.json`.
+- Chỉ dùng với server bạn có quyền tải dữ liệu.
+- Mã nguồn ở `tools/nro-res-exe` (Go). Build lại bằng: `cd tools/nro-res-exe && GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -o ../NroResTool.exe .`

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NRO Res Tool</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--text:#1d2330;--muted:#6b7280;--line:#e3e6eb;--acc:#e8771a;--acc2:#c75f0c;--ok:#1f9d55;--err:#d64545;--log:#11151c;--logtext:#d7dde8}
+@media (prefers-color-scheme:dark){:root{--bg:#12151b;--card:#1a1f27;--text:#e6e9ef;--muted:#9aa3b2;--line:#2a313c;--log:#0b0e13;--logtext:#cfd6e2}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--card);position:sticky;top:0;z-index:2}
+header h1{font-size:17px;margin:0}header .dot{width:12px;height:12px;border-radius:50%;background:var(--acc)}
+nav{display:flex;gap:4px;margin-left:auto}nav button{border:0;background:none;color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+nav button.on{background:var(--acc);color:#fff}
+main{max-width:1100px;margin:0 auto;padding:20px 16px;display:grid;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h2{font-size:15px;margin:0 0 12px}.hint{color:var(--muted);font-size:12.5px;margin:4px 0 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--muted)}
+input[type=text],input[type=number],input[type=password],select{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:inherit}
+.checks{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px}.checks label{flex-direction:row;align-items:center;color:var(--text);font-size:13.5px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+button.main{background:var(--acc);color:#fff;border:0;padding:9px 18px;border-radius:8px;font-weight:700;cursor:pointer}button.main:hover{background:var(--acc2)}
+button.sec{background:none;border:1px solid var(--line);color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer}
+details summary{cursor:pointer;color:var(--muted);margin-top:12px}
+.jobs{display:grid;gap:10px}.job{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.job .top{display:flex;gap:10px;align-items:center;padding:8px 12px;background:var(--bg)}.job .top b{flex:1}
+.badge{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--line)}.badge.running{background:#fde7d2;color:#9a4a07}.badge.done{background:#d5f2e1;color:#14683a}.badge.err{background:#fbdada;color:#9b2323}
+pre{margin:0;background:var(--log);color:var(--logtext);padding:10px 12px;max-height:280px;overflow:auto;font:12px/1.45 ui-monospace,Consolas,monospace;white-space:pre-wrap}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin-top:12px}
+.tile{background:repeating-conic-gradient(#8881 0 25%,transparent 0 50%) 0 0/14px 14px;border:1px solid var(--line);border-radius:8px;padding:6px;text-align:center}
+.tile img{max-width:100%;height:72px;object-fit:contain;image-rendering:pixelated}.tile div{font-size:11px;color:var(--muted);word-break:break-all}
+.drop{border:2px dashed var(--line);border-radius:10px;padding:14px;text-align:center;color:var(--muted);margin-top:12px}.drop.over{border-color:var(--acc);color:var(--acc)}
+.hide{display:none}
+@media (max-width:600px){header{flex-wrap:wrap}nav{margin-left:0;width:100%}}
+</style></head><body>
+<header><span class="dot"></span><h1>NRO Res Tool</h1>
+<nav><button data-tab="dl" class="on">Tải res</button><button data-tab="view">Xem</button></nav></header>
+<main>
+<section id="tab-dl" class="card">
+  <h2>Tải res từ server</h2>
+  <div class="grid">
+    <label>Host<input type="text" id="d_host" value="127.0.0.1"></label>
+    <label>Port<input type="number" id="d_port" value="14445"></label>
+    <label>Tài khoản (cần cho effect)<input type="text" id="d_user"></label>
+    <label>Mật khẩu<input type="password" id="d_password"></label>
+    <label>Thư mục lưu<input type="text" id="d_out" value="res_out"></label>
+    <label>Cỡ ảnh<select id="d_zoom"><option>4</option><option>3</option><option>2</option><option>1</option></select></label>
+  </div>
+  <div class="grid" style="margin-top:12px">
+    <label>Icon (id)<input type="text" id="d_icons" placeholder="0-20000"></label>
+    <label>Mount (id)<input type="text" id="d_mounts" placeholder="0-120"></label>
+    <label>Aura (id)<input type="text" id="d_auras" placeholder="0-130"></label>
+    <label>Effect (id)<input type="text" id="d_effects" placeholder="0-1200"></label>
+    <label>Ảnh khác theo tên<input type="text" id="d_names" placeholder="ten_anh_0,ten_anh_1"></label>
+  </div>
+  <div class="checks"><label><input type="checkbox" id="d_parts" checked> Toàn bộ part</label><label><input type="checkbox" id="d_res"> File res (data/res)</label><label><input type="checkbox" id="d_official"> Server TeaMobi chính thức</label></div>
+  <details><summary>Nâng cao</summary><div class="grid" style="margin-top:10px">
+    <label>Platform|phiên bản<input type="text" id="d_platform" value="pc|2.3.3"></label>
+    <label>Phiên bản đăng nhập<input type="text" id="d_version" value="2.3.3"></label>
+    <label>Số yêu cầu mỗi đợt<input type="number" id="d_batch" value="50"></label>
+    <label>Chờ sau mỗi đợt (giây)<input type="number" step="0.1" id="d_wait" value="1.5"></label>
+    <label>Nghỉ giữa yêu cầu (giây)<input type="number" step="0.01" id="d_delay" value="0"></label>
+  </div></details>
+  <div class="row"><button class="main" id="btn_dl">Bắt đầu tải</button><button class="sec" id="btn_open">Mở thư mục kết quả</button><span class="hint" id="dir_hint"></span></div>
+  <p class="hint">Effect cần tài khoản để vào game. Chỉ dùng với server bạn có quyền tải dữ liệu.</p>
+</section>
+
+
+
+<section id="tab-view" class="card hide">
+  <h2>Xem ảnh</h2>
+  <div class="grid">
+    <label style="grid-column:span 2">Thư mục (gói đã tải hoặc thư mục server)<input type="text" id="v_root" value="res_out"></label>
+    <label>Loại<select id="v_kind"><option value="icon">Icon</option><option value="img_by_name">Mount / aura</option><option value="effect">Effect</option></select></label>
+    <label>Lọc theo tên/id<input type="text" id="v_filter" placeholder="vd 176"></label>
+  </div>
+  <div class="row"><button class="main" id="btn_view">Xem</button><button class="sec" id="btn_more">Thêm 300</button><span class="hint" id="v_info"></span></div>
+  <div class="gallery" id="gallery"></div>
+</section>
+
+<section class="card"><h2>Tiến trình</h2><div class="jobs" id="jobs"><span class="hint">Chưa có tiến trình nào.</span></div></section>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+fetch('/api/config').then(r=>r.json()).then(c=>{ $('dir_hint').textContent = 'Thư mục tương đối tính từ chỗ đặt file exe: ' + c.dir });
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
+  ['dl','view'].forEach(t => $('tab-'+t).classList.toggle('hide', t !== b.dataset.tab));
+});
+function form(prefix, keys){const o={};keys.forEach(k=>{const e=$(prefix+k);if(!e)return;if(e.type==='checkbox')o[k]=e.checked;else if(e.value.trim()!=='')o[k]=e.value.trim()});return o}
+async function post(url, body, headers){const r=await fetch(url,{method:'POST',body,headers});const j=await r.json();if(!r.ok)throw new Error(j.error||r.status);return j}
+const jobs = {};
+async function track(id){
+  jobs[id] = {since:0}; renderJob(id, {title:'...', status:'running', lines:[]});
+  const tick = async () => {
+    const r = await fetch(`/api/job/${id}?since=${jobs[id].since}`); const j = await r.json();
+    jobs[id].since = j.total; renderJob(id, j);
+    if (j.status === 'running') setTimeout(tick, 800);
+  }; tick();
+}
+function renderJob(id, j){
+  let el = $('job-'+id);
+  if (!el){ if ($('jobs').querySelector('.hint')) $('jobs').innerHTML='';
+    el = document.createElement('div'); el.className='job'; el.id='job-'+id;
+    el.innerHTML = `<div class="top"><b></b><span class="badge"></span><button class="sec">Dừng</button></div><pre></pre>`;
+    el.querySelector('button').onclick = () => post('/api/stop/'+id);
+    $('jobs').prepend(el); }
+  el.querySelector('b').textContent = j.title;
+  const bd = el.querySelector('.badge'); bd.textContent = j.status === 'running' ? 'đang chạy' : j.status === 'done' ? 'xong' : j.status;
+  bd.className = 'badge ' + (j.status === 'running' ? 'running' : j.status === 'done' ? 'done' : 'err');
+  el.querySelector('button').classList.toggle('hide', j.status !== 'running');
+  if (j.lines && j.lines.length){ const pre = el.querySelector('pre'); pre.textContent += j.lines.join('\n') + '\n'; pre.scrollTop = pre.scrollHeight; }
+}
+$('btn_dl').onclick = async () => {
+  try { const f = form('d_', ['host','port','user','password','out','zoom','icons','mounts','auras','effects','names','parts','res','official','platform','version','batch','wait','delay']);
+    const r = await post('/api/download', JSON.stringify(f), {'Content-Type':'application/json'}); track(r.id);
+    $('v_root').value = f.out; } catch(e){ alert(e.message) }
+};
+let vOffset = 0;
+async function view(more){
+  if (!more){ vOffset = 0; $('gallery').innerHTML=''; }
+  const root = $('v_root').value.trim(), kind = $('v_kind').value, flt = $('v_filter').value.trim().toLowerCase();
+  const r = await (await fetch(`/api/images?root=${encodeURIComponent(root)}&kind=${kind}&offset=${vOffset}&limit=300`)).json();
+  if (!r.base){ $('v_info').textContent = 'Không thấy thư mục ảnh'; return }
+  $('v_info').textContent = `${r.base} · ${r.total} ảnh`;
+  r.items.filter(n => !flt || n.toLowerCase().includes(flt)).forEach(n => {
+    const t = document.createElement('div'); t.className='tile';
+    t.innerHTML = `<img loading="lazy" src="/img?p=${encodeURIComponent(r.base + '/' + n)}"><div>${n.replace('.png','')}</div>`;
+    $('gallery').append(t); });
+  vOffset += r.items.length;
+}
+$('btn_open').onclick = () => fetch('/api/open?p=' + encodeURIComponent($('d_out').value.trim()));
+$('btn_view').onclick = () => view(false); $('btn_more').onclick = () => view(true);
+fetch('/api/jobs').then(r=>r.json()).then(list => list.forEach(j => track(j.id)));
+</script></body></html>
