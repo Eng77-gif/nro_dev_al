@@ -328,3 +328,38 @@ Bước 3 đổi luôn đồ trong hành trang, rương và trên người.
 **Chưa có chức năng:**
 - Pet rắn cute và Pet Pikachu chưa có hình đi theo, vì chưa có part.
 - Năng lượng tà ác chưa có hiệu ứng khi dùng.
+
+## Đợt 10: tool tải và nhập res, sửa part 1999
+**Sửa lỗi part 1999:** part đầu 1999 chỉ có 2 khung, trong khi client luôn đọc đầu đủ 3 khung. Vì vậy client đọc lệch mọi part từ 2000 trở đi, gồm cả các cải trang mới thêm. Đã thêm khung trống cho đủ 3 và tăng `vsData` lên 15 để client tải lại part.
+
+### `tools/res_download.py`: tải res từ một server NRO
+Tool đăng nhập server như một client thật, rồi tải về:
+- icon (`--icons 0-20000`)
+- toàn bộ part, ghi ra `Nr_Part.sql` (`--parts`)
+- mount, aura và ảnh theo tên (`--mounts 0-120 --auras 0-130 --names ...`)
+- effect (`--effects 0-1200`, cần đăng nhập)
+- file trong `data/res` (`--res`)
+
+Ví dụ:
+```
+python tools/res_download.py --host <ip> --port 14445 --user <tk> --password <mk> --icons 0-20000 --parts --mounts 0-120 --auras 0-130 --effects 0-1200 --out res_out
+```
+- Chỉ dùng với server bạn có quyền tải dữ liệu, bằng tài khoản của bạn.
+- Server chính thức của TeaMobi có thể đòi chuỗi phiên bản hoặc thông tin client khác; đổi bằng `--platform` và `--version`.
+- Tải nhanh quá có thể bị server chặn; chỉnh nhịp tải bằng `--batch`, `--wait`, `--delay`.
+
+### `tools/res_import.py`: nhập gói res vào server
+Tool đọc một thư mục gói res (gói team hoặc thư mục do `res_download.py` tải về):
+- Icon, mount/aura và effect: chép vào `data/`. Ảnh chỉ có cỡ x4 được tự thu nhỏ ra x1–x3.
+- Part trong `Nr_Part.sql`:
+  - Mặc định chỉ thêm part dùng icon có trong gói và chưa có y hệt trong database.
+  - Part mới được đánh id nối tiếp id lớn nhất hiện có; bảng đổi id thư viện → id mới ghi ở đầu file SQL.
+- Mount/aura: tự thêm dòng `img_by_name` với số khung (lấy từ `img_by_name.json` hoặc tự đoán).
+
+Ví dụ:
+```
+python tools/res_import.py "D:/res team new 16th10" --db team2026 --apply
+```
+- Thêm `--apply` để chạy SQL bằng lệnh `mysql`; không có thì chỉ ghi file `res_import.sql`.
+- `--parts 2064-2072` để chỉ nhập các part chỉ định; `--overwrite` để ghi đè file đã có.
+- Nhập xong nhớ tăng `vsData` để client tải lại part.
