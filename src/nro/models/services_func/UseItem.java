@@ -945,6 +945,10 @@ public class UseItem {
                                     Event2026Service.gI().equipFoot(pl, item);
                                     return;
                                 }
+                                if (item.template.id == Event2026Service.SKH_BEERUS_BOX) {
+                                    Event2026Service.gI().openSkhBeerusMenu(pl);
+                                    return;
+                                }
                                 if (Event2026Service.gI().isBox(item)) {
                                     Event2026Service.gI().openBox(pl, item);
                                     return; // hộp có thể đã bị dispose khi trừ hết số lượng

@@ -258,6 +258,8 @@ public class Player implements Runnable {
     public int auraReward = -1; // aura thưởng top
     public long auraRewardUntil;
     public int qlRewardRank; // hạng đua top đang chờ nhận thưởng (0 = không có)
+    public int hdbaCount; // số Hộp đen bí ẩn đã mua (đua top)
+    public int hdbaRewardRank; // hạng top mua Hộp đen bí ẩn đang chờ nhận quà
     public long timePKVDST;
 
     public int binhChonHatMit;

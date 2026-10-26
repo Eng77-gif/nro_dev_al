@@ -12,6 +12,7 @@ import nro.models.server.Manager;
 import nro.models.services.Service;
 import nro.models.services_func.Input;
 import nro.models.shop.ShopService;
+import nro.models.services.Event2026Service;
 
 /**
  *
@@ -19,6 +20,8 @@ import nro.models.shop.ShopService;
  *
  */
 public class ChiChi extends Npc {
+
+    private static final int MENU_HOP_DEN = 2095;
 
     public ChiChi(int mapId, int status, int cx, int cy, int tempId, int avartar) {
         super(mapId, status, cx, cy, tempId, avartar);
@@ -32,6 +35,7 @@ public class ChiChi extends Npc {
                     "Top\nNước mía",
                     "Top\nKem trái cây",
                     "Cửa hàng",
+                    "Hộp đen\nbí ẩn",
                     "Đóng"));
 
             String[] menus = menu.toArray(new String[0]);
@@ -51,6 +55,18 @@ public class ChiChi extends Npc {
                     switch (select) {
                         case 3:
                             ShopService.gI().opendShop(player, "SHOP_CHI_CHI", false);
+                            break;
+                        case 4:
+                            createOtherMenu(player, MENU_HOP_DEN,
+                                    "Hộp đen bí ẩn giá " + Event2026Service.HOP_DEN_GIA_NGOC + " ngọc\n"
+                                    + "Mở ra có cơ hội nhận Bóng WC 2026, Cải trang Hit, Mảnh thẻ VIP, Năng lượng tà ác, Pet rắn cute, "
+                                    + "Phượng hoàng băng, Pet Pikachu, Cải trang Goku cận vô cực (có hạn sử dụng hoặc vĩnh viễn)\n"
+                                    + "Đua top mua hộp: top 1 nhận Danh hiệu Đón Xuân 180 ngày, Đá bảo vệ x100, Capsule 1 món kích hoạt x3, "
+                                    + "Capsule vỡ x3, Bông tai cấp 3, Giáp tập luyện cấp 5\n"
+                                    + "Bạn đã mua: " + player.hdbaCount + " hộp",
+                                    "Mua 1 hộp\n" + Event2026Service.HOP_DEN_GIA_NGOC + " ngọc",
+                                    "Mua 10 hộp\n" + (Event2026Service.HOP_DEN_GIA_NGOC * 10) + " ngọc",
+                                    "Top\nmua hộp", "Đóng");
                             break;
                         case 0:
                             createOtherMenu(player, ConstNpc.PHAO_BONG_VIP,
@@ -73,6 +89,12 @@ public class ChiChi extends Npc {
                                     "Xem điểm",
                                     "Đóng");
                             break;
+                    }
+                } else if (player.idMark.getIndexMenu() == MENU_HOP_DEN) {
+                    switch (select) {
+                        case 0 -> Event2026Service.gI().buyHopDen(player, 1);
+                        case 1 -> Event2026Service.gI().buyHopDen(player, 10);
+                        case 2 -> nro.models.map.service.NpcService.gI().createTutorial(player, tempId, this.avartar, Event2026Service.gI().topHopDenText());
                     }
                 } else if (player.idMark.getIndexMenu() == ConstNpc.PHAO_BONG_VIP) {
                     switch (select) {

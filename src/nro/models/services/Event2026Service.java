@@ -368,4 +368,161 @@ public class Event2026Service {
         }
         return l;
     }
+
+    // ------------------------------------------------------------------ Hộp đen bí ẩn (NPC Chi Chi, đua top mua hộp)
+
+    public static final int HOP_DEN_BI_AN = 2095;
+    public static final int HOP_DEN_GIA_NGOC = 20;
+
+    /** Mua Hộp đen bí ẩn bằng ngọc xanh; mỗi hộp mua được tính 1 điểm đua top. */
+    public synchronized void buyHopDen(Player pl, int qty) {
+        long cost = (long) HOP_DEN_GIA_NGOC * qty;
+        if (pl.inventory.gem < cost) {
+            Service.gI().sendThongBao(pl, "Cần " + cost + " ngọc để mua " + qty + " Hộp đen bí ẩn");
+            return;
+        }
+        Item box = createItem(HOP_DEN_BI_AN, qty, 0);
+        if (!InventoryService.gI().addItemBag(pl, box)) {
+            Service.gI().sendThongBao(pl, "Hành trang không còn chỗ trống");
+            return;
+        }
+        pl.inventory.gem -= (int) cost;
+        pl.hdbaCount += qty;
+        PlayerExtraDAO.save(pl);
+        Service.gI().sendMoney(pl);
+        InventoryService.gI().sendItemBags(pl);
+        Service.gI().sendThongBao(pl, "Đã mua " + qty + " Hộp đen bí ẩn, điểm đua top: " + pl.hdbaCount);
+    }
+
+    public String topHopDenText() {
+        StringBuilder sb = new StringBuilder("|1|Top mua Hộp đen bí ẩn\n");
+        List<Object[]> top = PlayerExtraDAO.top("hdba_count", 10);
+        if (top.isEmpty()) {
+            sb.append("Chưa có ai tham gia");
+        }
+        for (int i = 0; i < top.size(); i++) {
+            sb.append("|").append(i < 3 ? 7 : 0).append("|").append(i + 1).append(". ").append(top.get(i)[1]).append(": ").append(top.get(i)[2]).append(" hộp\n");
+        }
+        return sb.toString();
+    }
+
+    /** Admin: chốt top mua Hộp đen bí ẩn (top 10 nhận quà), đưa điểm về 0. */
+    public synchronized int closeHopDenRace() {
+        try {
+            for (Player p : new ArrayList<>(Client.gI().getPlayers())) {
+                if (p != null && p.hdbaCount > 0) {
+                    PlayerExtraDAO.save(p);
+                }
+            }
+            List<Object[]> top = PlayerExtraDAO.top("hdba_count", 10);
+            for (int i = 0; i < top.size(); i++) {
+                int playerId = (int) top.get(i)[0];
+                Player online = Client.gI().getPlayer((long) playerId);
+                if (online != null) {
+                    online.hdbaRewardRank = i + 1;
+                }
+                LocalManager.executeUpdate("update player_extra set hdba_reward_rank = ? where player_id = ?", i + 1, playerId);
+            }
+            LocalManager.executeUpdate("update player_extra set hdba_count = 0");
+            for (Player p : new ArrayList<>(Client.gI().getPlayers())) {
+                if (p != null) {
+                    p.hdbaCount = 0;
+                    deliverHopDenReward(p);
+                }
+            }
+            Logger.success("Đã chốt top Hộp đen bí ẩn: " + top.size() + " người\n");
+            return top.size();
+        } catch (Exception e) {
+            Logger.logException(Event2026Service.class, e, "Lỗi chốt top Hộp đen bí ẩn");
+            return 0;
+        }
+    }
+
+    public void deliverHopDenReward(Player pl) {
+        int rank = pl.hdbaRewardRank;
+        if (rank <= 0) {
+            return;
+        }
+        List<Item> items = new ArrayList<>();
+        if (rank <= 3) {
+            int k = rank - 1;
+            if (rank == 1) {
+                items.add(createItem(1978, 1, 180)); // Danh hiệu Đón Xuân 180 ngày
+            }
+            items.add(createItem(987, new int[]{100, 70, 50}[k], 0)); // Đá bảo vệ
+            items.add(createItem(1559, new int[]{3, 2, 1}[k], 0)); // Capsule 1 món kích hoạt
+            items.add(createItem(CAPSULE_VO, new int[]{3, 2, 1}[k], 0));
+            if (rank == 1) {
+                Item bt3 = createItem(1884, 1, 0); // Bông tai Porata cấp 3
+                bt3.itemOptions.removeIf(io -> io.optionTemplate.id == 72);
+                bt3.itemOptions.add(new Item.ItemOption(72, 3));
+                items.add(bt3);
+                items.add(createItem(2006, 1, 0)); // Giáp tập luyện cấp 5
+            }
+        } else {
+            items.add(createItem(987, 20, 0));
+            items.add(createItem(CAPSULE_VO, 1, 0));
+        }
+        if (InventoryService.gI().getCountEmptyBag(pl) < items.size()) {
+            Service.gI().sendThongBao(pl, "Bạn có quà đua top Hộp đen bí ẩn (hạng " + rank + "), cần " + items.size() + " ô trống hành trang để nhận");
+            return;
+        }
+        pl.hdbaRewardRank = 0;
+        for (Item it : items) {
+            InventoryService.gI().addItemBag(pl, it);
+        }
+        PlayerExtraDAO.save(pl);
+        InventoryService.gI().sendItemBags(pl);
+        Service.gI().sendThongBao(pl, "Chúc mừng bạn đạt hạng " + rank + " đua top mua Hộp đen bí ẩn, quà đã được gửi vào hành trang");
+    }
+
+    // ------------------------------------------------------------------ SKH Thần hủy diệt Beerus (đồ cấp 12)
+
+    public static final int SKH_BEERUS_BOX = 2102; // Set kích hoạt Beerus 1 món tự chọn
+    /** [hành tinh][Áo, Quần, Găng, Giày]: đồ cấp 12 (jean Calic / vàng Zealot / lưỡng long) */
+    private static final int[][] SKH_BEERUS_GEAR = {{233, 245, 257, 269}, {237, 249, 261, 273}, {241, 253, 265, 277}};
+    private static final int RADA_CAP_12 = 281;
+
+    public Item createSkhBeerus(int tempId) {
+        Item it = createItem(tempId, 1, 0);
+        addSkhBeerusOptions(it.itemOptions);
+        return it;
+    }
+
+    /** Dòng set Beerus (260), mô tả 2/4/5 món (261 - 263) và không giao dịch (30). */
+    public static void addSkhBeerusOptions(List<Item.ItemOption> options) {
+        options.add(new Item.ItemOption(260, 0));
+        options.add(new Item.ItemOption(261, 0));
+        options.add(new Item.ItemOption(262, 0));
+        options.add(new Item.ItemOption(263, 0));
+        options.add(new Item.ItemOption(30, 0));
+    }
+
+    public static int skhBeerusGear(int gender, int type) {
+        return type == 4 ? RADA_CAP_12 : SKH_BEERUS_GEAR[Math.min(Math.max(gender, 0), 2)][type];
+    }
+
+    public void openSkhBeerusMenu(Player pl) {
+        nro.models.map.service.NpcService.gI().createMenuConMeo(pl, SKH_BEERUS_BOX, -1,
+                "Chọn 1 món Set Thần hủy diệt Beerus", "Áo", "Quần", "Găng", "Giày", "Rada", "Đóng");
+    }
+
+    public void openSkhBeerusBox(Player pl, int select) {
+        if (select < 0 || select > 4) {
+            return;
+        }
+        Item box = InventoryService.gI().findItemBag(pl, SKH_BEERUS_BOX);
+        if (box == null) {
+            return;
+        }
+        if (InventoryService.gI().getCountEmptyBag(pl) <= 0) {
+            Service.gI().sendThongBao(pl, "Hành trang không còn chỗ trống");
+            return;
+        }
+        Item it = createSkhBeerus(skhBeerusGear(pl.gender, select));
+        InventoryService.gI().subQuantityItemsBag(pl, box, 1);
+        InventoryService.gI().addItemBag(pl, it);
+        InventoryService.gI().sendItemBags(pl);
+        Service.gI().sendThongBao(pl, "Bạn nhận được " + it.template.name + " (Set Thần hủy diệt Beerus)");
+    }
 }

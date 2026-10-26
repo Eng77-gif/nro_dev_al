@@ -808,6 +808,7 @@ public class Controller implements IMessageHandler {
                             player.sendNewPet();
                             nro.models.player_badges.BadgesService.checkPerfect(player);
                             nro.models.services.Event2026Service.gI().deliverRaceReward(player);
+                            nro.models.services.Event2026Service.gI().deliverHopDenReward(player);
                             if (player.getSession() != null && player.getSession().tongnap > 0) {
                                 AchievementService.gI().checkDoneTask(player, ConstAchievement.LAN_DAU_NAP_NGOC);
                             }

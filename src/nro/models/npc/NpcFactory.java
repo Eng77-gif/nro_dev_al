@@ -358,6 +358,8 @@ public class NpcFactory {
                                 Service.gI().sendThongBao(player, "Lựa chọn không hợp lệ.");
                         }
                     }
+                    case nro.models.services.Event2026Service.SKH_BEERUS_BOX ->
+                        nro.models.services.Event2026Service.gI().openSkhBeerusBox(player, select);
                     case ConstNpc.CAPSULE_KICH_HOAT -> {
                         try {
                             switch (select) {

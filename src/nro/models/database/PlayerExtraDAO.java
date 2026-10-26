@@ -27,6 +27,8 @@ public class PlayerExtraDAO {
                 player.auraReward = rs.getInt("aura_reward");
                 player.auraRewardUntil = rs.getLong("aura_until");
                 player.qlRewardRank = rs.getInt("ql_reward_rank");
+                player.hdbaCount = rs.getInt("hdba_count");
+                player.hdbaRewardRank = rs.getInt("hdba_reward_rank");
             }
         } catch (Exception e) {
             Logger.logException(PlayerExtraDAO.class, e, "Lỗi tải player_extra " + player.name);
@@ -39,8 +41,9 @@ public class PlayerExtraDAO {
 
     public static void save(Player player) {
         try {
-            LocalManager.executeUpdate("replace into player_extra (player_id, item_foot, ql_points, aura_reward, aura_until, ql_reward_rank) values (?, ?, ?, ?, ?, ?)",
-                    player.id, toJson(player.itemFoot), player.qlPoints, player.auraReward, player.auraRewardUntil, player.qlRewardRank);
+            LocalManager.executeUpdate("replace into player_extra (player_id, item_foot, ql_points, aura_reward, aura_until, ql_reward_rank, hdba_count, hdba_reward_rank) values (?, ?, ?, ?, ?, ?, ?, ?)",
+                    player.id, toJson(player.itemFoot), player.qlPoints, player.auraReward, player.auraRewardUntil, player.qlRewardRank,
+                    player.hdbaCount, player.hdbaRewardRank);
         } catch (Exception e) {
             Logger.logException(PlayerExtraDAO.class, e, "Lỗi lưu player_extra " + player.name);
         }
@@ -58,13 +61,23 @@ public class PlayerExtraDAO {
      * Top người chơi theo điểm Quy Lão: mỗi phần tử {player_id, name, points}.
      */
     public static List<Object[]> topQl(int limit) {
+        return top("ql_points", limit);
+    }
+
+    /**
+     * Top theo một cột điểm của player_extra (ql_points, hdba_count): mỗi phần tử {player_id, name, points}.
+     */
+    public static List<Object[]> top(String column, int limit) {
+        if (!column.equals("ql_points") && !column.equals("hdba_count")) {
+            throw new IllegalArgumentException(column);
+        }
         List<Object[]> list = new ArrayList<>();
         LocalResultSet rs = null;
         try {
-            rs = LocalManager.executeQuery("select e.player_id, p.name, e.ql_points from player_extra e join player p on p.id = e.player_id "
-                    + "where e.ql_points > 0 order by e.ql_points desc, e.player_id asc limit ?", limit);
+            rs = LocalManager.executeQuery("select e.player_id, p.name, e." + column + " from player_extra e join player p on p.id = e.player_id "
+                    + "where e." + column + " > 0 order by e." + column + " desc, e.player_id asc limit ?", limit);
             while (rs.next()) {
-                list.add(new Object[]{rs.getInt("player_id"), rs.getString("name"), rs.getInt("ql_points")});
+                list.add(new Object[]{rs.getInt("player_id"), rs.getString("name"), rs.getInt(column)});
             }
         } catch (Exception e) {
             Logger.logException(PlayerExtraDAO.class, e);

@@ -987,7 +987,7 @@ CREATE TABLE `data_badges` (
   `NAME` text CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
   `Options` text NOT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=226 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=227 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `data_badges` WRITE;
@@ -1011,7 +1011,8 @@ INSERT INTO `data_badges` VALUES
 (18,226,1297,'KOL','[{\"param\":10,\"id\":50},{\"param\":10,\"id\":77},{\"param\":10,\"id\":103},{\"param\":30,\"id\":93}]'),
 (223,300,1885,'Phá Cổ Trung Thu','[{\"param\":14,\"id\":50},{\"param\":14,\"id\":77},{\"param\":10,\"id\":10},{\"param\":7,\"id\":14},{\"param\":30,\"id\":93}]'),
 (224,301,2076,'Phá Cổ Trung Thu VIP','[{\"param\":20,\"id\":50},{\"param\":20,\"id\":77},{\"param\":20,\"id\":103},{\"param\":20,\"id\":10},{\"param\":10,\"id\":14}]'),
-(225,302,2081,'Perfect','[{\"param\":14,\"id\":50},{\"param\":14,\"id\":77},{\"param\":14,\"id\":103},{\"param\":5,\"id\":10},{\"param\":2,\"id\":251}]');
+(225,302,2081,'Perfect','[{\"param\":14,\"id\":50},{\"param\":14,\"id\":77},{\"param\":14,\"id\":103},{\"param\":5,\"id\":10},{\"param\":2,\"id\":251}]'),
+(226,303,1978,'Đón Xuân','[]');
 /*!40000 ALTER TABLE `data_badges` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `flag_bag`;
@@ -2177,7 +2178,7 @@ CREATE TABLE `item_box_reward` (
   `perm_rate` int(11) NOT NULL DEFAULT 0 COMMENT '% ra vĩnh viễn khi có HSD',
   PRIMARY KEY (`id`),
   KEY `box_id` (`box_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `item_box_reward` WRITE;
@@ -2236,7 +2237,15 @@ INSERT INTO `item_box_reward` VALUES
 (64,2087,628,1,1,2,'',0),
 (65,2078,1871,1,1,6,'7,15,30',5),
 (66,2080,1871,1,1,6,'7,15,30',5),
-(67,2079,1886,1,1,3,'7,15,30',20);
+(67,2079,1886,1,1,3,'7,15,30',20),
+(68,2095,2017,1,1,8,'7,15,30',20),
+(69,2095,884,1,1,10,'7,15,30',5),
+(70,2095,2089,1,3,20,'',0),
+(71,2095,2098,1,2,20,'',0),
+(72,2095,1774,1,1,10,'7,15,30',5),
+(73,2095,1443,1,1,8,'7,15,30',5),
+(74,2095,1870,1,1,10,'7,15,30',5),
+(75,2095,2020,1,1,5,'7,15,30',5);
 /*!40000 ALTER TABLE `item_box_reward` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `item_option_template`;
@@ -2513,9 +2522,9 @@ INSERT INTO `item_option_template` VALUES
 (258,'Đi cùng Cờ World Cup 2026 tăng #% chí mạng'),
 (259,'Đi cùng SKH Beerus tăng #% chí mạng'),
 (260,'Set Thần hủy diệt Beerus'),
-(261,'$[2] +10% sức đánh, +10% sát thương chí mạng'),
-(262,'$[4] +15% sức đánh, +20% sát thương chí mạng'),
-(263,'$[5] +30% sức đánh, +30% sát thương chí mạng'),
+(261,'$[2] Tăng vừa phải sức đánh và sát thương chí mạng'),
+(262,'$[4] Tăng đáng kể sức đánh và sát thương chí mạng'),
+(263,'$[5] Tăng mạnh sức đánh và sát thương chí mạng'),
 (264,'Đi cùng Pet Xên hoàn thiện tăng #% sát thương chí mạng'),
 (265,'Đi cùng Pet Xên Max tăng #% giảm sát thương');
 /*!40000 ALTER TABLE `item_option_template` ENABLE KEYS */;
@@ -9929,6 +9938,8 @@ CREATE TABLE `player_extra` (
   `aura_reward` int(11) NOT NULL DEFAULT -1,
   `aura_until` bigint(20) NOT NULL DEFAULT 0,
   `ql_reward_rank` int(11) NOT NULL DEFAULT 0 COMMENT 'hạng top đang chờ nhận quà',
+  `hdba_count` int(11) NOT NULL DEFAULT 0 COMMENT 'số Hộp đen bí ẩn đã mua (đua top)',
+  `hdba_reward_rank` int(11) NOT NULL DEFAULT 0 COMMENT 'hạng top Hộp đen bí ẩn đang chờ nhận quà',
   PRIMARY KEY (`player_id`),
   KEY `ql_points` (`ql_points`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

@@ -58,6 +58,8 @@ public class Command {
         adminCommands.put("getitem", player -> Input.gI().createFormGetItem(player));
         adminCommands.put("chottopql", player -> Service.gI().sendThongBao(player, "Đã chốt top Quy Lão: "
                 + nro.models.services.Event2026Service.gI().closeRace(player) + " người nhận quà"));
+        adminCommands.put("chottophdba", player -> Service.gI().sendThongBao(player, "Đã chốt top Hộp đen bí ẩn: "
+                + nro.models.services.Event2026Service.gI().closeHopDenRace() + " người nhận quà"));
         adminCommands.put("hs", player -> Service.gI().releaseCooldownSkill(player));
         adminCommands.put("d", player -> Service.gI().setPos(player, player.location.x, player.location.y + 10));
         adminCommands.put("a", player -> NpcService.gI().createMenuConMeo(player, ConstNpc.MENU_ADMIN, -1,

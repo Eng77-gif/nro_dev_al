@@ -203,7 +203,7 @@ Các option của danh hiệu (chí mạng, sát thương chuẩn…) trước �
 Phần hình 3 cải trang Đường Phố là part 2158–2166, lấy từ `Nr_Part.sql` của gói team new 16th10. `vsData` và `vsItem` tăng lên 11 để client tải lại dữ liệu.
 
 ### SKH Thần hủy diệt Beerus
-- Đồ Hủy Diệt rơi từ Super Broly (1%) mang dòng set 260 và 3 dòng mô tả 261–263.
+- Đồ Hủy Diệt rơi từ Super Broly (1%) mang dòng set 260 và 3 dòng mô tả 261–263. (Đợt 9 đổi sang đồ cấp 12.)
 - Mặc 2 món: +10% SĐ, +10% ST chí mạng.
 - Mặc 4 món: +15% SĐ, +20% ST chí mạng.
 - Mặc 5 món: +30% SĐ, +30% ST chí mạng.
@@ -296,3 +296,35 @@ Bước 3 đổi luôn đồ trong hành trang, rương và trên người.
 **Bảng chỉ số chi tiết:** client là Unity đã biên dịch nên không thêm được bảng nổi như video. Thay vào đó:
 - Chat `chiso` để xem chỉ số của mình, `chiso de` để xem chỉ số đệ tử.
 - Bảng gồm: HP, MP, Sức đánh, Chí mạng, STCM, Giáp, Giảm sát thương, Sát thương chuẩn, Sát thương cuối, Sát thương Boss, Né đòn, Hút máu, Hút KI, TNSM, Vàng rơi từ quái, và các set đang kích hoạt.
+
+## Đợt 9: Hộp đen bí ẩn và SKH Beerus theo bản chính thức
+**Hộp đen bí ẩn** (id 2095):
+- NPC Chi Chi bán giá 20 ngọc, có nút mua 1 hộp hoặc 10 hộp.
+- Mở ra nhận ngẫu nhiên một trong các món:
+  - Bóng WC 2026: có bảo hiểm, 20% vĩnh viễn
+  - Cải trang Hit
+  - Mảnh thẻ VIP (Tờ mảnh VIP)
+  - Năng lượng tà ác
+  - Pet rắn cute
+  - Phượng hoàng băng
+  - Pet Pikachu
+  - Cải trang Goku cận vô cực
+- Đồ mặc được có HSD 7/15/30 ngày hoặc vĩnh viễn. Tỉ lệ do mình đặt vì bài đăng không ghi.
+
+**Đua top mua hộp:**
+- Mỗi hộp mua được tính 1 điểm. Xem top ở Chi Chi; admin chat `chottophdba` để chốt top.
+- Quà:
+  - Top 1 (theo bài đăng): Danh hiệu Đón Xuân 180 ngày, Đá bảo vệ x100, Capsule 1 món kích hoạt x3, Capsule vỡ x3, Bông tai Porata cấp 3, Giáp tập luyện cấp 5.
+  - Top 2–3: Đá bảo vệ x70/x50, Capsule 1 món kích hoạt x2/x1, Capsule vỡ x2/x1.
+  - Top 4–10: Đá bảo vệ x20, Capsule vỡ x1.
+  - Quà top 2 trở đi do mình đặt vì ảnh bài đăng bị cắt.
+- Danh hiệu Đón Xuân (1978) đã có dòng trong `data_badges` (idEffect 303) để kích hoạt được, nhưng chưa có chỉ số.
+
+**SKH Thần hủy diệt Beerus:**
+- Dòng mô tả đổi theo bản chính thức: "[2] Tăng vừa phải…", "[4] Tăng đáng kể…", "[5] Tăng mạnh sức đánh và sát thương chí mạng". Đồ mang set này không giao dịch được.
+- Super Broly rơi set này trên đồ cấp 12 (jean Calic / vàng Zealot / lưỡng long, Rada cấp 12) thay cho đồ Hủy Diệt.
+- "Set kích hoạt Beerus 1 món tự chọn" (2102): dùng để chọn Áo/Quần/Găng/Giày/Rada đúng hành tinh.
+
+**Chưa có chức năng:**
+- Pet rắn cute và Pet Pikachu chưa có hình đi theo, vì chưa có part.
+- Năng lượng tà ác chưa có hiệu ứng khi dùng.

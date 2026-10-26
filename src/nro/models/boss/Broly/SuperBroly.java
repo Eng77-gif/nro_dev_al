@@ -93,14 +93,11 @@ public class SuperBroly extends Boss {
         if (Util.isTrue(30, 100)) {
             dropEquip(plKill, 8, 11, Util.isTrue(3, 100) ? 8 : Util.nextInt(1, 5), x, y);
         }
-        // Set kích hoạt Thần hủy diệt Beerus (đồ Hủy Diệt mang dòng set 260 + mô tả 2/4/5 món)
+        // Set kích hoạt Thần hủy diệt Beerus: đồ cấp 12 (jean Calic / vàng Zealot / lưỡng long, rada 12)
         if (Util.isTrue(1, 100)) {
-            ItemMap hd = dropEquip(plKill, 14, 14, 0, x, y);
-            if (hd != null) {
-                hd.options.add(new Item.ItemOption(260, 0));
-                hd.options.add(new Item.ItemOption(261, 0));
-                hd.options.add(new Item.ItemOption(262, 0));
-                hd.options.add(new Item.ItemOption(263, 0));
+            ItemMap skh = dropEquip(plKill, 12, 12, 0, x, y);
+            if (skh != null) {
+                nro.models.services.Event2026Service.addSkhBeerusOptions(skh.options);
             }
         }
         // 1 triệu vàng (tỉ lệ thấp)
