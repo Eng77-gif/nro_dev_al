@@ -112,7 +112,7 @@ public class Bill extends Npc {
     }
 
     private void doiNhanhItem(Player player) {
-        int[] itemIds = {1798, 1799, 1800, 1801, 1802};
+        int[] itemIds = {1857, 1858, 1859, 1860, 1862};
         Set<Integer> itemIdSet = Arrays.stream(itemIds).boxed().collect(Collectors.toSet());
         int total1805 = 0;
 
@@ -147,7 +147,7 @@ public class Bill extends Npc {
         }
 
         if (total1805 > 0) {
-            Item item1805 = ItemService.gI().createNewItem((short) 1805);
+            Item item1805 = ItemService.gI().createNewItem((short) 2106);
             item1805.quantity = total1805;
             InventoryService.gI().addItemBag(player, item1805);
 

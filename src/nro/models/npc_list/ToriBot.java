@@ -331,14 +331,14 @@ public class ToriBot extends Npc {
         submarine.itemOptions.add(new ItemOption(103, 15));
         submarine.itemOptions.add(new ItemOption(14, 10));
 
-        Item petDragon = ItemService.gI().createNewItem((short) 1771); // pet rồng nhí vĩnh viễn
+        Item petDragon = ItemService.gI().createNewItem((short) 1929); // pet rồng nhí vĩnh viễn
         petDragon.itemOptions.add(new ItemOption(50, 18));
         petDragon.itemOptions.add(new ItemOption(77, 18));
         petDragon.itemOptions.add(new ItemOption(5, 18)); // Chí mạng
         petDragon.itemOptions.add(new ItemOption(14, 10)); // Sức mạnh
         petDragon.itemOptions.add(new ItemOption(236, 15)); // Kháng tất cả
 
-        Item hammer = ItemService.gI().createNewItem((short) 1772); // búa vĩnh viễn
+        Item hammer = ItemService.gI().createNewItem((short) 1806); // búa vĩnh viễn
         hammer.itemOptions.add(new ItemOption(50, 15));
         hammer.itemOptions.add(new ItemOption(77, 15));
         hammer.itemOptions.add(new ItemOption(103, 15));

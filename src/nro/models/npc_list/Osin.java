@@ -42,7 +42,7 @@ public class Osin extends Npc {
                             "Về nhà", "Bùa hỗ\ntrợ", "Từ chối");
                 case 52 -> {
                     player.fightMabu.clear();
-                    boolean hasEnergyJar = InventoryService.gI().findItemBag(player, 1795) != null;
+                    boolean hasEnergyJar = InventoryService.gI().findItemBag(player, 1852) != null;
                     if (TimeUtil.isMabu14HOpen()) {
                         if (hasEnergyJar) {
                             this.createOtherMenu(player, ConstNpc.MENU_OPEN_MMB_WITH_JAR,

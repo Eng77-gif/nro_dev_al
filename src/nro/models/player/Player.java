@@ -741,7 +741,7 @@ public class Player implements Runnable {
             return -1;
         }
         for (Card card : this.Cards) {
-            if (card != null && (card.Id == 956 || card.Id == 1792 || card.Id == 1793 || card.Id == 1791 || card.Id == 1204 || card.Id == 1142) && card.Level > 1) {
+            if (card != null && (card.Id == 956 || card.Id == 2104 || card.Id == 2105 || card.Id == 1771 || card.Id == 1204 || card.Id == 1142) && card.Level > 1) {
                 RadarCard radarTemplate = RadarService.gI().RADAR_TEMPLATE.stream().filter(r -> r.Id == card.Id).findFirst().orElse(null);
                 if (radarTemplate != null) {
                     return (byte) radarTemplate.AuraId;
@@ -1602,7 +1602,7 @@ public class Player implements Runnable {
                         PetService.Pet2(this, 1464, 1465, 1466);
                         Service.gI().point(this);
                     }
-                    case 1765 -> {
+                    case 1819 -> {
                         PetService.Pet2(this, 1662, 1663, 1764);
                         Service.gI().point(this);
                     }
@@ -1614,31 +1614,31 @@ public class Player implements Runnable {
                         PetService.Pet2(this, 1616, 1617, 1618);
                         Service.gI().point(this);
                     }
-                    case 1789 -> {
+                    case 1830 -> {
                         PetService.Pet2(this, 1724, 1725, 1726);
                         Service.gI().point(this);
                     }
-                    case 1766 -> {
+                    case 1818 -> {
                         PetService.Pet2(this, 1665, 1666, 1667);
                         Service.gI().point(this);
                     }
-                    case 1767 -> {
+                    case 1817 -> {
                         PetService.Pet2(this, 1668, 1669, 1670);
                         Service.gI().point(this);
                     }
-                    case 1768 -> {
+                    case 1816 -> {
                         PetService.Pet2(this, 1671, 1672, 1673);
                         Service.gI().point(this);
                     }
-                    case 1769 -> {
+                    case 1815 -> {
                         PetService.Pet2(this, 1674, 1675, 1676);
                         Service.gI().point(this);
                     }
-                    case 1770 -> {
+                    case 1814 -> {
                         PetService.Pet2(this, 1677, 1678, 1679);
                         Service.gI().point(this);
                     }
-                    case 1771 -> {
+                    case 1929 -> {
                         PetService.Pet2(this, 1680, 1681, 1682);
                         Service.gI().point(this);
                     }

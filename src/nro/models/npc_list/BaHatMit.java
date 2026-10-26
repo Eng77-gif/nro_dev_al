@@ -87,7 +87,7 @@ public class BaHatMit extends Npc {
                     // Cờ kiểm tra BT
                     final boolean hasBt1or2 = InventoryService.gI().findItem(player, 454) || InventoryService.gI().findItem(player, 921);
                     final boolean hasBt2 = InventoryService.gI().findItemBongTaiCap2(player) || InventoryService.gI().findItem(player, 921);
-                    final boolean hasBt3 = InventoryService.gI().findItem(player, 1819); // BT Porata cấp 3
+                    final boolean hasBt3 = InventoryService.gI().findItem(player, 1884); // BT Porata cấp 3
 
                     // Base menu
                     List<String> menu = new ArrayList<>(Arrays.asList(
@@ -366,7 +366,7 @@ public class BaHatMit extends Npc {
                                 CombineService.gI().openTabCombine(player, CombineService.NHAP_NGOC_RONG);
                                 break;
                             case 7: {
-                                boolean hasBt3 = InventoryService.gI().findItem(player, 1819);
+                                boolean hasBt3 = InventoryService.gI().findItem(player, 1884);
                                 boolean hasBt2 = InventoryService.gI().findItemBongTaiCap2(player) || InventoryService.gI().findItem(player, 921);
                                 if (hasBt3) {
                                     // Mở tab "Mở chỉ số BT3"
@@ -404,7 +404,7 @@ public class BaHatMit extends Npc {
                                 CombineService.gI().openTabCombine(player, CombineService.PHAN_RA_SACH);
                                 break;
                             case 7: {                                
-                                boolean hasBt3 = InventoryService.gI().findItem(player, 1819); // Bông tai Porata cấp 3
+                                boolean hasBt3 = InventoryService.gI().findItem(player, 1884); // Bông tai Porata cấp 3
                                 boolean hasBt2 = InventoryService.gI().findItemBongTaiCap2(player) || InventoryService.gI().findItem(player, 921); // Porata 2
 
                                 if (hasBt3) {
@@ -422,7 +422,7 @@ public class BaHatMit extends Npc {
                     } else if (player.idMark.getIndexMenu() == ConstNpc.DOI_SACH_TUYET_KY) {
                         if (select == 0) {
                             DoiSachTuyetKy.doiSachTuyetKy(player, false);
-                        } else if (select == 1 && InventoryService.gI().findItemBag(player, 1794) != null) {
+                        } else if (select == 1 && InventoryService.gI().findItemBag(player, 1851) != null) {
                             DoiSachTuyetKy.doiSachTuyetKy(player, true);
                         }
                     } else if (player.idMark.getIndexMenu() == ConstNpc.MENU_OPTION_SHOP_BUA) {

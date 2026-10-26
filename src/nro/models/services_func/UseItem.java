@@ -256,7 +256,7 @@ public class UseItem {
         }
     }
 
-    private static final java.util.Set<Integer> SELF_EQUIP_IDS = java.util.Set.of(892, 893, 908, 909, 910, 916, 917, 918, 919, 936, 942, 943, 944, 967, 1008, 1039, 1040, 1046, 1107, 1114, 1188, 1202, 1203, 1207, 1224, 1225, 1226, 1243, 1244, 1256, 1318, 1347, 1414, 1435, 1452, 1458, 1482, 1497, 1550, 1551, 1564, 1568, 1573, 1596, 1597, 1611, 1620, 1621, 1622, 1629, 1630, 1631, 1633, 1654, 1668, 1682, 1683, 1686, 1727, 1729, 1750, 1765, 1766, 1767, 1768, 1769, 1770, 1771, 1789);
+    private static final java.util.Set<Integer> SELF_EQUIP_IDS = java.util.Set.of(892, 893, 908, 909, 910, 916, 917, 918, 919, 936, 942, 943, 944, 967, 1008, 1039, 1040, 1046, 1107, 1114, 1188, 1202, 1203, 1207, 1224, 1225, 1226, 1243, 1244, 1256, 1318, 1347, 1414, 1435, 1452, 1458, 1482, 1497, 1550, 1551, 1564, 1568, 1573, 1596, 1597, 1611, 1620, 1621, 1622, 1629, 1630, 1631, 1633, 1654, 1668, 1682, 1683, 1686, 1727, 1729, 1750, 1819, 1818, 1817, 1816, 1815, 1814, 1929, 1830);
 
     private void useItem(Player pl, Item item, int indexBag) {
         if (item != null && item.isNotNullItem()) {
@@ -606,12 +606,12 @@ public class UseItem {
                                 PetService.Pet2(pl, 1464, 1465, 1466);
                                 Service.gI().point(pl);
                                 break;
-                            case 1765:
+                            case 1819:
                                 InventoryService.gI().itemBagToBody(pl, indexBag);
                                 PetService.Pet2(pl, 1662, 1663, 1664);
                                 Service.gI().point(pl);
                                 break;
-                            case 1789:
+                            case 1830:
                                 InventoryService.gI().itemBagToBody(pl, indexBag);
                                 PetService.Pet2(pl, 1724, 1725, 1726);
                                 Service.gI().point(pl);
@@ -626,32 +626,32 @@ public class UseItem {
                                 PetService.Pet2(pl, 1621, 1622, 1623);
                                 Service.gI().point(pl);
                                 break;
-                            case 1766:
+                            case 1818:
                                 InventoryService.gI().itemBagToBody(pl, indexBag);
                                 PetService.Pet2(pl, 1665, 1666, 1667);
                                 Service.gI().point(pl);
                                 break;
-                            case 1767:
+                            case 1817:
                                 InventoryService.gI().itemBagToBody(pl, indexBag);
                                 PetService.Pet2(pl, 1668, 1669, 1670);
                                 Service.gI().point(pl);
                                 break;
-                            case 1768:
+                            case 1816:
                                 InventoryService.gI().itemBagToBody(pl, indexBag);
                                 PetService.Pet2(pl, 1671, 1672, 1673);
                                 Service.gI().point(pl);
                                 break;
-                            case 1769:
+                            case 1815:
                                 InventoryService.gI().itemBagToBody(pl, indexBag);
                                 PetService.Pet2(pl, 1674, 1675, 1676);
                                 Service.gI().point(pl);
                                 break;
-                            case 1770:
+                            case 1814:
                                 InventoryService.gI().itemBagToBody(pl, indexBag);
                                 PetService.Pet2(pl, 1677, 1678, 1679);
                                 Service.gI().point(pl);
                                 break;
-                            case 1771:
+                            case 1929:
                                 InventoryService.gI().itemBagToBody(pl, indexBag);
                                 PetService.Pet2(pl, 1680, 1681, 1682);
                                 Service.gI().point(pl);
@@ -659,7 +659,7 @@ public class UseItem {
                             case 1655: // capule kich hoat
                                 UseItem.gI().CapsuleKichHoat(pl, item);
                                 break;
-                            case 1787: // capule kich hoat
+                            case 1825: // capule kich hoat
                                 UseItem.gI().MapRiengTu(pl, item);
                                 break;
                             case 718: // vé tặng ngọc
@@ -677,20 +677,20 @@ public class UseItem {
                             case 1608:
                                 UseItem.gI().QuaThieuNhi(pl, item);
                                 break;
-                            case 1822: // rada ngọc rồng
+                            case 1808: // rada ngọc rồng
                                 UseItem.gI().RadaNgocRong(pl, item.template.id);
                                 break;
-                            case 1823: // rada ngọc rồng vip
+                            case 1809: // rada ngọc rồng vip
                                 UseItem.gI().RadaNgocRongVip(pl, item.template.id);
                                 break;
                             case 1569: // kho báu hải tặc
                                 UseItem.gI().KhoBauHaiTac(pl, item.template.id);
                                 break;
-                            case 1798:
-                            case 1801:
-                            case 1799:
-                            case 1800:
-                            case 1802:
+                            case 1857:
+                            case 1860:
+                            case 1858:
+                            case 1859:
+                            case 1862:
                                 UseItem.gI().ThucAnChoThan(pl, item);
                                 break;
                             case 1652: // Sử dụng item Loa Thế Giới
@@ -700,10 +700,10 @@ public class UseItem {
                                 e.printStackTrace();
                             }
                             break;
-                            case 1776:
+                            case 1823:
                                 UseItem.gI().OpenHopQuaThuong(pl, item.template.id);
                                 break;
-                            case 1777:
+                            case 1824:
                                 UseItem.gI().OpenHopQuaVip(pl, item.template.id);
                                 break;
                             case 1592:
@@ -821,7 +821,7 @@ public class UseItem {
                             case 921: //bông tai
                                 UseItem.gI().usePorata2(pl);
                                 break;
-                                case 1819: //bông tai
+                                case 1884: //bông tai
                                 UseItem.gI().usePorata3(pl);
                                 break;
                             case 193: //gói 10 viên capsule
@@ -846,7 +846,7 @@ public class UseItem {
                             case 728:
                                 UseItem.gI().ItemSieuThanThuy(pl, item);
                                 break;
-                            case 1775:
+                            case 2103:
                                 UseItem.gI().OpenHopThanlinh(pl, item.template.id);
                                 break;
                             case 648:
@@ -888,7 +888,7 @@ public class UseItem {
                             case 2006:
                                 Input.gI().createFormChangeNameByItem(pl);
                                 break;
-                            case 1758: {
+                            case 1936: {
                                 Player player = pl;
                                 if (player.pet != null) {
                                     InventoryService.gI().subQuantityItemsBag(pl, item, 1);
@@ -904,7 +904,7 @@ public class UseItem {
                                 }
                             }
                             break;
-                            case 1759: {
+                            case 1939: {
                                 Player player = pl;
                                 if (player.pet != null) {
                                     InventoryService.gI().subQuantityItemsBag(pl, item, 1);
@@ -920,10 +920,10 @@ public class UseItem {
                                 }
                             }
                             break;
-                            case 1795: //đổi đệ tử
+                            case 1852: //đổi đệ tử
                                 changePetRamdom(pl, item);
                                 break;
-                            case 1760: {
+                            case 1938: {
                                 Player player = pl;
                                 if (player.pet != null) {
                                     InventoryService.gI().subQuantityItemsBag(pl, item, 1);
@@ -1173,7 +1173,7 @@ public class UseItem {
     
     public void RadaNgocRong(Player player, int itemUseiD) {
         if (InventoryService.gI().getCountEmptyBag(player) > 0) {
-            Item itemused = InventoryService.gI().findItemBag(player, 1822);
+            Item itemused = InventoryService.gI().findItemBag(player, 1808);
 
             if (itemused == null || itemused.quantity < 1) {
                 Service.gI().sendThongBao(player, "Bạn không có vật phẩm cần dùng!");
@@ -1210,14 +1210,14 @@ public class UseItem {
     
     public void RadaNgocRongVip(Player player, int itemUseiD) {
         if (InventoryService.gI().getCountEmptyBag(player) > 0) {
-            Item itemused = InventoryService.gI().findItemBag(player, 1823);
+            Item itemused = InventoryService.gI().findItemBag(player, 1809);
 
             if (itemused == null || itemused.quantity < 1) {
                 Service.gI().sendThongBao(player, "Bạn không có vật phẩm cần dùng!");
                 return;
             }
 
-            int[] itemIds = {1586, 1809, 1810, 1811, 1812, 1813, 1814};
+            int[] itemIds = {1586, 2107, 2108, 2109, 1998, 1930, 1927};
             int randomIndex = (int) (Math.random() * itemIds.length);
             short randomItemId = (short) itemIds[randomIndex];
 
@@ -1306,7 +1306,7 @@ public class UseItem {
     }
 
     private void changePetRamdom(Player player, Item item) {
-        if (item.template.id != 1795) {
+        if (item.template.id != 1852) {
             Service.gI().sendThongBao(player, "Vật phẩm không hợp lệ!");
             return;
         }
@@ -1426,7 +1426,7 @@ public class UseItem {
                 return;
             }
 
-            int[] itemIds = {1804};
+            int[] itemIds = {1854};
             int randomIndex = (int) (Math.random() * itemIds.length);
             short randomItemId = (short) itemIds[randomIndex];
 
@@ -1468,7 +1468,7 @@ public class UseItem {
                 return;
             }
 
-            int[] itemIds = {1807, 1599, 1600, 1601, 1602};
+            int[] itemIds = {1805, 1599, 1600, 1601, 1602};
             int randomIndex = (int) (Math.random() * itemIds.length);
             short randomItemId = (short) itemIds[randomIndex];
 
@@ -1515,11 +1515,11 @@ public class UseItem {
             }
 
             int id = itemUsed.template.id;
-            if ((id == 1789 || id == 1799 || id == 1800 || id == 1801 || id == 1802) && itemUsed.quantity >= 99) {
+            if ((id == 1830 || id == 1858 || id == 1859 || id == 1860 || id == 1862) && itemUsed.quantity >= 99) {
 
                 InventoryService.gI().subQuantityItemsBag(player, itemUsed, 99);
 
-                Item newItem = ItemService.gI().createNewItem((short) 1805);
+                Item newItem = ItemService.gI().createNewItem((short) 2106);
                 InventoryService.gI().addItemBag(player, newItem);
 
                 Service.gI().sendThongBao(player, "Bạn đã nhận được 1 " + newItem.template.name + "!");
@@ -2054,7 +2054,7 @@ public class UseItem {
         if (InventoryService.gI().getCountEmptyBag(player) > 1) {
             Item itemused = InventoryService.gI().findItemBag(player, itemUseiD);
 
-            int[] itemIds = {1772, 1773};
+            int[] itemIds = {1806, 1807};
             int randomIndex = (int) (Math.random() * itemIds.length);
             short randomItemId = (short) itemIds[randomIndex];
 
@@ -2091,7 +2091,7 @@ public class UseItem {
                 return;
             }
 
-            int[] itemIds = {1765, 1766, 1767, 1768, 1769, 1770, 1771};
+            int[] itemIds = {1819, 1818, 1817, 1816, 1815, 1814, 1929};
             int randomIndex = (int) (Math.random() * itemIds.length);
             short randomItemId = (short) itemIds[randomIndex];
 
@@ -2129,7 +2129,7 @@ public class UseItem {
         if (InventoryService.gI().getCountEmptyBag(player) > 1) {
             Item itemused = InventoryService.gI().findItemBag(player, itemUseiD);
 
-            int[] itemIds = {1761, 1731, 1732};
+            int[] itemIds = {1810, 1731, 1732};
             int randomIndex = (int) (Math.random() * itemIds.length);
             short randomItemId = (short) itemIds[randomIndex];
 

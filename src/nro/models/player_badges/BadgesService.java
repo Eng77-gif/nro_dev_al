@@ -11,7 +11,7 @@ import nro.models.player.Player;
 public class BadgesService {
 
     public static final int PERFECT_EFFECT = 302;
-    public static final int[] XEN_PETS = {1990, 1991, 1992};
+    public static final int[] XEN_PETS = {2037, 2036, 2038};
 
     /**
      * Thêm danh hiệu (hoặc gia hạn nếu đã có) rồi bật nó lên. days <= 0 là vĩnh viễn.

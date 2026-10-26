@@ -816,7 +816,7 @@ public class ShopService {
             int capsuleClanPointPrice = 0;
 
             switch (is.temp.id) {
-                case 1794:
+                case 1851:
                 case 1204:
                 case 1423:
                 case 1438:
@@ -825,13 +825,13 @@ public class ShopService {
                 case 1635:
                     capsuleClanPointPrice = 1;
                     break;
-                case 1790:
+                case 1838:
                     capsuleClanPointPrice = 2;
                     break;
-                case 1791:
+                case 1771:
                     capsuleClanPointPrice = 3;
                     break;
-                case 1792:
+                case 2104:
                     capsuleClanPointPrice = 4;
                     break;
                 case 1634:

@@ -32,13 +32,13 @@ public class Event2026Service {
         return instance;
     }
 
-    public static final Set<Integer> FOOT_IDS = Set.of(1999, 1940);
-    public static final int VAN_RONG_7_SAO = 1941;
-    public static final int CAPSULE_VO = 1942;
-    public static final int MANH_CAPSULE_VO = 1943;
-    public static final int KHOA_BONG_TAI_3 = 1944;
-    public static final int QUA_TRANG_TRON = 1950;
-    public static final int QUA_TRANG_KHUYET = 1951;
+    public static final Set<Integer> FOOT_IDS = Set.of(2097, 2096);
+    public static final int VAN_RONG_7_SAO = 2100;
+    public static final int CAPSULE_VO = 2111;
+    public static final int MANH_CAPSULE_VO = 1909;
+    public static final int KHOA_BONG_TAI_3 = 2046;
+    public static final int QUA_TRANG_TRON = 2088;
+    public static final int QUA_TRANG_KHUYET = 2087;
     public static final int TRANG_TRON_POINT = 99;
     public static final long TRANG_KHUYET_GOLD = 20_000_000L;
     /** Số ngày giữ aura thưởng của top 1 - 3 */
@@ -346,10 +346,10 @@ public class Event2026Service {
             l.add(createItem(1283, new int[]{70, 60, 50}[k], 0)); // Cuốn sách cũ
             l.add(createItem(1559, new int[]{3, 2, 1}[k], 0)); // Capsule 1 món kích hoạt
             l.add(createItem(CAPSULE_VO, new int[]{3, 2, 1}[k], 0));
-            l.add(createItem(1820, new int[]{10000, 5000, 1000}[k], 0)); // Mảnh vỡ bông tai cấp 3
+            l.add(createItem(1868, new int[]{10000, 5000, 1000}[k], 0)); // Mảnh vỡ bông tai cấp 3
             l.add(createItem(KHOA_BONG_TAI_3, new int[]{10, 5, 2}[k], 0));
             if (rank == 1) {
-                l.add(createItem(1869, 1, 0)); // Giáp tập luyện cấp 5
+                l.add(createItem(2006, 1, 0)); // Giáp tập luyện cấp 5
             }
         } else if (rank <= 10) {
             l.add(createItem(VAN_RONG_7_SAO, 1, 0));

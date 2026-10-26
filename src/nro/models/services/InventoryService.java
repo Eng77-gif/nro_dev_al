@@ -808,7 +808,7 @@ public class InventoryService {
             }
         }
         // Check item rồng nhí vĩnh viễn
-        if (item.template.id >= 1765 && item.template.id <= 1771) {
+        if ((item.template.id >= 1814 && item.template.id <= 1819) || item.template.id == 1929) { // Rồng nhí 2 - 7 sao, Pet Ma tốc độ
             boolean check_options = false;
             for (Item.ItemOption op : item.itemOptions) {
                 if (op.optionTemplate != null && op.optionTemplate.id == 93) {
@@ -1016,12 +1016,12 @@ public class InventoryService {
     }
     public boolean findItemBongTaiCap3(Player player) {
         for (Item item : player.inventory.itemsBag) {
-            if (item.isNotNullItem() && item.template.id == 1819) {
+            if (item.isNotNullItem() && item.template.id == 1884) {
                 return true;
             }
         }
         for (Item item : player.inventory.itemsBox) {
-            if (item.isNotNullItem() && item.template.id == 1819) {
+            if (item.isNotNullItem() && item.template.id == 1884) {
                 return true;
             }
         }

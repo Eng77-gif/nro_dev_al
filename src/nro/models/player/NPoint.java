@@ -454,7 +454,7 @@ public class NPoint {
         }
         if (this.player.fusion.typeFusion == ConstPlayer.HOP_THE_PORATA3) {
             this.player.inventory.itemsBag.stream()
-                    .filter(it -> it.isNotNullItem() && it.template.id == 1819)
+                    .filter(it -> it.isNotNullItem() && it.template.id == 1884)
                     .findFirst()
                     .ifPresent(btc3 -> {
                         for (ItemOption io : btc3.itemOptions) {
@@ -501,9 +501,9 @@ public class NPoint {
         setSpeed();
     }
 
-    public static final int PET_KUMA = 1975;
-    public static final int CO_VAN_HOA_DONG = 1982;
-    public static final int CO_WORLD_CUP_2026 = 1986;
+    public static final int PET_KUMA = 2019;
+    public static final int CO_VAN_HOA_DONG = 2030;
+    public static final int CO_WORLD_CUP_2026 = 2031;
 
     private boolean isWearing(int templateId) {
         for (Item it : this.player.inventory.itemsBody) {
@@ -547,8 +547,8 @@ public class NPoint {
         }
     }
 
-    public static final int PET_XEN_HOAN_THIEN = 1991;
-    public static final int PET_XEN_MAX = 1992;
+    public static final int PET_XEN_HOAN_THIEN = 2036;
+    public static final int PET_XEN_MAX = 2038;
 
     /**
      * Gọi khi bị đánh: kích hoạt Akaza (HP dưới 50%, hồi 180s) và Ảo Thuật (hồi 120s), mỗi hiệu ứng kéo dài 3 giây.

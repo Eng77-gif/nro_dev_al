@@ -35,7 +35,7 @@ public class Baby extends Boss {
         }
         plKill.bossBabyDefeatParticipationCount++;
         if (Util.isTrue(1, 100)) {
-            int[] costumes = {1785, 1786, 1788};
+            int[] costumes = {1762, 1763, 1764};
             int costumeId = costumes[Util.nextInt(costumes.length)];
 
             ItemMap itemMap = new ItemMap(this.zone, costumeId, 1, x, y, plKill.id);

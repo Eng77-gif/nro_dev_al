@@ -136,7 +136,7 @@ public class Inventory {
             for (Item item : inventory) {
                 if (item != null && isPermanent(item)) {
                     int itemId = item.template.id;
-                    if (itemId >= 1765 && itemId <= 1771 && !checkedItemIds.contains(itemId)) {
+                    if (((itemId >= 1814 && itemId <= 1819) || itemId == 1929) && !checkedItemIds.contains(itemId)) {
                         BadgesTaskService.updateCountBagesTask(player, ConstTaskBadges.ME_RONG, 1);
                         checkedItemIds.add(itemId);
                     }

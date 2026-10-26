@@ -85,6 +85,8 @@ Commit `26569b3` là mã nguồn gốc. Mỗi commit sau đó gom một nhóm l�
 - Đã khởi động thật với MariaDB và `team2026.sql`: tải đủ dữ liệu, server lắng nghe cổng 14445, không có exception.
 - Client test theo giao thức game: đăng nhập, tạo nhân vật (giới tính sai bị từ chối), một bên bấm đồng ý giao dịch 2 lần thì bị chặn, giao dịch hợp lệ chuyển đúng 5.000.000 vàng, đưa ra số vàng nhiều hơn số đang có thì giao dịch bị hủy.
 
+> **Lưu ý:** id vật phẩm trong các mục đợt 1–5 ở trên là id cũ. Từ đợt 6, id đã xếp lại theo DataNRO; bảng đổi id cũ → mới nằm ở `sql/doi_id_vat_pham.txt`.
+
 ## Vật phẩm mới (gói res team 18th7 / 22th8 / 18th9)
 
 Đã thêm 542 icon cho cả 4 mức zoom (x1–x3 tự thu nhỏ từ x4), 59 part mới (id 2099–2157) và 19 vật phẩm vào các slot trống id 1961–1979 trong `sql/team2026.sql`:
@@ -234,3 +236,31 @@ Phần hình 3 cải trang Đường Phố là part 2158–2166, lấy từ `Nr_
 - Gói thiếu icon 17662, là 1 khung chân của Cải trang Android 18 Đường Phố (part 2166). Khung đó sẽ trống cho tới khi có icon.
 - Hợp thể Bông tai cấp 3 của Trái Đất đổi sang Goku Blue cầm kiếm: 3 khung đầu động, part 2170–2174, array_head_2_frames 53. Trước đây Trái Đất dùng chung thân và chân với Xayda.
 - Thêm Cải trang Poc Thỏ Đen (id 1953, part 2175–2177) vào Hộp quà Trung Thu 2026 VIP (HSD 7/15/30 ngày, 20% vĩnh viễn vì có bảo hiểm). Ảnh chưa ghi chỉ số nên chưa có chỉ số.
+
+## Đợt 6: xếp lại id vật phẩm theo DataNRO
+Nguồn: `ItemTemplates.json` của DataNRO (TeaMobi), gồm 2103 vật phẩm, id 0–2102.
+
+**Cách ghép:**
+- Ghép từng món của server với danh sách chính thức theo tên và icon. Những món từng mượn icon thì ghép tay.
+- Tên lấy theo DataNRO. Riêng 5 món DataNRO chỉ đặt tên tạm "Cải trang N" (2048–2052) thì giữ tên của server.
+- Icon cũng lấy theo DataNRO nếu server đã có file icon đó.
+- Cột `description` chỉ dài 75 ký tự nên mô tả dài hơn bị cắt.
+
+**Kết quả** (chi tiết ở `sql/doi_id_vat_pham.txt`):
+- Giữ nguyên id: 1759 món.
+- Đổi sang id chính thức: 133 món. Phần lớn nằm ở dải 1758–1999, nơi server cũ tự đánh số riêng; vd. Bông tai Porata cấp 3 1819 → 1884, Cải trang Beerus 1973 → 2082, bóng bước chân → Bóng mờ hoa hồng 2096/2097.
+- Thêm 223 món của DataNRO mà server chưa có. Các món này mới chỉ có tên, icon và loại, chưa có hình mặc hay chức năng.
+  - Loại 18 (pet), 19 và 38 (bóng mờ) của client mới được đổi thành loại 27.
+  - Cờ không giữ `part` vì id flag_bag của server khác bản chính thức.
+- 9 món riêng của server không có trong DataNRO nhưng code hoặc DB vẫn dùng: dời ra sau, id 2103–2111. Gồm Hộp thần linh, 2 thẻ Oozaru phụ, Phiếu thức ăn, Super 2/3/4 sao, Vé KOL VIP và Capsule vỡ.
+- 19 món không có trong DataNRO và không còn chỗ nào dùng: bỏ, trong đó có Thiệp chúc VIP và các "Cải trang Gốc" thiếu icon.
+- Các món trùng gộp lại: Pet Minion 2026 vào Pet Minion 2059, Pet Xên Max cũ vào Pet Xên bọ hung MAX 2038.
+
+**Những chỗ đã đổi theo id mới:**
+- **Bảng DB:** `item_template_option`, `item_box_reward`, `item_shop`, `data_badges`, `radar`, `shop_ky_gui`, cùng đồ trong dữ liệu người chơi và ô bước chân.
+- **Code Java:** 114 dòng dùng id cứng; các số không phải id vật phẩm (thời gian 1800, id part, toạ độ…) giữ nguyên.
+- **Kiểm tra Rồng nhí:** trước là khoảng 1765–1771, nay là 1814–1819 và 1929.
+
+File `sql/team2026.sql` được xuất lại từ DB đã đổi. `vsData` và `vsItem` tăng lên 14.
+
+**Lưu ý khi cập nhật server đang chạy:** nếu database đang có người chơi thật thì đừng import đè. Chạy `remap.py` và `remap_players.py` (có trong lịch sử phiên làm việc) trên database đó, để đổi luôn đồ trong hành trang và rương.

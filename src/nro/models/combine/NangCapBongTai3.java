@@ -19,8 +19,8 @@ public class NangCapBongTai3 {
     private static final int GEM_BONG_TAI = 1_000;
     private static final int RATIO_BONG_TAI = 50;   
     private static final int ITEM_ID_BONG_TAI_C2 = 921;   
-    private static final int ITEM_ID_BONG_TAI_C3 = 1819;
-    private static final int ITEM_ID_MANH_VO_BT3 = 1820;
+    private static final int ITEM_ID_BONG_TAI_C3 = 1884;
+    private static final int ITEM_ID_MANH_VO_BT3 = 1868;
     private static final int ITEM_OPTION_ID_CAP = 72;
     private static final int ITEM_OPTION_VALUE_CAP_3 = 3;
     private static final int ITEM_PARAM_INDEX = 31;

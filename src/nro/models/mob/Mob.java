@@ -198,7 +198,7 @@ public class Mob {
 
             if (Util.isTrue(successRate, 333)) {
                 if (plAtt != null) {
-                    Item item = InventoryService.gI().findItemBag(plAtt, 1795);
+                    Item item = InventoryService.gI().findItemBag(plAtt, 1852);
                     if (item != null) {
                         boolean updated = false;
                         Item.ItemOption kilisOption = item.getOptionById(250);
@@ -692,15 +692,15 @@ public class Mob {
         }
         if (MapService.gI().AllMap(mapid)) {
             if (Util.isTrue(5, 100)) {
-                ItemMap it = new ItemMap(zone, 1798, 1, x, yEnd, player.id);
+                ItemMap it = new ItemMap(zone, 1857, 1, x, yEnd, player.id);
                 list.add(it);
             }
             if (Util.isTrue(5, 100)) {
-                ItemMap it = new ItemMap(zone, 1799, 1, x, yEnd, player.id);
+                ItemMap it = new ItemMap(zone, 1858, 1, x, yEnd, player.id);
                 list.add(it);
             }
             if (Util.isTrue(5, 100)) {
-                ItemMap it = new ItemMap(zone, 1800, 1, x, yEnd, player.id);
+                ItemMap it = new ItemMap(zone, 1859, 1, x, yEnd, player.id);
                 list.add(it);
             }
             if (Util.isTrue(5, 100)) {
@@ -708,11 +708,11 @@ public class Mob {
                 list.add(it);
             }
             if (Util.isTrue(1, 100)) {
-                ItemMap it = new ItemMap(zone, 1801, 1, x, yEnd, player.id);
+                ItemMap it = new ItemMap(zone, 1860, 1, x, yEnd, player.id);
                 list.add(it);
             }
             if (Util.isTrue(1, 130)) {
-                ItemMap it = new ItemMap(zone, 1802, 1, x, yEnd, player.id);
+                ItemMap it = new ItemMap(zone, 1862, 1, x, yEnd, player.id);
                 list.add(it);
             }
         }
@@ -781,7 +781,7 @@ public class Mob {
 
             if (Util.isTrue(tileDrop, 100)) {
                 int soLuong = 1;
-                list.add(new ItemMap(zone, 1778, soLuong, x, yEnd, player.id));
+                list.add(new ItemMap(zone, 1836, soLuong, x, yEnd, player.id));
             }
         }
         if (MapService.gI().isMapRiengTu(mapid)) {

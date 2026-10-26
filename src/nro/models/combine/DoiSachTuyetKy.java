@@ -25,7 +25,7 @@ public class DoiSachTuyetKy {
     public static void showCombine(Player player) {
         Item cuonSachCu = InventoryService.gI().findItemBag(player, 1283);
         Item kimBamGiay = InventoryService.gI().findItemBag(player, 1285);
-        Item conDau = InventoryService.gI().findItemBag(player, 1794);
+        Item conDau = InventoryService.gI().findItemBag(player, 1851);
 
         int quantityCuonSachCu = cuonSachCu != null ? cuonSachCu.quantity : 0;
         int quantityKimBamGiay = kimBamGiay != null ? kimBamGiay.quantity : 0;
@@ -67,7 +67,7 @@ public class DoiSachTuyetKy {
 
         Item cuonSachCu = InventoryService.gI().findItemBag(player, 1283);
         Item kimBamGiay = InventoryService.gI().findItemBag(player, 1285);
-        Item conDau = useConDau ? InventoryService.gI().findItemBag(player, 1794) : null;
+        Item conDau = useConDau ? InventoryService.gI().findItemBag(player, 1851) : null;
 
         if (cuonSachCu == null || cuonSachCu.quantity < REQUIRED_CUON_SACH_CU
                 || kimBamGiay == null || kimBamGiay.quantity < REQUIRED_KIM_BAM_GIAY

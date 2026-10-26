@@ -22,8 +22,8 @@ public class VuaHung extends Npc {
     private static final int NGA_VOI = 1220;
     private static final int CUA_GA = 1221;
     private static final int HONG_MAO = 1222;
-    private static final int HOP_QUA_THUONG = 1776;
-    private static final int HOP_QUA_VIP = 1777;
+    private static final int HOP_QUA_THUONG = 1823;
+    private static final int HOP_QUA_VIP = 1824;
     private static final int BANH_DAY = 1542;
     private static final int BANH_CHUNG = 1556;
     private static final int DUA_HAU = 569;

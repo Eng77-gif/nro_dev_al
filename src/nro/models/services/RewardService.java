@@ -39,10 +39,10 @@ public class RewardService {
      * tỷ lệ vĩnh viễn x3 so với vật phẩm thường (3% thay vì 1%).
      */
     public static final int[] SPECIAL_WHEEL_ITEMS = {
-        1972, 1962, 1963, 1965, 1973, 1974, 1966, // Akaza (Thượng Tam), Naruto, Sasuke, Akatsuki, Beerus, Nappa Aura, Pan Trung Thu
-        1975, 1979, 1989, 1990, 1991, 1992, // Pet Kuma, Ngựa Thành Troy, Minion 2026, 3 Pet Xên
-        1980, 1981, 1982, 1983, 1984, 1985, 1986, 1987, 1988, // Bóng Mờ, Lồng Đèn, Cờ Vạn Hoa Đồng, Đại Bàng (+VIP), Ván bay WC, Cờ WC, Ván bay TT, Bóng WC
-        1993 // Danh hiệu Phá Cổ Trung Thu
+        2053, 2026, 2027, 2039, 2082, 2075, 2043, // Akaza (Thượng Tam), Naruto, Sasuke, Akatsuki, Beerus, Nappa Aura, Pan Trung Thu
+        2019, 2072, 2059, 2037, 2036, 2038, // Pet Kuma, Ngựa Thành Troy, Minion 2026, 3 Pet Xên
+        2054, 2061, 2030, 2041, 2058, 2044, 2031, 2060, 2017, // Bóng Mờ, Lồng Đèn, Cờ Vạn Hoa Đồng, Đại Bàng (+VIP), Ván bay WC, Cờ WC, Ván bay TT, Bóng WC
+        1885 // Danh hiệu Phá Cổ Trung Thu
     };
     public static final int SPECIAL_WHEEL_RATE = 3; // % mỗi ô quay
     public static final int SPECIAL_WHEEL_PERMANENT = 3; // % vĩnh viễn (x3)

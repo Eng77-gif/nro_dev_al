@@ -1,0 +1,393 @@
+Tổng: 2112 dòng (0..2111); giữ nguyên id 1759, đổi id 133, thêm từ DataNRO 223, món riêng dời ra sau 9, bỏ 19
+
+== Đổi id (cũ -> mới) ==
+1537 -> 2103  Hộp thần linh  =>  Hộp thần linh
+1758 -> 1936  Phở Linh Lang  =>  Tô phở tái nhiều hành
+1759 -> 1939  Phở Giải Phóng  =>  Tô phở tái bò viên
+1760 -> 1938  Phở Công viên Hòa Bình  =>  Tô phở nạm 2 quẩy
+1761 -> 1810  Mị Hoàng Kim  =>  Mị Hoàng Kim
+1762 -> 1811  hùng vương   =>  Vua Vegeta
+1763 -> 1826  Sơn tinh   =>  Cải trang Sơn Tinh
+1764 -> 1827  Thủy Tinh   =>  Cải trang Thủy Tinh
+1765 -> 1819  Bé Rồng Cute  =>  Rồng nhí 7 sao
+1766 -> 1818  Bé Rồng Cute  =>  Rồng nhí 6 sao
+1767 -> 1817  Bé Rồng Cute  =>  Rồng nhí 5 sao
+1768 -> 1816  Bé Rồng Cute  =>  Rồng nhí 4 sao
+1769 -> 1815  Bé Rồng Cute  =>  Rồng nhí 3 sao
+1770 -> 1814  Bé Rồng Cute  =>  Rồng nhí 2 sao
+1771 -> 1929  Bé Rồng Cute  =>  Pet Ma tốc độ
+1772 -> 1806  búa sơn tinh  =>  Rìu Sơn Tinh
+1773 -> 1807  bút thủy tinh  =>  Giáo Thủy Tinh
+1775 -> 2103  Hộp thần linh  =>  Hộp thần linh
+1776 -> 1823  Hộp quà sự kiện  =>  Hộp quà giỗ tổ
+1777 -> 1824  Hộp quà sự kiện VIP  =>  Hộp quà giỗ tổ cao cấp
+1778 -> 1836  Cuốn chả giò  =>  Cuốn chả giò
+1780 -> 1803  Cải trang goku  =>  CT Goku SSJ 4 Red
+1781 -> 1832  Cải trang gohan  =>  Cải trang Gohan Beast
+1782 -> 1795  Cải trang chichi  =>  CT Chi Chi Hoa Hồng Xanh
+1783 -> 1775  Cải trang broly  =>  CT Broly SSJ4
+1784 -> 1777  Cải trang broly red  =>  CT Broly SSJ God
+1785 -> 1762  Cải trang baby  =>  CT Baby
+1786 -> 1763  Cải trang vegeta baby  =>  CT Baby
+1787 -> 1825  Vé riêng tư  =>  Vé riêng tư
+1788 -> 1764  Cải trang baby khỉ  =>  CT Baby
+1789 -> 1830  Thỏ may mắn  =>  Pet Thỏ Vui Vẻ
+1790 -> 1838  Mẹ Rồng  =>  Mẹ Rồng
+1791 -> 1771  Mảnh khỉ Oorazu  =>  Mảnh Khỉ Oozaru
+1792 -> 2104  Mảnh khỉ Oorazu 1  =>  Mảnh khỉ Oorazu 1
+1793 -> 2105  Mảnh khỉ Oorazu 2  =>  Mảnh khỉ Oorazu 2
+1794 -> 1851  Con dấu  =>  Con dấu
+1795 -> 1852  Bình hút năng lượng  =>  Bình hút năng lượng
+1797 -> 1829  Cải trang Picolo  =>  Cải trang Pôcôlô
+1798 -> 1857  Tayaki  =>  Tayaki
+1799 -> 1858  Kẹo táo  =>  Kẹo táo
+1800 -> 1859  Kem que đôi  =>  Kem que đôi
+1801 -> 1860  Mochi  =>  Mochi
+1802 -> 1862  Ramen  =>  Mì ramen
+1803 -> 1853  Cadic đi biển  =>  Cải trang Cađíc đi biển
+1804 -> 1854  Buma đi biển  =>  Cải trang Bun ma đi biển
+1805 -> 2106  Phiếu thức ăn  =>  Phiếu thức ăn
+1806 -> 1855  Kem que  =>  Đeo lưng ẩm thực
+1807 -> 1805  Goku ssj 4 kid  =>  CT Goku SSJ 4 nhí
+1809 -> 2107  Super 2 sao  =>  Super 2 sao
+1810 -> 2108  Super 3 sao  =>  Super 3 sao
+1811 -> 2109  Super 4 sao  =>  Super 4 sao
+1812 -> 1998  Guardian Angel  =>  Cánh hào khí
+1813 -> 1930  Fallen Angel  =>  Cánh thiên thần sa ngã (Đệ)
+1814 -> 1927  Eternal Hope  =>  Cánh thiên thần sa ngã
+1815 -> 1865  ct dep vcl  =>  Cải trang Gogeta SSJ Blue
+1816 -> 1869  td  =>  Cải trang Đích Ku SSJ Blue
+1817 -> 1867  nm  =>  Cải trang Super Pôcôlô
+1818 -> 1866  xd  =>  Cải trang Vegito SSJ Blue
+1819 -> 1884  Bông tai Porata  =>  Bông tai Porata
+1820 -> 1868  Mảnh vỡ bông tai cấp 3  =>  Mảnh vỡ bông tai cấp 3
+1822 -> 1808  Rada ngọc rồng  =>  Rađa ngọc rồng
+1823 -> 1809  Rada ngọc rồng Vip  =>  Rađa ngọc rồng VIP
+1824 -> 1935  Cậu Vàng  =>  Pet cậu vàng
+1825 -> 2110  Vé Nhệm Vụ KOL Vip  =>  Vé Nhệm Vụ KOL Vip
+1852 -> 1952  Cải trang Gốc  =>  Cải trang Póc Noel
+1853 -> 1949  Cải trang Gốc  =>  Cải trang Kirin tuần lộc
+1854 -> 1946  Cải trang Gốc  =>  Cải trang Thiên sư phụ
+1855 -> 1937  Cải trang Gốc  =>  Cải trang Giáo sư Bunma
+1856 -> 1934  Cải trang Gốc  =>  Cải trang Videl học đường
+1857 -> 1933  Cải trang Gốc  =>  Cải trang Gohan học đường
+1858 -> 1921  Cải trang Gốc  =>  Cải trang Pan VIP
+1859 -> 1919  Cải trang Gốc  =>  Cải trang Chi Chi Áo Cưới Mới
+1860 -> 1957  Cải trang Gốc 1  =>  Cải trang Goku GT
+1861 -> 1968  Cải trang Gốc 2  =>  Cải trang Goku Tết
+1862 -> 1972  Cải trang Gốc 3  =>  Cải trang Chi Chi Tết
+1864 -> 1997  Cải trang Gốc 5  =>  Cải trang Chi Chi giỗ tổ
+1865 -> 1999  Cải trang Gốc 6  =>  Cải trang Gohan chiến binh
+1866 -> 2005  Cải trang Gốc 7  =>  Cải trang Videl chiến binh
+1867 -> 1913  Cải trang Gốc 8  =>  Cải trang Black Fide
+1868 -> 1955  Cải trang Gốc 9  =>  Cải trang Goku GT Kid
+1869 -> 2006  Giáp tập luyện cấp 5  =>  Giáp tập luyện cấp 5
+1870 -> 2020  Cải trang Gốc 10  =>  Cải trang Goku cận vô cực
+1940 -> 2096  Bóng bước chân Hoa Hồng Đỏ  =>  Bóng mờ hoa hồng đỏ
+1941 -> 2100  Ván Rồng 7 Sao  =>  Ván Rồng 7 sao
+1942 -> 2111  Capsule vỡ  =>  Capsule vỡ
+1943 -> 1909  Mảnh capsule vỡ  =>  Mảnh Cápsule Vỡ
+1944 -> 2046  Khóa chỉ số bông tai cấp 3  =>  Khóa chì số 1 Bông tai cấp 3
+1945 -> 2045  Trứng Xên  =>  Trứng ve sầu
+1947 -> 2079  Hộp quà Trung Thu 2026 VIP  =>  Hộp bánh Trung Thu Vip 2026
+1948 -> 2078  Hộp bánh Trung Thu 2026  =>  Hộp bánh Trung Thu 2026
+1949 -> 2080  Hộp bánh Trung Thu chay 2026  =>  Hộp bánh Trung Thu Chay 2026
+1950 -> 2088  Quà Trăng Tròn  =>  Trăng tròn
+1951 -> 2087  Quà Trăng Khuyết  =>  Trăng khuyết
+1952 -> 1871  Pet Charmander  =>  Pet Charmander
+1953 -> 1886  Cải trang Poc Thỏ Đen  =>  Cải trang Póc Thỏ Đen
+1962 -> 2026  Cải trang Naruto  =>  Cải trang Tuyền Qua Minh Nhân
+1963 -> 2027  Cải trang Sasuke  =>  Cải trang Vũ Trí Ba Tá Trợ
+1964 -> 2033  Cải trang chú hề Picolo  =>  Cải trang chú hề Picolo
+1965 -> 2039  Cải trang Akatsuki  =>  Cải trang Akatsuki
+1966 -> 2043  Cải trang Pan Trung Thu 2026  =>  Cải trang Pan Trung Thu
+1967 -> 2048  Cải trang Kính Vàng  =>  Cải trang Kính Vàng
+1968 -> 2049  Cải trang Hồn Ma Tóc Xanh  =>  Cải trang Hồn Ma Tóc Xanh
+1969 -> 2050  Cải trang Tóc Bạc  =>  Cải trang Tóc Bạc
+1970 -> 2051  Cải trang Tóc Trắng  =>  Cải trang Tóc Trắng
+1971 -> 2052  Cải trang Zamasu Hợp Thể  =>  Cải trang Zamasu Hợp Thể
+1972 -> 2053  Cải trang Akaza  =>  Cải trang Thượng Huyền Tam
+1973 -> 2082  Cải trang Beerus  =>  Cải trang Berus
+1974 -> 2075  Cải trang Nappa Aura  =>  Cải Trang Nappa Aura
+1975 -> 2019  Pet Kuma  =>  Pet Cửu Vĩ Hồ
+1976 -> 2038  Pet Robot Đỏ  =>  Pet Xên bọ hung MAX
+1977 -> 2077  Pet Cừu Bông  =>  Pet Cừu không mập
+1978 -> 2059  Pet Hề Súng Nước  =>  Pet Minion
+1979 -> 2072  Pet Ngựa Thành Troy  =>  Pet Ngựa Troy
+1980 -> 2054  Bóng Mờ Trung Thu  =>  Bóng mờ trung thu
+1981 -> 2061  Lồng Đèn Dôremon  =>  Lồng đèn Hốc trưởng
+1982 -> 2030  Cờ Vạn Hoa Đồng  =>  Cờ Vạn Hoa Đồng
+1983 -> 2041  Đại Bàng Đất Sét Nổ  =>  Thú cưỡi chim đất
+1984 -> 2058  Đại Bàng Đất Sét Nổ VIP  =>  Thú cưỡi chim đất VIP
+1985 -> 2044  Ván bay WC 2026  =>  Ván bay World Cup 2026
+1986 -> 2031  Cờ World Cup 2026  =>  Cờ World Cup 2026
+1987 -> 2060  Ván bay Trung Thu 2026  =>  Ván Bay Trung Thu 2026
+1988 -> 2017  Bóng WC 2026  =>  Bóng WC 2026
+1989 -> 2059  Pet Minion 2026  =>  Pet Minion
+1990 -> 2037  Pet Xên bọ hung con  =>  Pet Xên bọ hung con
+1991 -> 2036  Pet Xên bọ hung hoàn thiện  =>  Pet Xên bọ hung hoàn thiện
+1992 -> 2038  Pet Xên bọ hung Max  =>  Pet Xên bọ hung MAX
+1993 -> 1885  Danh hiệu Phá Cổ Trung Thu  =>  Phá cỗ trung thu
+1994 -> 2076  Danh hiệu Phá Cổ Trung Thu VIP  =>  Danh hiệu phá cỗ trung thu VIP
+1995 -> 2081  Danh hiệu Perfect  =>  Danh hiệu Perfect
+1996 -> 2085  Cải trang Bulma Đường Phố  =>  Cải Trang Bunma bụi
+1997 -> 2091  Cải trang Lý Tiểu Nương Đường Phố  =>  Cải Trang Lý Tiểu Nương đường phố
+1998 -> 2086  Cải trang Android 18 Đường Phố  =>  Cải Trang Póc đường phố
+1999 -> 2097  Bóng bước chân Hoa Hồng Xanh  =>  Bóng mờ hoa hồng băng
+
+== Món riêng của server (không có trong DataNRO, code/DB còn dùng) dời ra sau ==
+1775 -> 2103  Hộp thần linh
+1792 -> 2104  Mảnh khỉ Oorazu 1
+1793 -> 2105  Mảnh khỉ Oorazu 2
+1805 -> 2106  Phiếu thức ăn
+1809 -> 2107  Super 2 sao
+1810 -> 2108  Super 3 sao
+1811 -> 2109  Super 4 sao
+1825 -> 2110  Vé Nhệm Vụ KOL Vip
+1942 -> 2111  Capsule vỡ
+
+== Bỏ (không có trong DataNRO, không nơi nào dùng) ==
+1774  Đệ Black Goku
+1779  Cải trang buma
+1796  Đệ tử vegeta
+1808  Kid jiren
+1841  Cải trang Gốc
+1842  Cải trang Gốc
+1843  Cải trang Gốc
+1844  Cải trang Gốc
+1845  Cải trang Gốc
+1846  Cải trang Gốc
+1847  Cải trang Gốc
+1848  Cải trang Gốc
+1849  Cải trang Gốc
+1850  Cải trang Gốc
+1851  Broly Nes
+1863  Cải trang Gốc 4
+1900  Ghost Rider
+1946  Thiệp chúc VIP
+1961  Cải trang Broly Xanh
+
+== Thêm mới từ DataNRO ==
+1536  Hộp quà Set kích hoạt  (type 27)
+1537  Hộp quà Set kích hoạt 3 sao  (type 27)
+1758  Hộp Diêm thống nhất  (type 27)
+1759  Que diêm  (type 27)
+1760  Đeo lưng Kẹo Noel  (type 11)
+1761  Gà Tây Nướng  (type 29)
+1765  Mùa đông không lạnh  (type 36)
+1766  Que diêm bùng cháy  (type 27)
+1767  Ván bay Magikarp  (type 23)
+1768  Rắn bay  (type 23)
+1769  Bóng sinh nhật NRO  (type 11)
+1770  Bánh sinh nhật NRO 11 tuổi  (type 29)
+1772  Đuôi rắn xanh  (type 11)
+1773  Đuôi rắn rực lửa  (type 11)
+1774  Pet rắn cute  (type 18)
+1776  Cúp Vàng  (type 11)
+1778  CT Lý Tiểu Nương Rực Rỡ  (type 5)
+1779  Lì xì xanh  (type 27)
+1780  Lì xì vàng  (type 27)
+1781  Lì xì VIP  (type 27)
+1782  Chuột mặp  (type 29)
+1783  Hộp Pet Tết  (type 27)
+1784  Hộp Nón Tết  (type 27)
+1785  Karin Kid Lân 2025  (type 5)
+1786  Pet cá mặp Koi bốn chân  (type 18)
+1787  Canh khổ qua  (type 29)
+1788  Thịt kho trứng  (type 29)
+1789  MT Gaming  (type 23)
+1790  CT Đặng Văn Chiến  (type 5)
+1791  Pet Secret  (type 18)
+1792  Pet Rabbit  (type 18)
+1793  Pet Dino  (type 18)
+1794  Pet Panda  (type 18)
+1796  Hộp mù Pet  (type 27)
+1797  CT Bunma Rider  (type 5)
+1798  Máy bay 41  (type 23)
+1799  Hộp mù Pet  (type 27)
+1800  Cải trang Chan Xư S+  (type 5)
+1801  Pet Mắt Long Lanh  (type 18)
+1802  Pet Mắt Rưng  (type 18)
+1804  Hộp mù Pet VIP  (type 27)
+1812  Thú cưỡi Rồng Thiêng  (type 23)
+1813  Rồng nhí 1 sao  (type 18)
+1820  Trứng Rồng Nhí  (type 27)
+1822  Mảnh Trứng Rồng Nhí  (type 27)
+1828  Ván bay Rồng Thiêng VIP  (type 23)
+1831  Rađa đa năng  (type 27)
+1833  Máy Bay Xám  (type 23)
+1834  Máy Bay chiến đấu  (type 23)
+1837  Chai Cuke 2 lít  (type 29)
+1839  Cải trang Fide chai  (type 5)
+1841  Đeo lưng bạch tuộc Xanh cáu kỉnh  (type 11)
+1842  Đeo lưng bạch tuộc Hồng  (type 11)
+1843  Đeo lưng bạch tuộc Vàng  (type 11)
+1844  Đeo lưng bạch tuộc Xanh  (type 11)
+1845  Pet cá Dory  (type 18)
+1846  Pet cá Nemo  (type 18)
+1847  Ván bay cá đuối  (type 23)
+1848  Ván bay bạch tuộc  (type 23)
+1849  Cải trang Test  (type 5)
+1850  Bông cúc  (type 11)
+1856  Hộp quà thiếu nhi 2025  (type 27)
+1861  Râu bạch tuộc nướng  (type 27)
+1863  Hộp trang bị Thần  (type 27)
+1864  Rương cải trang Hải Tặc  (type 27)
+1870  Pet Pikachu  (type 18)
+1872  Pet Squirtle  (type 18)
+1873  Pet Bullbasaur  (type 18)
+1874  Pet MewTwo  (type 18)
+1875  Cờ Quả Cầu Pokemon  (type 11)
+1876  Vé vàng  (type 27)
+1877  Thú cưỡi Lugia  (type 23)
+1878  Ván bay cá đuối VIP  (type 23)
+1879  Cải trang Kochiro  (type 5)
+1880  Cải trang Musashi  (type 5)
+1881  Pet Meowth  (type 18)
+1882  Đeo lưng bạch tuộc Xanh  (type 11)
+1883  Đeo lưng bạch tuộc Xanh  (type 11)
+1887  Ván bay cung trăng  (type 23)
+1888  Lồng đèn 2 lon  (type 11)
+1889  Cải trang Kirin chú cuội  (type 5)
+1890  Đổi đệ tử 2  (type 27)
+1891  Thùng rác  (type 11)
+1892  Bóng Poke  (type 27)
+1893  Bóng Ultra  (type 27)
+1894  Bóng Master  (type 27)
+1895  Rác  (type 27)
+1896  Thú cưỡi rồng Thiêng  (type 23)
+1897  Thú cưỡi rồng Băng  (type 23)
+1898  Thú cưỡi rồng Đen  (type 23)
+1899  Thú cưỡi rồng Vô Cực  (type 23)
+1900  Rương Rồng Thần  (type 27)
+1901  Rương Rồng Thần VIP  (type 27)
+1902  Hộp quà tháng 9  (type 27)
+1903  Hộp quà tháng 9 VIP  (type 27)
+1904  Chiến binh sao đen  (type 36)
+1905  Cải trang Sida  (type 5)
+1906  Cải trang Bill  (type 5)
+1907  Cải trang Champa  (type 5)
+1908  Cải trang Heles  (type 5)
+1910  Hộp quà Trung Thu VIP  (type 27)
+1911  Cải trang Rumsshi  (type 5)
+1912  Cải trang Mosco  (type 5)
+1914  Pet Gấu Dâu  (type 18)
+1915  Hộp bánh Trung Thu  (type 27)
+1916  Hộp bánh Trung Thu Chay  (type 27)
+1917  Hộp bánh Trung Thu lớn  (type 27)
+1918  Hộp bánh Trung Thu nhỏ  (type 27)
+1920  Vé nhiệm vụ tháng 10 vip  (type 27)
+1922  Chổi bay phù thủy  (type 23)
+1923  Đeo lưng Cú con cưng  (type 11)
+1924  Rương Siêu Hạng  (type 27)
+1925  Bó Hoa Hồng 2 Mới  (type 11)
+1926  Cải trang Ác Ma Pico  (type 5)
+1928  Capsule Trang Sức VIP  (type 27)
+1931  Cải trang Janemba  (type 5)
+1932  Cánh thiên thần 3 (Đệ)  (type 11)
+1940  Thòng lọng  (type 27)
+1941  Ba lô ngọc rồng  (type 11)
+1942  Máy bay giấy  (type 23)
+1943  Bảng đen  (type 23)
+1944  Hộp quà 20-11 VIP  (type 27)
+1945  Pet ngựa KPI  (type 18)
+1947  Capsule cải trang VIP  (type 27)
+1948  Capsule cải trang HSD  (type 27)
+1950  Ván khủng long Noel  (type 23)
+1951  Đeo lưng bông tuyết  (type 11)
+1953  Pet Bư Noel  (type 18)
+1954  Máy bay NRO  (type 23)
+1956  Pet tuần lộc ngố  (type 18)
+1958  Túi ngọc rồng băng  (type 27)
+1959  Cacao nóng  (type 31)
+1960  Bóng mờ tuyết rơi  (type 38)
+1961  Chuông Vàng Noel  (type 27)
+1962  Pet ngựa chiến  (type 18)
+1963  Đeo lưng lồng đèn Tết  (type 11)
+1964  Pet Ngựa Thần Tài  (type 18)
+1965  Pháo hoa NRO  (type 11)
+1966  Đeo lưng Mãi Dell thành công  (type 11)
+1967  Vé nhiệm vụ tháng 1 vip  (type 27)
+1969  Bánh sinh nhật 1 sao  (type 27)
+1970  Bánh sinh nhật 2 sao  (type 27)
+1971  Bóng mờ NRO  (type 38)
+1973  Pet Ngựa Đỏ  (type 18)
+1974  Pet Ngựa Be  (type 18)
+1975  Pet Ngựa Trắng  (type 18)
+1976  Hiệu ứng hoa Tết  (type 38)
+1977  Cá chép đồng tiền  (type 23)
+1978  Danh hiệu Đón Xuân  (type 36)
+1979  Đeo lưng Bao lì xì  (type 11)
+1980  Pet Kirby  (type 18)
+1981  Bư tập tạ  (type 11)
+1982  Cải trang Arale  (type 5)
+1983  Cờ đeo lưng cớt hồng  (type 11)
+1984  Lì xì 2026  (type 27)
+1985  Hộp Nón Tết VIP  (type 27)
+1986  Hộp Nón Tết  (type 27)
+1987  Lộc  (type 27)
+1988  Yêu quái núi lãng lãng  (type 11)
+1989  Bó rơm  (type 27)
+1990  Vé nhiệm vụ tháng 2 vip  (type 27)
+1991  Thủy Thủ Mặt Trăng  (type 5)
+1992  Cải trang Xuka  (type 5)
+1993  Cờ đeo lưng cớt hồng VIP  (type 11)
+1994  Thú cưỡi Sư Tử Đen  (type 23)
+1995  Capsule 8 tháng 3 2026  (type 27)
+1996  Cải trang Goku giỗ tổ  (type 5)
+2000  Đá Linh Hồn  (type 14)
+2001  Đá Hiện Thực  (type 14)
+2002  Đá Sức Mạnh  (type 14)
+2003  Đá Không Gian  (type 14)
+2004  Đá Thời Gian  (type 14)
+2007  Vé nhiệm vụ tháng 4 VIP  (type 27)
+2008  Hộp Tháng Tư  (type 27)
+2009  Hộp Hề  (type 27)
+2010  Hộp Cá Tháng Tư  (type 27)
+2011  Hộp quà đầu tháng  (type 27)
+2012  Thần tiễn  (type 23)
+2013  Hộp hào khí  (type 27)
+2014  Pet hươu  (type 18)
+2015  Pet hổ  (type 18)
+2016  Pet đại bàng  (type 18)
+2018  Lệnh bài thành cổ  (type 27)
+2021  Phiếu sao vàng may mắn  (type 27)
+2022  Ván bay sao băng  (type 23)
+2023  Bóng mờ sao may mắn  (type 38)
+2024  Cờ đeo lưng sao may mắn  (type 11)
+2025  Pet Mèo thần tài  (type 18)
+2028  Hộp tháng 5  (type 27)
+2029  Vé nhiệm vụ tháng 5 VIP  (type 27)
+2032  Thỏi vàng NRJ  (type 27)
+2034  Hộp đá nâng cấp +9  (type 27)
+2035  Năng lượng E10  (type 29)
+2040  Mảnh hồn khỉ con  (type 33)
+2042  Quả bóng vàng 2026  (type 27)
+2047  Vé World Cup  (type 27)
+2055  Cuồng bạo  (type 29)
+2056  Trái cây nhiệt đới  (type 27)
+2057  Trái cây nhiệt đới VIP  (type 27)
+2062  Cải trang Champa  (type 5)
+2063  Cải trang Belmod  (type 5)
+2064  Ngọc rồng xanh 1 sao  (type 30)
+2065  Ngọc rồng xanh 2 sao  (type 30)
+2066  Ngọc rồng xanh 3 sao  (type 30)
+2067  Ngọc rồng xanh 4 sao  (type 30)
+2068  Ngọc rồng xanh 5 sao  (type 30)
+2069  Ngọc rồng xanh 6 sao  (type 30)
+2070  Ngọc rồng xanh 7 sao  (type 30)
+2071  Hộp ngọc rồng xanh  (type 27)
+2073  Mũi khoan siêu cấp  (type 27)
+2074  Sao pha lê ánh kim  (type 30)
+2083  Lồng đèn Thỏ trắng  (type 11)
+2084  Trứng Xên Vàng  (type 27)
+2089  Mảnh thẻ VIP  (type 27)
+2090  Hộp nâng cấp đồ thiên sứ  (type 27)
+2092  Hỏa tiêm thương  (type 11)
+2093  Cải Trang Goku Ninja  (type 5)
+2094  Pet ma dơi  (type 18)
+2095  Hộp đen bí ẩn  (type 27)
+2098  Năng lượng tà ác  (type 29)
+2099  Cải Trang công chúa quỷ  (type 5)
+2101  Hộp hoa hồng  (type 27)
+2102  Set kích hoạt Beerus 1 món tự chọn  (type 27)
