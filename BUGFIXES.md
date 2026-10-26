@@ -217,7 +217,7 @@ Phần hình 3 cải trang Đường Phố là part 2158–2166, lấy từ `Nr_
 - Mỗi dòng gồm vật phẩm (-1 vàng, -2 ngọc, -3 hồng ngọc), số lượng, tỉ trọng, các mức HSD và % ra vĩnh viễn. Sửa bảng rồi khởi động lại server là có tác dụng.
 - Hộp 20/10 (1720) cũng dùng bảng này.
 - Tỉ lệ do mình đặt, ảnh không ghi.
-- Vật phẩm chưa có trong database nên chưa đưa vào hộp: Chi Chi Áo Cưới, Pan VIP, Năng lượng tà ác, Bunma Rider mới, Janemba, Poc Thỏ Đen, Pet Charmander, Pet ngựa KPI, Ván bay Magikarp, Hộp nâng cấp đồ thiên sứ, Tờ mảnh VIP, Cánh hào khí, Chi Chi giỗ tổ, Thiên sư phụ, Cờ ngọc rồng 4 sao / Super, Bóng sinh nhật NRO, Picolo Kid.
+- Vật phẩm chưa có trong database nên chưa đưa vào hộp: Chi Chi Áo Cưới, Pan VIP, Năng lượng tà ác, Bunma Rider mới, Janemba, Poc Thỏ Đen, Pet ngựa KPI, Ván bay Magikarp, Hộp nâng cấp đồ thiên sứ, Tờ mảnh VIP, Cánh hào khí, Chi Chi giỗ tổ, Thiên sư phụ, Cờ ngọc rồng 4 sao / Super, Bóng sinh nhật NRO, Picolo Kid.
 - Hiện chưa có nguồn rơi Thiệp chúc VIP và các hộp Trung Thu. Admin phát bằng lệnh `item`, hoặc thêm vào shop / boss.
 
 ### Quy Lão
@@ -226,3 +226,9 @@ Phần hình 3 cải trang Đường Phố là part 2158–2166, lấy từ `Nr_
   - Người đang online nhận quà ngay. Người offline nhận khi vào game, nếu hành trang đủ chỗ.
   - Top 1–3 nhận thêm aura 122/121/120 trong 30 ngày (`Event2026Service.TOP_AURA_DAYS`).
 - **Quà Trung Thu:** đổi Quà Trăng Tròn bằng 99 điểm sự kiện, Quà Trăng Khuyết bằng 20 triệu vàng.
+
+## Đợt 4: gói Icon11th7
+- Bù 6 icon đang thiếu: Đai lưng 1752–1754 (14523–14525), item 673 (15313) và 2 khung chân của part 2017 (15199, 15200).
+- Thêm Pet Charmander (id 1952, part 2167–2169) vào Hộp bánh Trung Thu 2026 và Hộp bánh chay (HSD 7/15/30 ngày, 5% vĩnh viễn). Ảnh chưa ghi chỉ số nên pet chưa có chỉ số.
+- `vsData` và `vsItem` tăng lên 12.
+- Gói thiếu icon 17662, là 1 khung chân của Cải trang Android 18 Đường Phố (part 2166). Khung đó sẽ trống cho tới khi có icon.
