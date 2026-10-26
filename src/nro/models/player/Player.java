@@ -748,10 +748,7 @@ public class Player implements Runnable {
                 }
             }
         }
-        // SKH Thần hủy diệt Beerus (2/4/5 món), sau đó là aura thưởng đua top
-        if (this.nPoint != null && this.nPoint.getSkhBeerusAura() != -1) {
-            return (byte) this.nPoint.getSkhBeerusAura();
-        }
+        // aura thưởng đua top Quy Lão
         if (this.auraReward >= 0 && this.auraRewardUntil > System.currentTimeMillis()) {
             return (byte) this.auraReward;
         }

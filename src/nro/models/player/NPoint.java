@@ -551,13 +551,6 @@ public class NPoint {
     public static final int PET_XEN_MAX = 1992;
 
     /**
-     * Aura theo số món SKH Beerus: 2 món xanh, 4 món vàng, 5 món tím.
-     */
-    public int getSkhBeerusAura() {
-        return skhBeerus >= 5 ? 122 : skhBeerus >= 4 ? 121 : skhBeerus >= 2 ? 120 : -1;
-    }
-
-    /**
      * Gọi khi bị đánh: kích hoạt Akaza (HP dưới 50%, hồi 180s) và Ảo Thuật (hồi 120s), mỗi hiệu ứng kéo dài 3 giây.
      */
     public void onInjured() {

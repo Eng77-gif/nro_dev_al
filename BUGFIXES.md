@@ -202,10 +202,10 @@ Phần hình 3 cải trang Đường Phố là part 2158–2166, lấy từ `Nr_
 
 ### SKH Thần hủy diệt Beerus
 - Đồ Hủy Diệt rơi từ Super Broly (1%) mang dòng set 260 và 3 dòng mô tả 261–263.
-- Mặc 2 món: +10% SĐ, +10% ST chí mạng, aura xanh (aura_120).
-- Mặc 4 món: +15% SĐ, +20% ST chí mạng, aura vàng (aura_121).
-- Mặc 5 món: +30% SĐ, +30% ST chí mạng, aura tím (aura_122).
-- Aura lấy theo thứ tự: thẻ radar, rồi SKH Beerus, rồi aura thưởng top.
+- Mặc 2 món: +10% SĐ, +10% ST chí mạng.
+- Mặc 4 món: +15% SĐ, +20% ST chí mạng.
+- Mặc 5 món: +30% SĐ, +30% ST chí mạng.
+- Set không có aura. Aura lấy theo thứ tự: thẻ radar, rồi aura thưởng top.
 
 ### Bóng bước chân (ô riêng)
 - Dùng vật phẩm để mang vào ô riêng, không chiếm ô cờ hay ô pet. Mang món khác thì món cũ trả về hành trang.
