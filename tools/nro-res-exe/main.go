@@ -46,6 +46,7 @@ type client struct {
 	big        map[int8]bool
 	ch         chan msg
 	closed     chan struct{}
+	closeErr   error
 	wmu        sync.Mutex
 }
 
@@ -124,6 +125,9 @@ func (c *client) read() (msg, error) {
 		}
 		n = int(c.dec(h[0]))<<8 | int(c.dec(h[1]))
 	}
+	if n > 64<<20 {
+		return msg{}, fmt.Errorf("gói lệnh %d dài %d byte bất thường (lệch dữ liệu, thử bật/tắt ô Server TeaMobi chính thức)", cmd, n)
+	}
 	d := make([]byte, n)
 	if _, err := io.ReadFull(c.r, d); err != nil {
 		return msg{}, err
@@ -157,6 +161,7 @@ func (c *client) handshake() error {
 		for {
 			m, err := c.read()
 			if err != nil {
+				c.closeErr = err
 				return
 			}
 			c.ch <- m
@@ -291,6 +296,17 @@ type downloader struct {
 	parts  [][][3]int
 	types  []int
 	resEnd bool
+	got    map[string]bool // các yêu cầu đã nhận được (để không gửi lại / đếm trùng)
+	hinted bool
+}
+
+// mark ghi nhận đã nhận key; trả về true nếu là lần đầu.
+func (d *downloader) mark(key string) bool {
+	if d.got[key] {
+		return false
+	}
+	d.got[key] = true
+	return true
 }
 
 func (d *downloader) write(rel string, data []byte) {
@@ -308,7 +324,9 @@ func (d *downloader) onMsg(m msg) {
 		img, err2 := r.blob()
 		if err == nil && err2 == nil {
 			d.write("icon/x"+z+"/"+strconv.Itoa(int(id))+".png", img)
-			d.stats["icon"]++
+			if d.mark("icon:" + strconv.Itoa(int(id))) {
+				d.stats["icon"]++
+			}
 		}
 	case 66: // ảnh theo tên
 		name, err := r.utf()
@@ -317,7 +335,9 @@ func (d *downloader) onMsg(m msg) {
 		if err == nil && err2 == nil && len(img) > 0 {
 			d.write("img_by_name/x"+z+"/"+filepath.Base(name)+".png", img)
 			d.frames[name] = int(nf)
-			d.stats["mount/aura"]++
+			if d.mark("img:" + name) {
+				d.stats["mount/aura"]++
+			}
 		}
 	case -66: // effect
 		id, err := r.i16()
@@ -334,7 +354,9 @@ func (d *downloader) onMsg(m msg) {
 		if err == nil {
 			d.write("effdata/DataEffect_"+strconv.Itoa(int(id)), eff)
 			d.write("effect/x"+z+"/ImgEffect_"+strconv.Itoa(int(id))+".png", img)
-			d.stats["effect"]++
+			if d.mark("eff:" + strconv.Itoa(int(id))) {
+				d.stats["effect"]++
+			}
 		}
 	case -87: // dart, arrow, effect, image, part, skill
 		r.i8()
@@ -349,6 +371,10 @@ func (d *downloader) onMsg(m msg) {
 			}
 		}
 		d.parseParts(part)
+	case -26, -25:
+		if s, err := r.utf(); err == nil && strings.TrimSpace(s) != "" {
+			d.j.log("  Server: %s", strings.ReplaceAll(s, "\n", " "))
+		}
 	case -74:
 		t, _ := r.i8()
 		if t == 2 {
@@ -439,53 +465,93 @@ func parseRange(s string) []int {
 	return ids
 }
 
-func (d *downloader) batch(label string, reqs [][]byte, cmd int8) {
+func (d *downloader) isClosed() bool {
+	select {
+	case <-d.c.closed:
+		return true
+	default:
+		return false
+	}
+}
+
+// reconnect: server ngắt kết nối (hết giờ chờ đăng nhập, chống spam...) thì kết nối lại.
+func (d *downloader) reconnect() bool {
+	reason := "không rõ lý do"
+	if d.c.closeErr != nil {
+		reason = d.c.closeErr.Error()
+	}
+	d.c.conn.Close()
+	d.j.log("  Mất kết nối (%s)", reason)
+	if d.o.User == "" && !d.hinted {
+		d.hinted = true
+		d.j.log("  Gợi ý: nhiều server ngắt kết nối nếu không đăng nhập, hãy điền tài khoản; hoặc tăng thời gian chờ / giảm số yêu cầu mỗi đợt ở mục Nâng cao")
+	}
+	for try := 1; try <= 5 && !d.j.isStopped(); try++ {
+		time.Sleep(time.Duration(try*2) * time.Second)
+		d.j.log("  Kết nối lại lần %d...", try)
+		if err := d.connect(); err == nil {
+			return true
+		} else {
+			d.j.log("  Lỗi: %v", err)
+		}
+	}
+	return false
+}
+
+func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8) {
 	d.j.log("Tải %s: %d yêu cầu...", label, len(reqs))
-	for k := 0; k < len(reqs) && !d.j.isStopped(); k += d.o.Batch {
+	retries := 0
+	for k := 0; k < len(reqs) && !d.j.isStopped(); {
 		end := k + d.o.Batch
 		if end > len(reqs) {
 			end = len(reqs)
 		}
-		for _, p := range reqs[k:end] {
+		ok := true
+		for i, p := range reqs[k:end] {
+			if d.got[keys[k+i]] {
+				continue // đã nhận trước khi mất kết nối
+			}
 			if d.c.send(cmd, p) != nil {
-				return
+				ok = false
+				break
 			}
 			if d.o.Delay > 0 {
 				time.Sleep(time.Duration(d.o.Delay * float64(time.Second)))
 			}
 		}
-		d.pump(d.o.Wait)
+		if ok {
+			d.pump(d.o.Wait)
+		}
+		if !ok || d.isClosed() {
+			retries++
+			if retries > 20 || !d.reconnect() {
+				d.j.log("  Dừng: không kết nối lại được server (đã tải %d/%d)", k, len(reqs))
+				return
+			}
+			continue // gửi lại đợt vừa mất
+		}
 		d.j.log("  %d/%d  đã nhận %d", end, len(reqs), d.stats[label])
+		k = end
 	}
 	d.pump(d.o.Wait * 2)
 }
 
-func (d *downloader) run() error {
+// connect: kết nối, nhận khoá, chọn loại client và đăng nhập (nếu có tài khoản).
+func (d *downloader) connect() error {
 	o := &d.o
-	d.j.log("Kết nối %s:%d...", o.Host, o.Port)
 	c, err := dial(o.Host, o.Port, o.Official)
 	if err != nil {
 		return err
 	}
 	d.c = c
-	defer c.conn.Close()
 	if err := c.handshake(); err != nil {
+		c.conn.Close()
 		return err
 	}
 	ct := (&pkt{}).b(2).b(4).b(int8(o.Zoom)).b(0).i(int32(1280 / o.Zoom)).i(int32(720 / o.Zoom)).bo(true).bo(true).u(o.Platform)
 	c.send(-29, ct.Bytes())
 	d.pump(1.5)
-	if o.Res {
-		d.j.log("Tải file res...")
-		c.send(-74, (&pkt{}).b(1).Bytes())
-		c.send(-74, (&pkt{}).b(2).Bytes())
-		for end := time.Now().Add(10 * time.Minute); !d.resEnd && !d.j.isStopped() && time.Now().Before(end); {
-			d.pump(2)
-		}
-		d.j.log("  %d file res", d.stats["res"])
-	}
 	if o.User != "" {
-		d.j.log("Đăng nhập...")
 		c.send(-29, (&pkt{}).b(0).u(o.User).u(o.Password).u(o.Version).bo(false).Bytes())
 		d.pump(3)
 		for _, sub := range []int8{6, 7, 8, 13} {
@@ -494,9 +560,34 @@ func (d *downloader) run() error {
 		c.send(-38, nil)
 		d.pump(4)
 	}
+	if d.isClosed() {
+		if c.closeErr != nil {
+			return c.closeErr
+		}
+		return errors.New("server đóng kết nối")
+	}
+	return nil
+}
+
+func (d *downloader) run() error {
+	o := &d.o
+	d.j.log("Kết nối %s:%d%s...", o.Host, o.Port, map[bool]string{true: " và đăng nhập", false: ""}[o.User != ""])
+	if err := d.connect(); err != nil {
+		return err
+	}
+	defer func() { d.c.conn.Close() }()
+	if o.Res {
+		d.j.log("Tải file res...")
+		d.c.send(-74, (&pkt{}).b(1).Bytes())
+		d.c.send(-74, (&pkt{}).b(2).Bytes())
+		for end := time.Now().Add(10 * time.Minute); !d.resEnd && !d.j.isStopped() && time.Now().Before(end); {
+			d.pump(2)
+		}
+		d.j.log("  %d file res", d.stats["res"])
+	}
 	if o.Parts {
 		d.j.log("Tải part...")
-		c.send(-87, nil)
+		d.c.send(-87, nil)
 		for end := time.Now().Add(30 * time.Second); d.parts == nil && !d.j.isStopped() && time.Now().Before(end); {
 			d.pump(1)
 		}
@@ -514,10 +605,12 @@ func (d *downloader) run() error {
 	}
 	if strings.TrimSpace(o.Icons) != "" {
 		var reqs [][]byte
+		var keys []string
 		for _, id := range parseRange(o.Icons) {
 			reqs = append(reqs, (&pkt{}).i(int32(id)).Bytes())
+			keys = append(keys, "icon:"+strconv.Itoa(id))
 		}
-		d.batch("icon", reqs, -67)
+		d.batch("icon", reqs, keys, -67)
 	}
 	var names []string
 	for _, id := range parseRange(o.Mounts) {
@@ -533,10 +626,12 @@ func (d *downloader) run() error {
 	}
 	if len(names) > 0 {
 		var reqs [][]byte
+		var keys []string
 		for _, n := range names {
 			reqs = append(reqs, (&pkt{}).u(n).Bytes())
+			keys = append(keys, "img:"+n)
 		}
-		d.batch("mount/aura", reqs, 66)
+		d.batch("mount/aura", reqs, keys, 66)
 		jf := filepath.Join(o.Out, "img_by_name.json")
 		all := map[string]int{}
 		if b, err := os.ReadFile(jf); err == nil {
@@ -554,10 +649,12 @@ func (d *downloader) run() error {
 			d.j.log("Bỏ qua effect: cần tài khoản để vào game")
 		} else {
 			var reqs [][]byte
+			var keys []string
 			for _, id := range parseRange(o.Effects) {
 				reqs = append(reqs, (&pkt{}).s(int16(id)).Bytes())
+				keys = append(keys, "eff:"+strconv.Itoa(id))
 			}
-			d.batch("effect", reqs, -66)
+			d.batch("effect", reqs, keys, -66)
 		}
 	}
 	keys := make([]string, 0, len(d.stats))
@@ -632,7 +729,7 @@ func startDownload(w http.ResponseWriter, r *http.Request) {
 	order = append(order, j.ID)
 	jobsMu.Unlock()
 	go func() {
-		d := &downloader{o: o, j: j, stats: map[string]int{}, frames: map[string]int{}}
+		d := &downloader{o: o, j: j, stats: map[string]int{}, frames: map[string]int{}, got: map[string]bool{}}
 		err := d.run()
 		j.mu.Lock()
 		defer j.mu.Unlock()
