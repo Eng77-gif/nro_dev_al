@@ -251,6 +251,13 @@ public class Player implements Runnable {
     public long lastTimePKVoDaiSinhTu;
     public boolean haveRewardVDST;
     public int thoiVangVoDaiSinhTu;
+
+    // dữ liệu bảng player_extra
+    public Item itemFoot; // ô bóng bước chân (chỉ server tính chỉ số)
+    public int qlPoints; // điểm đua top tặng bộ ngọc rồng cho Quy Lão
+    public int auraReward = -1; // aura thưởng top
+    public long auraRewardUntil;
+    public int qlRewardRank; // hạng đua top đang chờ nhận thưởng (0 = không có)
     public long timePKVDST;
 
     public int binhChonHatMit;
@@ -730,7 +737,7 @@ public class Player implements Runnable {
     }
 
     public byte getAura() {
-        if (!isPl() || this.Cards.isEmpty()) {
+        if (!isPl()) {
             return -1;
         }
         for (Card card : this.Cards) {
@@ -740,6 +747,13 @@ public class Player implements Runnable {
                     return (byte) radarTemplate.AuraId;
                 }
             }
+        }
+        // SKH Thần hủy diệt Beerus (2/4/5 món), sau đó là aura thưởng đua top
+        if (this.nPoint != null && this.nPoint.getSkhBeerusAura() != -1) {
+            return (byte) this.nPoint.getSkhBeerusAura();
+        }
+        if (this.auraReward >= 0 && this.auraRewardUntil > System.currentTimeMillis()) {
+            return (byte) this.auraReward;
         }
         return -1;
     }

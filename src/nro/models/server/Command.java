@@ -56,6 +56,8 @@ public class Command {
         adminCommands.put("item", player -> Input.gI().createFormGiveItem(player));
         adminCommands.put("brl", player -> BrolyManager.gI().showListBoss(player));
         adminCommands.put("getitem", player -> Input.gI().createFormGetItem(player));
+        adminCommands.put("chottopql", player -> Service.gI().sendThongBao(player, "Đã chốt top Quy Lão: "
+                + nro.models.services.Event2026Service.gI().closeRace(player) + " người nhận quà"));
         adminCommands.put("hs", player -> Service.gI().releaseCooldownSkill(player));
         adminCommands.put("d", player -> Service.gI().setPos(player, player.location.x, player.location.y + 10));
         adminCommands.put("a", player -> NpcService.gI().createMenuConMeo(player, ConstNpc.MENU_ADMIN, -1,
@@ -265,6 +267,11 @@ parameterizedCommands.put("upp", (player, text) -> {
                     return true;
                 }
             }
+        }
+
+        if (text.equals("thao buoc chan")) {
+            nro.models.services.Event2026Service.gI().unequipFoot(player);
+            return true;
         }
 
         if (text.startsWith("ten con la ")) {

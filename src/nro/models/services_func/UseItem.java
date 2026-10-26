@@ -1,5 +1,7 @@
 package nro.models.services_func;
 
+import nro.models.services.Event2026Service;
+
 import nro.models.boss.Boss;
 import nro.models.boss.Boss_mini.SoiHecQuyn;
 import nro.models.services.shenron.SummonDragon;
@@ -938,6 +940,15 @@ public class UseItem {
                             }
                             break;
                             default:
+                                if (Event2026Service.gI().isFoot(item)) {
+                                    // bóng bước chân: ô riêng, không chiếm ô cờ / pet
+                                    Event2026Service.gI().equipFoot(pl, item);
+                                    return;
+                                }
+                                if (Event2026Service.gI().isBox(item)) {
+                                    Event2026Service.gI().openBox(pl, item);
+                                    return; // hộp có thể đã bị dispose khi trừ hết số lượng
+                                }
                                 // pet (type 27) chưa có case riêng: mặc vào và tạo pet theo part trong item_template
                                 if (item.template.type == 27 && item.template.head >= 0 && item.template.body >= 0 && item.template.leg >= 0) {
                                     int h = item.template.head, b = item.template.body, l = item.template.leg;

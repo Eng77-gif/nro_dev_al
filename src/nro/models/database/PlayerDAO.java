@@ -352,6 +352,7 @@ public class PlayerDAO {
     public static void updatePlayer(Player player) {
         if (player != null && player.idMark.isLoadedAllDataPlayer()) {
             long st = System.currentTimeMillis();
+            PlayerExtraDAO.save(player);
             try {
                 JSONArray dataArray = new JSONArray();
 

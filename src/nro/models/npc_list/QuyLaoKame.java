@@ -1,5 +1,6 @@
 package nro.models.npc_list;
 
+import nro.models.services.Event2026Service;
 import nro.models.consts.ConstNpc;
 import nro.models.item.Item;
 import nro.models.map.phoban.BanDoKhoBau;
@@ -97,6 +98,8 @@ public class QuyLaoKame extends Npc {
                 menu.add("Đổi điểm\nsự kiện\n[" + player.event.getEventPoint() + "]");
                 menu.add("Nhận quà\nKOL");
                 menu.add("Nhận quà\nKOL VIP");
+                menu.add("Đua top\nngọc rồng\n[" + player.qlPoints + "]");
+                menu.add("Quà\nTrung Thu");
                 if (ruacon != null && ruacon.quantity >= 1) {
                     menu.add("Giao\nRùa con");
                 }
@@ -159,6 +162,19 @@ public class QuyLaoKame extends Npc {
             case ConstNpc.KOL_VIP_REWARD_MENU:
                 handleKOLQuestRewardConfirm(player, select, true);
                 break;
+            case MENU_DUA_TOP:
+                switch (select) {
+                    case 0 -> Event2026Service.gI().giveDragonBallSet(player, false);
+                    case 1 -> Event2026Service.gI().giveDragonBallSet(player, true);
+                    case 2 -> NpcService.gI().createTutorial(player, tempId, this.avartar, Event2026Service.gI().topText());
+                }
+                break;
+            case MENU_QUA_TRUNG_THU:
+                switch (select) {
+                    case 0 -> Event2026Service.gI().exchangeTrangTron(player);
+                    case 1 -> Event2026Service.gI().exchangeTrangKhuyet(player);
+                }
+                break;
         }
     }
 
@@ -177,10 +193,23 @@ public class QuyLaoKame extends Npc {
                 handleKOLQuest(player, true);
                 break;
             case 4:
+                this.createOtherMenu(player, MENU_DUA_TOP, "Tặng ta 1 bộ ngọc rồng 1 - 7 sao để nhận 1 điểm đua top.\n"
+                        + "Điểm của con: " + player.qlPoints + "\nTop 1 - 100 nhận Ván Rồng 7 Sao và nhiều phần quà, top 1 - 3 nhận thêm hào quang " + Event2026Service.TOP_AURA_DAYS + " ngày",
+                        "Tặng\n1 bộ", "Tặng\ntất cả", "Xem top", "Đóng");
+                break;
+            case 5:
+                this.createOtherMenu(player, MENU_QUA_TRUNG_THU, "Quà Trăng Tròn: " + Event2026Service.TRANG_TRON_POINT + " điểm sự kiện\n"
+                        + "Quà Trăng Khuyết: " + Util.numberToMoney(Event2026Service.TRANG_KHUYET_GOLD) + " vàng",
+                        "Quà\nTrăng Tròn", "Quà\nTrăng Khuyết", "Đóng");
+                break;
+            case 6:
                 handleTradeRuacon(player);
                 break;
         }
     }
+
+    private static final int MENU_DUA_TOP = 2026_1;
+    private static final int MENU_QUA_TRUNG_THU = 2026_2;
 
     private void handleTalk(Player player) {
         if (player.LearnSkill.Time != -1 && player.LearnSkill.Time <= System.currentTimeMillis()) {

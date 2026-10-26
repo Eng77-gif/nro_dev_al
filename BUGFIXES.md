@@ -167,7 +167,7 @@ Các option của danh hiệu (chí mạng, sát thương chuẩn…) trước �
 
 ### Nguồn nhận
 - **Vòng quay ngọc/vé:** mỗi ô có 3% ra vật phẩm đặc biệt (danh sách trong `RewardService.SPECIAL_WHEEL_ITEMS`). Mỗi món có 3% vĩnh viễn (×3 so với 1% của vật phẩm thường), còn lại có hạn 3–15 ngày.
-- **Boss Super Broly:** giáp 65%. Rơi đá nâng cấp, item chí mạng, đồ thần linh (cả găng), ngọc rồng 1–4 sao, sao pha lê cấp 2 ×4–8, sao pha lê, đồ cấp 8–11 (3% ra đồ 8 sao), set Hủy Diệt (Champa) 1%, 1 triệu vàng 5%.
+- **Boss Super Broly:** giáp 65%. Rơi đá nâng cấp, item chí mạng, đồ thần linh (cả găng), ngọc rồng 1–4 sao, sao pha lê cấp 2 ×4–8, sao pha lê, đồ cấp 8–11 (3% ra đồ 8 sao), set Hủy Diệt 1% (từ đợt 3 là SKH Thần hủy diệt Beerus), 1 triệu vàng 5%.
 
 ### Phần tạm hoặc chưa làm được
 - Gói tài nguyên không có hình nên mình tạm mượn:
@@ -182,3 +182,47 @@ Các option của danh hiệu (chí mạng, sát thương chuẩn…) trước �
 - "Hộp đá cấp 9" và "Hộp NRO Xanh" chưa có trong database. Boss rơi đá nâng cấp thay cho hộp đá; Hộp NRO Xanh chưa rơi.
 - Tanjiro, Inosuke (2 bản), Zenitsu, Nezuko, Pet cậu vàng, "Cờ Mãi Dell Thành Công" chưa có hình nên chưa tạo. Thượng Tam = Akaza đã có.
 - "Hề Hước: +5% né cho người xung quanh" của chú hề Picolo mới chỉ là mô tả, chưa có hiệu ứng.
+
+## Đợt 3: Đường Phố, SKH Beerus, bóng bước chân, hộp quà, đua top Quy Lão
+
+### Vật phẩm
+| id | Tên | Chỉ số |
+|---|---|---|
+| 1996 | Cải trang Bulma Đường Phố | SĐ 25%, SĐ +25.000, SĐ chí mạng 11%, chí mạng 7% |
+| 1997 | Cải trang Lý Tiểu Nương Đường Phố | HP 25%, HP +30.000, giảm ST 10%, né 10% |
+| 1998 | Cải trang Android 18 Đường Phố | (ảnh chưa ghi chỉ số) |
+| 1973 | Cải trang Beerus (cập nhật) | SĐ 70%, SĐ lên Boss 20%, đi cùng SKH Beerus +10% chí mạng |
+| 1999 | Bóng bước chân Hoa Hồng Xanh | SĐ 3–7%, SĐ +3.000–10.000, đi cùng Pet Xên hoàn thiện +6% ST chí mạng |
+| 1940 | Bóng bước chân Hoa Hồng Đỏ | HP 3–7%, HP +5.000–15.000, đi cùng Pet Xên Max +5% giảm ST |
+| 1941 | Ván Rồng 7 Sao | SĐ 12%, SĐ lên quái 7%, lên Boss 7%, SĐ chí mạng 7%, chí mạng 7%, hút máu 7%, vàng rơi 7% |
+| 1942–1945 | Capsule vỡ, Mảnh capsule vỡ, Khóa chỉ số bông tai cấp 3, Trứng Xên | nguyên liệu |
+| 1946–1951 | Thiệp chúc VIP, Hộp quà TT 2026 VIP, Hộp bánh TT 2026, Hộp bánh TT chay 2026, Quà Trăng Tròn, Quà Trăng Khuyết | hộp mở ngẫu nhiên |
+
+Phần hình 3 cải trang Đường Phố là part 2158–2166, lấy từ `Nr_Part.sql` của gói team new 16th10. `vsData` và `vsItem` tăng lên 11 để client tải lại dữ liệu.
+
+### SKH Thần hủy diệt Beerus
+- Đồ Hủy Diệt rơi từ Super Broly (1%) mang dòng set 260 và 3 dòng mô tả 261–263.
+- Mặc 2 món: +10% SĐ, +10% ST chí mạng, aura xanh (aura_120).
+- Mặc 4 món: +15% SĐ, +20% ST chí mạng, aura vàng (aura_121).
+- Mặc 5 món: +30% SĐ, +30% ST chí mạng, aura tím (aura_122).
+- Aura lấy theo thứ tự: thẻ radar, rồi SKH Beerus, rồi aura thưởng top.
+
+### Bóng bước chân (ô riêng)
+- Dùng vật phẩm để mang vào ô riêng, không chiếm ô cờ hay ô pet. Mang món khác thì món cũ trả về hành trang.
+- Chat `thao buoc chan` để tháo ra.
+- Ô này lưu ở bảng `player_extra`.
+- Client cũ không có ô này nên chỉ có chỉ số, chưa hiện hình dưới chân.
+
+### Hộp quà (bảng `item_box_reward`)
+- Mỗi dòng gồm vật phẩm (-1 vàng, -2 ngọc, -3 hồng ngọc), số lượng, tỉ trọng, các mức HSD và % ra vĩnh viễn. Sửa bảng rồi khởi động lại server là có tác dụng.
+- Hộp 20/10 (1720) cũng dùng bảng này.
+- Tỉ lệ do mình đặt, ảnh không ghi.
+- Vật phẩm chưa có trong database nên chưa đưa vào hộp: Chi Chi Áo Cưới, Pan VIP, Năng lượng tà ác, Bunma Rider mới, Janemba, Poc Thỏ Đen, Pet Charmander, Pet ngựa KPI, Ván bay Magikarp, Hộp nâng cấp đồ thiên sứ, Tờ mảnh VIP, Cánh hào khí, Chi Chi giỗ tổ, Thiên sư phụ, Cờ ngọc rồng 4 sao / Super, Bóng sinh nhật NRO, Picolo Kid.
+- Hiện chưa có nguồn rơi Thiệp chúc VIP và các hộp Trung Thu. Admin phát bằng lệnh `item`, hoặc thêm vào shop / boss.
+
+### Quy Lão
+- **Đua top ngọc rồng:** tặng 1 bộ ngọc rồng 1–7 sao được 1 điểm, có nút tặng tất cả và nút xem top 10.
+- **Chốt top:** admin chat `chottopql` để chốt top 100 và đưa điểm về 0.
+  - Người đang online nhận quà ngay. Người offline nhận khi vào game, nếu hành trang đủ chỗ.
+  - Top 1–3 nhận thêm aura 122/121/120 trong 30 ngày (`Event2026Service.TOP_AURA_DAYS`).
+- **Quà Trung Thu:** đổi Quà Trăng Tròn bằng 99 điểm sự kiện, Quà Trăng Khuyết bằng 20 triệu vàng.

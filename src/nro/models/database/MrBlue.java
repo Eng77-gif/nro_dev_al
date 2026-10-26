@@ -1323,6 +1323,7 @@ public class MrBlue {
             }
             player.nPoint.hp = plHp;
             player.nPoint.mp = plMp;
+            PlayerExtraDAO.load(player);
             player.idMark.setLoadedAllDataPlayer(true);
         } catch (Exception e) {
             if (player != null) {

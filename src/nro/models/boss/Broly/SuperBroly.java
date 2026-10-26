@@ -93,9 +93,15 @@ public class SuperBroly extends Boss {
         if (Util.isTrue(30, 100)) {
             dropEquip(plKill, 8, 11, Util.isTrue(3, 100) ? 8 : Util.nextInt(1, 5), x, y);
         }
-        // Set kích hoạt Champa (đồ Hủy Diệt)
+        // Set kích hoạt Thần hủy diệt Beerus (đồ Hủy Diệt mang dòng set 260 + mô tả 2/4/5 món)
         if (Util.isTrue(1, 100)) {
-            dropEquip(plKill, 14, 14, 0, x, y);
+            ItemMap hd = dropEquip(plKill, 14, 14, 0, x, y);
+            if (hd != null) {
+                hd.options.add(new Item.ItemOption(260, 0));
+                hd.options.add(new Item.ItemOption(261, 0));
+                hd.options.add(new Item.ItemOption(262, 0));
+                hd.options.add(new Item.ItemOption(263, 0));
+            }
         }
         // 1 triệu vàng (tỉ lệ thấp)
         if (Util.isTrue(5, 100)) {
@@ -109,7 +115,7 @@ public class SuperBroly extends Boss {
         Service.gI().dropItemMap(this.zone, it);
     }
 
-    private void dropEquip(Player plKill, int minLevel, int maxLevel, int stars, int x, int y) {
+    private ItemMap dropEquip(Player plKill, int minLevel, int maxLevel, int stars, int x, int y) {
         java.util.List<Integer> ids = new java.util.ArrayList<>();
         for (nro.models.player_system.Template.ItemTemplate t : nro.models.server.Manager.ITEM_TEMPLATES) {
             if (t.type >= 0 && t.type <= 4 && t.level >= minLevel && t.level <= maxLevel) {
@@ -117,7 +123,7 @@ public class SuperBroly extends Boss {
             }
         }
         if (ids.isEmpty()) {
-            return;
+            return null;
         }
         int tempId = ids.get(Util.nextInt(0, ids.size() - 1));
         ItemMap it = new ItemMap(this.zone, tempId, 1, x + Util.nextInt(-30, 30), y, plKill.id);
@@ -126,6 +132,7 @@ public class SuperBroly extends Boss {
             it.options.add(new Item.ItemOption(107, stars));
         }
         Service.gI().dropItemMap(this.zone, it);
+        return it;
     }
 
     @Override

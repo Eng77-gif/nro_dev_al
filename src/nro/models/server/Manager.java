@@ -675,6 +675,7 @@ public final class Manager {
 
                 Logger.success(Logger.RED + "Successfully loaded map item template (" + ITEM_TEMPLATES.size() + " items)\n");
                 loadTemplateOptions(ConnectionDatabase);
+                nro.models.services.Event2026Service.gI().loadBoxes(ConnectionDatabase);
 
             } catch (SQLException e) {
                 Logger.error("Error loading item templates: " + e.getMessage());

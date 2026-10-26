@@ -12193,6 +12193,180 @@ INSERT INTO `data_badges` (`idEffect`, `idItem`, `NAME`, `Options`) VALUES
 -- sửa dữ liệu lỗi: danh hiệu KOL ghi nhầm id/param của dòng KI +10%
 UPDATE `data_badges` SET `Options` = '[{"param":10,"id":50},{"param":10,"id":77},{"param":10,"id":103},{"param":30,"id":93}]' WHERE `id` = 18;
 
+
+-- --------------------------------------------------------
+-- Đợt 3: Đường Phố, SKH Thần hủy diệt Beerus, bóng bước chân, hộp quà, đua top Quy Lão
+-- --------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `player_extra` (
+  `player_id` int(11) NOT NULL,
+  `item_foot` text DEFAULT NULL COMMENT 'ô bóng bước chân',
+  `ql_points` int(11) NOT NULL DEFAULT 0 COMMENT 'điểm đua top tặng ngọc rồng Quy Lão',
+  `aura_reward` int(11) NOT NULL DEFAULT -1,
+  `aura_until` bigint(20) NOT NULL DEFAULT 0,
+  `ql_reward_rank` int(11) NOT NULL DEFAULT 0 COMMENT 'hạng top đang chờ nhận quà',
+  PRIMARY KEY (`player_id`),
+  KEY `ql_points` (`ql_points`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS `item_box_reward` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `box_id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL COMMENT '-1 vàng, -2 ngọc xanh, -3 hồng ngọc',
+  `qty_min` int(11) NOT NULL DEFAULT 1,
+  `qty_max` int(11) NOT NULL DEFAULT 1,
+  `weight` int(11) NOT NULL DEFAULT 1 COMMENT 'tỉ trọng trong hộp',
+  `hsd_days` varchar(64) NOT NULL DEFAULT '' COMMENT 'các mức HSD (ngày) chọn ngẫu nhiên, rỗng = vĩnh viễn',
+  `perm_rate` int(11) NOT NULL DEFAULT 0 COMMENT '% ra vĩnh viễn khi có HSD',
+  PRIMARY KEY (`id`),
+  KEY `box_id` (`box_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `item_option_template` (`id`, `NAME`) VALUES
+(259, 'Đi cùng SKH Beerus tăng #% chí mạng'),
+(260, 'Set Thần hủy diệt Beerus'),
+(261, '$[2] +10% sức đánh, +10% sát thương chí mạng'),
+(262, '$[4] +15% sức đánh, +20% sát thương chí mạng'),
+(263, '$[5] +30% sức đánh, +30% sát thương chí mạng'),
+(264, 'Đi cùng Pet Xên hoàn thiện tăng #% sát thương chí mạng'),
+(265, 'Đi cùng Pet Xên Max tăng #% giảm sát thương');
+
+UPDATE `item_template` SET `TYPE` = 5, `gender` = 3, `NAME` = 'Cải trang Bulma Đường Phố', `description` = 'Cải trang', `level` = 0, `icon_id` = 17604, `part` = -1, `is_up_to_up` = 0, `power_require` = 1500000, `gold` = 0, `gem` = 0, `head` = 2158, `body` = 2159, `leg` = 2160 WHERE `id` = 1996 AND `NAME` = '';
+UPDATE `item_template` SET `TYPE` = 5, `gender` = 3, `NAME` = 'Cải trang Lý Tiểu Nương Đường Phố', `description` = 'Cải trang', `level` = 0, `icon_id` = 17633, `part` = -1, `is_up_to_up` = 0, `power_require` = 1500000, `gold` = 0, `gem` = 0, `head` = 2161, `body` = 2162, `leg` = 2163 WHERE `id` = 1997 AND `NAME` = '';
+UPDATE `item_template` SET `TYPE` = 5, `gender` = 3, `NAME` = 'Cải trang Android 18 Đường Phố', `description` = 'Cải trang', `level` = 0, `icon_id` = 17666, `part` = -1, `is_up_to_up` = 0, `power_require` = 1500000, `gold` = 0, `gem` = 0, `head` = 2164, `body` = 2165, `leg` = 2166 WHERE `id` = 1998 AND `NAME` = '';
+
+INSERT INTO `part` (`id`, `type`, `data`) VALUES
+(2158, 0, '[[17577,3,-7],[17578,0,-8],[2955,0,0]]'),
+(2159, 1, '[[17579,-3,-2],[17580,-1,-5],[17581,-1,-7],[2955,0,0],[2955,0,0],[2955,0,0],[2955,0,0],[17582,-3,-8],[17583,-5,-5],[17584,-4,-6],[17585,-3,-5],[17586,-5,-5],[17587,-3,-10],[17588,-3,-7],[17589,-5,-5],[17590,-4,-5],[2955,0,0]]'),
+(2160, 2, '[[17591,7,5],[17592,0,-4],[17593,0,-4],[17594,1,-11],[17595,-1,-11],[17596,1,-12],[17597,1,-12],[17598,-1,0],[17599,-3,-1],[17600,-3,-4],[17601,4,-2],[17602,1,2],[17603,0,0],[2955,0,0]]'),
+(2161, 0, '[[17606,-3,-7],[17607,-2,-8],[2955,0,0]]'),
+(2162, 1, '[[17608,-2,-4],[17609,-2,-5],[17610,-9,-8],[2955,0,0],[2955,0,0],[2955,0,0],[2955,0,0],[17611,-3,-8],[17612,-2,-4],[17613,-4,-6],[17614,-6,-8],[17615,-1,-8],[17616,-4,-7],[17617,0,-8],[17618,-7,-8],[17619,-8,-6],[2955,0,0]]'),
+(2163, 2, '[[17620,4,6],[17621,-2,-2],[17622,0,-3],[17623,-5,-16],[17624,-3,-12],[17625,-1,-12],[17626,-2,-12],[17627,-1,0],[17628,-1,-2],[17629,-5,-7],[17630,0,-3],[17631,-2,0],[17632,-2,0],[2955,0,0]]'),
+(2164, 0, '[[17639,1,-6],[17640,0,-7],[2955,0,0]]'),
+(2165, 1, '[[17641,1,-1],[17642,0,-5],[17643,-2,-6],[2955,0,0],[2955,0,0],[2955,0,0],[2955,0,0],[17644,1,-7],[17645,-3,1],[17646,-1,-6],[17647,-2,-5],[17648,-2,-7],[17649,0,-9],[17650,0,-6],[17651,-4,-5],[17652,-2,-6],[2955,0,0]]'),
+(2166, 2, '[[17653,6,6],[17654,-1,-3],[17655,2,-2],[17656,1,-11],[17657,0,-11],[17658,-1,-12],[17659,0,-12],[17660,-2,2],[17661,0,-2],[17662,-1,-3],[17663,1,0],[17664,-2,2],[17665,1,1],[2955,0,0]]');
+
+INSERT INTO `head_avatar` (`head_id`, `avatar_id`) VALUES
+(2158, 17605),
+(2161, 17634),
+(2164, 17667);
+
+UPDATE `item_template` SET `TYPE` = 27, `gender` = 3, `NAME` = 'Bóng bước chân Hoa Hồng Xanh', `description` = 'Bóng bước chân, mang ở ô riêng (chat "thao buoc chan" để tháo)', `level` = 0, `icon_id` = 17709, `part` = -1, `is_up_to_up` = 0, `power_require` = 0, `gold` = 0, `gem` = 0, `head` = -1, `body` = -1, `leg` = -1 WHERE `id` = 1999 AND `NAME` = '';
+UPDATE `item_template` SET `TYPE` = 27, `gender` = 3, `NAME` = 'Bóng bước chân Hoa Hồng Đỏ', `description` = 'Bóng bước chân, mang ở ô riêng (chat "thao buoc chan" để tháo)', `level` = 0, `icon_id` = 17708, `part` = -1, `is_up_to_up` = 0, `power_require` = 0, `gold` = 0, `gem` = 0, `head` = -1, `body` = -1, `leg` = -1 WHERE `id` = 1940 AND `NAME` = '';
+UPDATE `item_template` SET `TYPE` = 23, `gender` = 3, `NAME` = 'Ván Rồng 7 Sao', `description` = 'Phần thưởng đua top tặng ngọc rồng Quy Lão', `level` = 0, `icon_id` = 17741, `part` = 34, `is_up_to_up` = 0, `power_require` = 0, `gold` = 0, `gem` = 0, `head` = -1, `body` = -1, `leg` = -1 WHERE `id` = 1941 AND `NAME` = '';
+UPDATE `item_template` SET `TYPE` = 27, `gender` = 3, `NAME` = 'Capsule vỡ', `description` = 'Vật phẩm sự kiện', `level` = 0, `icon_id` = 17489, `part` = -1, `is_up_to_up` = 1, `power_require` = 0, `gold` = 0, `gem` = 0, `head` = -1, `body` = -1, `leg` = -1 WHERE `id` = 1942 AND `NAME` = '';
+UPDATE `item_template` SET `TYPE` = 27, `gender` = 3, `NAME` = 'Mảnh capsule vỡ', `description` = 'Vật phẩm sự kiện', `level` = 0, `icon_id` = 17489, `part` = -1, `is_up_to_up` = 1, `power_require` = 0, `gold` = 0, `gem` = 0, `head` = -1, `body` = -1, `leg` = -1 WHERE `id` = 1943 AND `NAME` = '';
+UPDATE `item_template` SET `TYPE` = 27, `gender` = 3, `NAME` = 'Khóa chỉ số bông tai cấp 3', `description` = 'Vật phẩm sự kiện', `level` = 0, `icon_id` = 17195, `part` = -1, `is_up_to_up` = 1, `power_require` = 0, `gold` = 0, `gem` = 0, `head` = -1, `body` = -1, `leg` = -1 WHERE `id` = 1944 AND `NAME` = '';
+UPDATE `item_template` SET `TYPE` = 27, `gender` = 3, `NAME` = 'Trứng Xên', `description` = 'Vật phẩm sự kiện', `level` = 0, `icon_id` = 17197, `part` = -1, `is_up_to_up` = 1, `power_require` = 0, `gold` = 0, `gem` = 0, `head` = -1, `body` = -1, `leg` = -1 WHERE `id` = 1945 AND `NAME` = '';
+UPDATE `item_template` SET `TYPE` = 27, `gender` = 3, `NAME` = 'Thiệp chúc VIP', `description` = 'Mở nhận ngẫu nhiên vật phẩm 20/10', `level` = 0, `icon_id` = 17710, `part` = -1, `is_up_to_up` = 1, `power_require` = 0, `gold` = 0, `gem` = 0, `head` = -1, `body` = -1, `leg` = -1 WHERE `id` = 1946 AND `NAME` = '';
+UPDATE `item_template` SET `TYPE` = 27, `gender` = 3, `NAME` = 'Hộp quà Trung Thu 2026 VIP', `description` = 'Mở nhận ngẫu nhiên vật phẩm Trung Thu', `level` = 0, `icon_id` = 17740, `part` = -1, `is_up_to_up` = 1, `power_require` = 0, `gold` = 0, `gem` = 0, `head` = -1, `body` = -1, `leg` = -1 WHERE `id` = 1947 AND `NAME` = '';
+UPDATE `item_template` SET `TYPE` = 27, `gender` = 3, `NAME` = 'Hộp bánh Trung Thu 2026', `description` = 'Mở nhận ngẫu nhiên vật phẩm Trung Thu', `level` = 0, `icon_id` = 11718, `part` = -1, `is_up_to_up` = 1, `power_require` = 0, `gold` = 0, `gem` = 0, `head` = -1, `body` = -1, `leg` = -1 WHERE `id` = 1948 AND `NAME` = '';
+UPDATE `item_template` SET `TYPE` = 27, `gender` = 3, `NAME` = 'Hộp bánh Trung Thu chay 2026', `description` = 'Mở nhận ngẫu nhiên vật phẩm Trung Thu', `level` = 0, `icon_id` = 11719, `part` = -1, `is_up_to_up` = 1, `power_require` = 0, `gold` = 0, `gem` = 0, `head` = -1, `body` = -1, `leg` = -1 WHERE `id` = 1949 AND `NAME` = '';
+UPDATE `item_template` SET `TYPE` = 27, `gender` = 3, `NAME` = 'Quà Trăng Tròn', `description` = 'Đổi tại Quy Lão (99 điểm sự kiện), mở nhận ngẫu nhiên', `level` = 0, `icon_id` = 17393, `part` = -1, `is_up_to_up` = 1, `power_require` = 0, `gold` = 0, `gem` = 0, `head` = -1, `body` = -1, `leg` = -1 WHERE `id` = 1950 AND `NAME` = '';
+UPDATE `item_template` SET `TYPE` = 27, `gender` = 3, `NAME` = 'Quà Trăng Khuyết', `description` = 'Đổi tại Quy Lão (20 triệu vàng), mở nhận ngẫu nhiên', `level` = 0, `icon_id` = 17392, `part` = -1, `is_up_to_up` = 1, `power_require` = 0, `gold` = 0, `gem` = 0, `head` = -1, `body` = -1, `leg` = -1 WHERE `id` = 1951 AND `NAME` = '';
+
+DELETE FROM `item_template_option` WHERE `template_id` IN (1996, 1997, 1973, 1999, 1940, 1941);
+INSERT INTO `item_template_option` (`template_id`, `option_id`, `param`, `param_max`, `chance`, `group_id`) VALUES
+(1996, 50, 25, 25, 100, 0),
+(1996, 0, 25000, 25000, 100, 0),
+(1996, 5, 11, 11, 100, 0),
+(1996, 14, 7, 7, 100, 0),
+(1997, 77, 25, 25, 100, 0),
+(1997, 6, 30000, 30000, 100, 0),
+(1997, 94, 10, 10, 100, 0),
+(1997, 108, 10, 10, 100, 0),
+(1973, 50, 70, 70, 100, 0),
+(1973, 204, 20, 20, 100, 0),
+(1973, 259, 10, 10, 100, 0),
+(1999, 50, 3, 7, 100, 0),
+(1999, 0, 3000, 10000, 100, 0),
+(1999, 264, 6, 6, 100, 0),
+(1940, 77, 3, 7, 100, 0),
+(1940, 6, 5000, 15000, 100, 0),
+(1940, 265, 5, 5, 100, 0),
+(1941, 50, 12, 12, 100, 0),
+(1941, 19, 7, 7, 100, 0),
+(1941, 204, 7, 7, 100, 0),
+(1941, 5, 7, 7, 100, 0),
+(1941, 14, 7, 7, 100, 0),
+(1941, 95, 7, 7, 100, 0),
+(1941, 100, 7, 7, 100, 0);
+
+INSERT INTO `item_box_reward` (`box_id`, `item_id`, `qty_min`, `qty_max`, `weight`, `hsd_days`, `perm_rate`) VALUES
+(1946, 1504, 1, 1, 3, '', 0),
+(1946, 1503, 1, 1, 3, '', 0),
+(1946, 1512, 1, 1, 3, '', 0),
+(1946, 1705, 1, 1, 8, '15,30,45', 10),
+(1946, 1416, 1, 3, 5, '', 0),
+(1946, 1417, 1, 3, 5, '', 0),
+(1946, 1418, 1, 3, 5, '', 0),
+(1946, 1419, 1, 3, 5, '', 0),
+(1946, 1420, 1, 3, 5, '', 0),
+(1946, 1421, 1, 3, 5, '', 0),
+(1946, 1422, 1, 3, 5, '', 0),
+(1946, 1520, 1, 1, 10, '7,15', 10),
+(1946, 1036, 1, 1, 15, '5,15,30,60', 0),
+(1720, 1235, 1, 1, 6, '7,15', 5),
+(1720, 1567, 1, 1, 6, '7,15', 5),
+(1720, 1476, 1, 1, 6, '7,15', 5),
+(1720, 1557, 1, 1, 6, '7,15', 5),
+(1720, 860, 1, 1, 6, '7,15', 5),
+(1720, 1453, 1, 1, 8, '', 0),
+(1720, 1572, 1, 1, 5, '7,15', 5),
+(1720, 1573, 1, 1, 5, '7,15', 5),
+(1720, 1513, 1, 1, 5, '7,15', 5),
+(1720, 1084, 1, 1, 8, '', 0),
+(1720, 1085, 1, 1, 8, '', 0),
+(1720, 1086, 1, 1, 8, '', 0),
+(1720, 1036, 1, 1, 15, '5,15,30,60', 0),
+(1947, 1945, 1, 1, 10, '', 0),
+(1947, 1204, 1, 3, 15, '', 0),
+(1947, 1700, 1, 1, 8, '7,15,30', 5),
+(1947, 1966, 1, 1, 3, '7,15,30', 20),
+(1947, 1974, 1, 1, 3, '7,15,30', 3),
+(1947, 1453, 1, 1, 10, '', 0),
+(1948, 1986, 1, 1, 6, '7,15,30', 5),
+(1948, 1036, 1, 1, 15, '5,15,30', 0),
+(1948, 737, 1, 1, 15, '', 0),
+(1948, 1453, 1, 1, 8, '', 0),
+(1948, -3, 1000, 1000, 10, '', 0),
+(1948, 1143, 1, 1, 12, '', 0),
+(1948, 1173, 5, 5, 10, '', 0),
+(1949, 1986, 1, 1, 6, '7,15,30', 5),
+(1949, 732, 1, 1, 6, '7,15,30', 5),
+(1949, 737, 1, 1, 15, '', 0),
+(1949, 1143, 1, 1, 12, '', 0),
+(1949, -1, 1000000, 1000000000, 20, '', 0),
+(1949, 1173, 5, 5, 10, '', 0),
+(1950, 1036, 1, 1, 20, '5,15,30', 5),
+(1950, 745, 1, 1, 15, '7,15,30', 5),
+(1950, 1973, 1, 1, 1, '7,15,30', 5),
+(1950, 1966, 1, 1, 4, '7,15,30', 5),
+(1951, 1074, 1, 1, 6, '', 0),
+(1951, 1075, 1, 1, 6, '', 0),
+(1951, 1076, 1, 1, 6, '', 0),
+(1951, 1079, 1, 1, 6, '', 0),
+(1951, 1080, 1, 1, 6, '', 0),
+(1951, 1081, 1, 1, 6, '', 0),
+(1951, 1084, 1, 1, 6, '', 0),
+(1951, 1705, 1, 1, 5, '15,30', 3),
+(1951, 1564, 1, 1, 2, '', 0),
+(1951, 1572, 1, 1, 2, '', 0),
+(1951, 1573, 1, 1, 5, '15,30', 0),
+(1951, 1723, 1, 1, 5, '15,30', 0),
+(1951, 860, 1, 1, 4, '15,30', 10),
+(1951, 1981, 1, 1, 4, '15,30', 10),
+(1951, 628, 1, 1, 2, '', 0);
+
+INSERT INTO `img_by_name` (`NAME`, `n_frame`) VALUES
+('aura_120_0', 4),
+('aura_120_1', 4),
+('aura_121_0', 4),
+('aura_121_1', 4),
+('aura_122_0', 4),
+('aura_122_1', 4);
+
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -208,6 +208,8 @@ public class NPoint {
     public long rageUntil, lastTimeRage; // hiệu ứng Akaza
     public long aoThuatUntil, lastTimeAoThuat; // hiệu ứng Ảo Thuật
     private int setHpWithPet, setSTCuoiWithFlag, setCritWithFlag; // option 255, 256, 258
+    private int setCritWithSkhBeerus, setSDCMWithXenHT, setGiapWithXenMax; // option 259, 264, 265
+    public int skhBeerus; // số món SKH Thần hủy diệt Beerus đang mặc (option 260)
 
     public boolean isGogeta;
 
@@ -479,8 +481,17 @@ public class NPoint {
                     teleport = true;
                 }
                 for (ItemOption io : item.itemOptions) {
+                    if (io.optionTemplate.id == 260 && (this.player.inventory.itemsBody.indexOf(item) > 4)) {
+                        continue; // set kích hoạt chỉ tính trên 5 món trang bị
+                    }
                     addOption(io);
                 }
+            }
+        }
+        // ô bóng bước chân (lưu riêng ở server)
+        if (!this.player.isPet && this.player.itemFoot != null && this.player.itemFoot.isNotNullItem()) {
+            for (ItemOption io : this.player.itemFoot.itemOptions) {
+                addOption(io);
             }
         }
         applySetBonus();
@@ -516,6 +527,34 @@ public class NPoint {
         if (setCritWithFlag > 0 && isWearing(CO_WORLD_CUP_2026)) {
             this.critAdd += setCritWithFlag;
         }
+        // SKH Thần hủy diệt Beerus: 2 món +10% SĐ +10% STCM, 4 món +15%/+20%, 5 món +30%/+30%
+        int skhDame = skhBeerus >= 5 ? 30 : skhBeerus >= 4 ? 15 : skhBeerus >= 2 ? 10 : 0;
+        int skhSDCM = skhBeerus >= 5 ? 30 : skhBeerus >= 4 ? 20 : skhBeerus >= 2 ? 10 : 0;
+        if (skhDame > 0) {
+            this.tlDame.add(skhDame);
+            this.tlDameCrit.add(skhSDCM);
+            this.tlSDCM += skhSDCM;
+        }
+        if (setCritWithSkhBeerus > 0 && skhBeerus >= 2) {
+            this.critAdd += setCritWithSkhBeerus;
+        }
+        if (setSDCMWithXenHT > 0 && isWearing(PET_XEN_HOAN_THIEN)) {
+            this.tlDameCrit.add(setSDCMWithXenHT);
+            this.tlSDCM += setSDCMWithXenHT;
+        }
+        if (setGiapWithXenMax > 0 && isWearing(PET_XEN_MAX)) {
+            this.tlGiap += setGiapWithXenMax;
+        }
+    }
+
+    public static final int PET_XEN_HOAN_THIEN = 1991;
+    public static final int PET_XEN_MAX = 1992;
+
+    /**
+     * Aura theo số món SKH Beerus: 2 món xanh, 4 món vàng, 5 món tím.
+     */
+    public int getSkhBeerusAura() {
+        return skhBeerus >= 5 ? 122 : skhBeerus >= 4 ? 121 : skhBeerus >= 2 ? 120 : -1;
     }
 
     /**
@@ -573,6 +612,18 @@ public class NPoint {
                 break;
             case 258: //Đi cùng Cờ World Cup 2026 tăng #% chí mạng
                 this.setCritWithFlag += io.param;
+                break;
+            case 259: //Đi cùng SKH Beerus tăng #% chí mạng
+                this.setCritWithSkhBeerus += io.param;
+                break;
+            case 260: //Set Thần hủy diệt Beerus
+                this.skhBeerus++;
+                break;
+            case 264: //Đi cùng Pet Xên hoàn thiện tăng #% sát thương chí mạng
+                this.setSDCMWithXenHT += io.param;
+                break;
+            case 265: //Đi cùng Pet Xên Max tăng #% giảm sát thương
+                this.setGiapWithXenMax += io.param;
                 break;
             case 2: //HP, KI+#000
                 this.hpAdd += io.param * 1000;
@@ -1394,6 +1445,10 @@ public class NPoint {
         this.setHpWithPet = 0;
         this.setSTCuoiWithFlag = 0;
         this.setCritWithFlag = 0;
+        this.setCritWithSkhBeerus = 0;
+        this.setSDCMWithXenHT = 0;
+        this.setGiapWithXenMax = 0;
+        this.skhBeerus = 0;
         this.tlSpeed = 0;
         this.teleport = false;
         this.wearingVoHinh = false;
