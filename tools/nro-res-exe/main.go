@@ -272,6 +272,7 @@ type options struct {
 	Batch    int     `json:"batch,string"`
 	Wait     float64 `json:"wait,string"`
 	Delay    float64 `json:"delay,string"`
+	Renew    int     `json:"renew,string"` // số yêu cầu tối đa mỗi phiên rồi kết nối lại (0 = không giới hạn)
 }
 
 type job struct {
@@ -511,17 +512,22 @@ func (d *downloader) isClosed() bool {
 }
 
 // reconnect: server ngắt kết nối (hết giờ chờ đăng nhập, chống spam...) thì kết nối lại.
-func (d *downloader) reconnect() bool {
-	reason := "không rõ lý do"
-	if d.c.closeErr != nil {
-		reason = d.c.closeErr.Error()
+// why khác rỗng là chủ động mở phiên mới (server ngừng trả lời / đủ giới hạn mỗi phiên).
+func (d *downloader) reconnect(why string) bool {
+	if why == "" {
+		why = "không rõ lý do"
+		if d.c.closeErr != nil {
+			why = d.c.closeErr.Error()
+		}
+		d.j.log("  Mất kết nối (%s)", why)
+		if d.o.User == "" && !d.hinted {
+			d.hinted = true
+			d.j.log("  Gợi ý: nhiều server ngắt kết nối nếu không đăng nhập, hãy điền tài khoản; hoặc tăng thời gian chờ / giảm số yêu cầu mỗi đợt ở mục Nâng cao")
+		}
+	} else {
+		d.j.log("  %s, mở phiên mới...", why)
 	}
 	d.c.conn.Close()
-	d.j.log("  Mất kết nối (%s)", reason)
-	if d.o.User == "" && !d.hinted {
-		d.hinted = true
-		d.j.log("  Gợi ý: nhiều server ngắt kết nối nếu không đăng nhập, hãy điền tài khoản; hoặc tăng thời gian chờ / giảm số yêu cầu mỗi đợt ở mục Nâng cao")
-	}
 	for try := 1; try <= 5 && !d.j.isStopped(); try++ {
 		time.Sleep(time.Duration(try*2) * time.Second)
 		d.j.log("  Kết nối lại lần %d...", try)
@@ -537,11 +543,23 @@ func (d *downloader) reconnect() bool {
 func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8) {
 	d.j.log("Tải %s: %d yêu cầu...", label, len(reqs))
 	retries := 0
+	// Server chính thức ngừng trả lời sau ~100 yêu cầu mỗi phiên mà không ngắt kết nối:
+	// nếu 2 đợt liền không nhận được gì thì mở phiên mới và gửi lại từ chỗ bị bỏ.
+	stalls, stallAt, renewedAt, sessionSent := 0, -1, -1, 0
 	for k := 0; k < len(reqs) && !d.j.isStopped(); {
 		end := k + d.o.Batch
 		if end > len(reqs) {
 			end = len(reqs)
 		}
+		if d.o.Renew > 0 && sessionSent >= d.o.Renew {
+			if !d.reconnect(fmt.Sprintf("Đã gửi %d yêu cầu trong phiên này", sessionSent)) {
+				d.j.log("  Dừng: không kết nối lại được server (đã tải %d/%d)", k, len(reqs))
+				return
+			}
+			sessionSent = 0
+		}
+		before := len(d.got)
+		sent := 0
 		ok := true
 		for i, p := range reqs[k:end] {
 			if d.got[keys[k+i]] {
@@ -551,22 +569,43 @@ func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8)
 				ok = false
 				break
 			}
+			sent++
 			if d.o.Delay > 0 {
 				time.Sleep(time.Duration(d.o.Delay * float64(time.Second)))
 			}
 		}
+		sessionSent += sent
 		if ok {
 			d.pump(d.o.Wait)
 		}
 		if !ok || d.isClosed() {
 			retries++
-			if retries > 20 || !d.reconnect() {
+			if retries > 20 || !d.reconnect("") {
 				d.j.log("  Dừng: không kết nối lại được server (đã tải %d/%d)", k, len(reqs))
 				return
 			}
+			sessionSent = 0
 			continue // gửi lại đợt vừa mất
 		}
 		d.j.log("  %d/%d  đã nhận %d", end, len(reqs), d.stats[label])
+		if sent > 0 && len(d.got) == before {
+			if stalls == 0 {
+				stallAt = k
+			}
+			stalls++
+		} else {
+			stalls = 0
+		}
+		if stalls >= 2 && stallAt != renewedAt {
+			// lần đầu tắc ở chỗ này: mở phiên mới rồi gửi lại; tắc tiếp thì coi như các id đó không có dữ liệu
+			if !d.reconnect("Server ngừng trả lời") {
+				d.j.log("  Dừng: không kết nối lại được server (đã tải %d/%d)", stallAt, len(reqs))
+				return
+			}
+			renewedAt, stalls, sessionSent = stallAt, 0, 0
+			k = stallAt
+			continue
+		}
 		k = end
 	}
 	d.pump(d.o.Wait * 2)
@@ -775,8 +814,8 @@ func startDownload(w http.ResponseWriter, r *http.Request) {
 	os.MkdirAll(o.Out, 0o755)
 	if f, err := os.Create(filepath.Join(o.Out, "nhat_ky.txt")); err == nil {
 		j.file = f
-		fmt.Fprintf(f, "NroResTool  %s  %s:%d  user=%v  official=%v  batch=%d  wait=%.1f  delay=%.2f  zoom=%d\n",
-			time.Now().Format("2006-01-02 15:04:05"), o.Host, o.Port, o.User != "", o.Official, o.Batch, o.Wait, o.Delay, o.Zoom)
+		fmt.Fprintf(f, "NroResTool  %s  %s:%d  user=%v  official=%v  batch=%d  wait=%.1f  delay=%.2f  renew=%d  zoom=%d\n",
+			time.Now().Format("2006-01-02 15:04:05"), o.Host, o.Port, o.User != "", o.Official, o.Batch, o.Wait, o.Delay, o.Renew, o.Zoom)
 	}
 	go func() {
 		defer func() {

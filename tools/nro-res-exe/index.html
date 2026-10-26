@@ -58,6 +58,7 @@ pre{margin:0;background:var(--log);color:var(--logtext);padding:10px 12px;max-he
     <label>Số yêu cầu mỗi đợt<input type="number" id="d_batch" value="50"></label>
     <label>Chờ sau mỗi đợt (giây)<input type="number" step="0.1" id="d_wait" value="1.5"></label>
     <label>Nghỉ giữa yêu cầu (giây)<input type="number" step="0.01" id="d_delay" value="0"></label>
+    <label>Mở phiên mới sau N yêu cầu (0 = không)<input type="number" id="d_renew" value="0"></label>
   </div></details>
   <div class="row"><button class="main" id="btn_dl">Bắt đầu tải</button><button class="sec" id="btn_open">Mở thư mục kết quả</button><span class="hint" id="dir_hint"></span></div>
   <p class="hint">Effect cần tài khoản để vào game. Chỉ dùng với server bạn có quyền tải dữ liệu.</p>
@@ -109,9 +110,9 @@ function renderJob(id, j){
   el.querySelector('button').classList.toggle('hide', j.status !== 'running');
   if (j.lines && j.lines.length){ const pre = el.querySelector('pre'); pre.textContent += j.lines.join('\n') + '\n'; pre.scrollTop = pre.scrollHeight; }
 }
-$('d_official').onchange = () => { if ($('d_official').checked) { $('d_batch').value = 5; $('d_wait').value = 2.5; $('d_delay').value = 0.3; } else { $('d_batch').value = 50; $('d_wait').value = 1.5; $('d_delay').value = 0; } };
+$('d_official').onchange = () => { if ($('d_official').checked) { $('d_batch').value = 5; $('d_wait').value = 2.5; $('d_delay').value = 0.3; $('d_renew').value = 90; } else { $('d_batch').value = 50; $('d_wait').value = 1.5; $('d_delay').value = 0; $('d_renew').value = 0; } };
 $('btn_dl').onclick = async () => {
-  try { const f = form('d_', ['host','port','user','password','out','zoom','icons','mounts','auras','effects','names','parts','res','official','debug','platform','version','batch','wait','delay']);
+  try { const f = form('d_', ['host','port','user','password','out','zoom','icons','mounts','auras','effects','names','parts','res','official','debug','platform','version','batch','wait','delay','renew']);
     const r = await post('/api/download', JSON.stringify(f), {'Content-Type':'application/json'}); track(r.id);
     $('v_root').value = f.out; } catch(e){ alert(e.message) }
 };
