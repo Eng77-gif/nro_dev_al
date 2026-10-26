@@ -163,8 +163,8 @@ public class SnakeWay implements Runnable {
 
             if (zone.map.mapId == 144) {
                 try {
-                    long bossDamage = (200000 * level);
-                    long bossMaxHealth = (2000000 * level);
+                    long bossDamage = (200000L * level);
+                    long bossMaxHealth = (2000000L * level);
                     for (int i = 6; i > 0; i--) {
                         bossDamage = Math.min(bossDamage, 200000000L);
                         bossMaxHealth = Math.min(bossMaxHealth, 2000000000L);

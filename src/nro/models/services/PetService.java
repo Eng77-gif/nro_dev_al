@@ -163,7 +163,7 @@ public class PetService {
         ChangeMapService.gI().exitMap(player.pet);
         player.pet.dispose();
         player.pet = null;
-        createUubPet(player, player.pet.gender, limitPower);
+        createUubPet(player, limitPower);
     }
 
     public void changeKidBeerPet(Player player) {
@@ -174,7 +174,7 @@ public class PetService {
         ChangeMapService.gI().exitMap(player.pet);
         player.pet.dispose();
         player.pet = null;
-        createKidBeerPet(player, player.pet.gender, limitPower);
+        createKidBeerPet(player, limitPower);
     }
     
     public void changeJirenPet(Player player) {
@@ -185,7 +185,7 @@ public class PetService {
         ChangeMapService.gI().exitMap(player.pet);
         player.pet.dispose();
         player.pet = null;
-        createKidBeerPet(player, player.pet.gender, limitPower);
+        createJirenPet(player, limitPower);
     }
 
     public void changeMabuPet(Player player, int gender) {

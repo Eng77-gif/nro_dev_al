@@ -297,7 +297,7 @@ public class FriendAndEnemyService {
     public void addEnemy(Player player, Player enemy) {
         boolean hadEnemy = false;
         for (Enemy ene : player.enemies) {
-            if (ene.id == ene.id) {
+            if (ene.id == enemy.id) {
                 hadEnemy = true;
             }
         }

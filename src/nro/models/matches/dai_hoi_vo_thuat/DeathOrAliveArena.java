@@ -206,7 +206,7 @@ public class DeathOrAliveArena {
 
     private void traThuongHatMit(boolean playerWin) {
         try {
-            long tongCuoc = (cuocBaHatMit + cuocPlayer) * 900_000;
+            long tongCuoc = ((long) cuocBaHatMit + cuocPlayer) * 900_000L;
             if (cuocBaHatMit >= 0 && !playerWin || cuocPlayer > 0 && playerWin) {
                 if (playerWin) {
                     tongCuoc /= cuocPlayer;

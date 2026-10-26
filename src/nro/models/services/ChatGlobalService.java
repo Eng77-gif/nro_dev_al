@@ -1,6 +1,5 @@
 package nro.models.services;
 
-import java.awt.SystemColor;
 import nro.models.player.Player;
 import nro.models.network.Message;
 import nro.models.utils.Logger;
@@ -28,8 +27,8 @@ public class ChatGlobalService implements Runnable {
     private final List<ChatGlobal> waitingChat;
 
     private ChatGlobalService() {
-        this.listChatting = new ArrayList<>();
-        this.waitingChat = new LinkedList<>();
+        this.listChatting = java.util.Collections.synchronizedList(new ArrayList<>());
+        this.waitingChat = java.util.Collections.synchronizedList(new LinkedList<>());
         this.start();
     }
 
@@ -67,10 +66,12 @@ public class ChatGlobalService implements Runnable {
             return;
         }
         boolean haveInChatting = false;
-        for (ChatGlobal chat : listChatting) {
-            if (chat.text.equals(text)) {
-                haveInChatting = true;
-                break;
+        synchronized (listChatting) {
+            for (ChatGlobal chat : listChatting) {
+                if (chat.text.equals(text)) {
+                    haveInChatting = true;
+                    break;
+                }
             }
         }
         if (haveInChatting) {
@@ -138,39 +139,6 @@ public class ChatGlobalService implements Runnable {
             Service.gI().sendMessAllPlayer(msg);
             msg.cleanup();
         } catch (Exception e) {
-        }
-    }
-
-    public void chat(Player pl, SystemColor text) {
-        if (waitingChat.size() >= COUNT_WAIT) {
-            Service.gI().sendThongBao(pl, "Kênh thế giới hiện đang quá tải, không thể chat lúc này");
-            return;
-        }
-
-        boolean haveInChatting = false;
-        for (ChatGlobal chat : listChatting) {
-            if (chat.text.equals(text)) {
-                haveInChatting = true;
-                break;
-            }
-        }
-
-        if (haveInChatting) {
-            return;
-        }
-
-        if (pl.isAdmin() || Util.canDoWithTime(pl.idMark.getLastTimeChatGlobal(), 30000)) {
-            if (pl.isAdmin() || pl.nPoint.power > 1_500_000) {
-                // KHÔNG trừ ngọc nữa
-                pl.idMark.setLastTimeChatGlobal(System.currentTimeMillis());
-                String msg = text.toString();
-                waitingChat.add(new ChatGlobal(pl, msg.length() > 100 ? msg.substring(0, 100) : msg));
-            } else {
-                Service.gI().sendThongBao(pl, "Sức mạnh phải ít nhất 1tr5 mới có thể chat thế giới");
-            }
-        } else {
-            Service.gI().sendThongBao(pl, "Không thể chat thế giới lúc này, vui lòng đợi "
-                    + TimeUtil.getTimeLeft(pl.idMark.getLastTimeChatGlobal(), 5));
         }
     }
 

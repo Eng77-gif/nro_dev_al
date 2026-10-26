@@ -289,7 +289,7 @@ public class MapService {
     }
     
     public List<Map> getAllMaps() {
-        return this.getAllMaps();
+        return Manager.MAPS;
     }
 
     public Zone getZone(int mapId) {

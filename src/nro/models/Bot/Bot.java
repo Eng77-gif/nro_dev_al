@@ -211,7 +211,7 @@ public class Bot extends Player {
                 }
             } else {
                 point = 10;
-                tiemNangUse = point * (2 * this.nPoint.dameg + point - 1) / 2 * 100;
+                tiemNangUse = (long) point * (2L * this.nPoint.dameg + point - 1) / 2 * 100;
                 if (doUseTiemNang(tiemNangUse)) {
                     this.nPoint.dameg += point;
                     Service.gI().point(this);

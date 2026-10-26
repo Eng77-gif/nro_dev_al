@@ -80,8 +80,8 @@ public class DestronGas implements Runnable {
 
             if (allCharactersDead && !callBoss) {
                 try {
-                    long bossDamage = (1000 * level);
-                    long bossMaxHealth = (15000000 * level);
+                    long bossDamage = (1000L * level);
+                    long bossMaxHealth = (15000000L * level);
                     bossDamage = Math.min(bossDamage, 200000000L);
                     bossMaxHealth = Math.min(bossMaxHealth, 2000000000L);
                     bosses.add(new DrLychee(

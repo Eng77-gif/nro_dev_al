@@ -1460,7 +1460,7 @@ public class NPoint {
                     }
                 }
 
-                long dameqckk = (hpmob * 10 / 100) + (hppl * 10 / 100) + this.dame * 10;
+                long dameqckk = (hpmob * 10 / 100) + (hppl * 10 / 100) + this.dame * 10L;
 
                 if (this.player.setClothes.kirin == 5) {
                     dameqckk *= 2;

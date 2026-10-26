@@ -193,8 +193,8 @@ public class BanDoKhoBau implements Runnable {
 
             if (zone.map.mapId == 137) {
                 try {
-                    long bossDamage = (200000 * level);
-                    long bossMaxHealth = (20000000 * level);
+                    long bossDamage = (200000L * level);
+                    long bossMaxHealth = (20000000L * level);
                     bossDamage = Math.min(bossDamage, 200000000L);
                     bossMaxHealth = Math.min(bossMaxHealth, 2000000000L);
                     boss = new TrungUyXanhLo(
