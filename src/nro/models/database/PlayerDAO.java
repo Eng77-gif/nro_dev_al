@@ -1088,17 +1088,22 @@ public class PlayerDAO {
         return lastTimeLogout > lastTimeLogin;
     }
 
-    public static boolean subvnd(Player player, int num) {
-        PreparedStatement ps = null;
-        try (Connection con = LocalManager.getConnection();) {
-            if (player.getSession().vnd >= num) {
-            } else {
+    public static synchronized boolean subvnd(Player player, int num) {
+        if (num <= 0) {
+            return false;
+        }
+        try (Connection con = LocalManager.getConnection();
+                PreparedStatement ps = con.prepareStatement("update account set vnd = vnd - ? where id = ? and vnd >= ?")) {
+            if (player.getSession().vnd < num) {
                 return false;
             }
-            ps = con.prepareStatement("update account set vnd = vnd - ? where id = ?");
             ps.setInt(1, num);
             ps.setInt(2, player.getSession().userId);
-            ps.executeUpdate();
+            ps.setInt(3, num);
+            // kiểm tra số dư ngay trong DB để tránh trừ âm khi số dư bị thay đổi từ web
+            if (ps.executeUpdate() <= 0) {
+                return false;
+            }
             player.getSession().vnd -= num;
 
         } catch (Exception e) {
@@ -1108,18 +1113,22 @@ public class PlayerDAO {
         return true;
     }
 
-    public static boolean MuaThanhVien(Player player, int num) {
-        PreparedStatement ps = null;
-        try (Connection con = LocalManager.getConnection();) {
-            if (player.getSession().vnd >= num) {
-            } else {
+    public static synchronized boolean MuaThanhVien(Player player, int num) {
+        if (num < 0) {
+            return false;
+        }
+        try (Connection con = LocalManager.getConnection();
+                PreparedStatement ps = con.prepareStatement("update account set vnd = (vnd - ?), active = ? where id = ? and vnd >= ?")) {
+            if (player.getSession().vnd < num) {
                 return false;
             }
-            ps = con.prepareStatement("update account set vnd = (vnd - ?), active = ? where id = ?");
             ps.setInt(1, num);
             ps.setInt(2, player.getSession().actived ? 1 : 0);
             ps.setInt(3, player.getSession().userId);
-            ps.executeUpdate();
+            ps.setInt(4, num);
+            if (ps.executeUpdate() <= 0) {
+                return false;
+            }
             player.getSession().vnd -= num;
         } catch (Exception e) {
             Logger.logException(PlayerDAO.class, e, "Lỗi update mua thành viên " + player.name);

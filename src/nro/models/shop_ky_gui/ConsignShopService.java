@@ -103,6 +103,9 @@ public class ConsignShopService {
     }
 
     private boolean SubThoiVang(Player pl, int quatity) {
+        if (quatity <= 0) {
+            return false;
+        }
         for (Item item : pl.inventory.itemsBag) {
             if (item.isNotNullItem() && item.template.id == 457 && item.quantity >= quatity) {
                 nro.models.services.InventoryService.gI().subQuantityItemsBag(pl, item, quatity);
@@ -112,7 +115,7 @@ public class ConsignShopService {
         return false;
     }
 
-    public void buyItem(Player pl, int id) {
+    public synchronized void buyItem(Player pl, int id) {
         if (pl.nPoint.power < 17000000000L) {
             Service.gI().sendThongBao(pl, "Yêu cầu sức mạnh lớn hơn 17 tỷ");
             openShopKyGui(pl);
@@ -128,13 +131,17 @@ public class ConsignShopService {
             openShopKyGui(pl);
             return;
         }
+        if (InventoryService.gI().getCountEmptyBag(pl) <= 0) {
+            Service.gI().sendThongBao(pl, "Hành trang không còn chỗ trống");
+            return;
+        }
         boolean isBuy = false;
         if (it.goldSell > 0) {
-            if (pl.inventory.gold >= it.goldSell) {
-                pl.inventory.gold -= it.goldSell;
+            // Người bán nhận thỏi vàng (457) khi rút tiền, nên người mua cũng phải trả bằng thỏi vàng
+            if (SubThoiVang(pl, it.goldSell)) {
                 isBuy = true;
             } else {
-                Service.gI().sendThongBao(pl, "Bạn không đủ vàng để mua vật phẩm");
+                Service.gI().sendThongBao(pl, "Bạn không đủ thỏi vàng để mua vật phẩm");
                 isBuy = false;
             }
         } else if (it.gemSell > 0) {
@@ -244,22 +251,22 @@ public class ConsignShopService {
             return;
         }
         pl.idMark.setIdItemUpTop(id);
-        NpcService.gI().createMenuConMeo(pl, ConstNpc.UP_TOP_ITEM, -1, "Bạn có muốn đưa vật phẩm ['" + ItemService.gI().createNewItem(it.itemId).template.name + "'] của bản thân lên trang đầu?\nYêu cầu 5 Ngọc Xanh.", "Đồng ý", "Từ Chối");
+        NpcService.gI().createMenuConMeo(pl, ConstNpc.UP_TOP_ITEM, -1, "Bạn có muốn đưa vật phẩm ['" + ItemService.gI().createNewItem(it.itemId).template.name + "'] của bản thân lên trang đầu?\nYêu cầu 2 thỏi vàng.", "Đồng ý", "Từ Chối");
     }
 
-    public void StartupItemToTop(Player pl) {
+    public synchronized void StartupItemToTop(Player pl) {
+        ConsignItem target = getItemBuy(pl, pl.idMark.getIdItemUpTop());
+        if (target == null || target.isBuy) {
+            Service.gI().sendThongBao(pl, "Vật phẩm không tồn tại hoặc đã được bán");
+            return;
+        }
         if (!SubThoiVang(pl, 2)) {
             Service.gI().sendThongBao(pl, "Bạn cần có ít nhất 2 thỏi vàng đưa vật phẩm lên trang đầu");
             return;
         }
-
-        for (ConsignItem its : ConsignShopManager.gI().listItem) {
-            if (its.id == pl.idMark.getIdItemUpTop()) {
-                its.isUpTop = 1;
-                Service.gI().sendThongBao(pl, "Đưa vật phẩm lên trang đầu thành công");
-                break;
-            }
-        }
+        target.isUpTop = 1;
+        InventoryService.gI().sendItemBags(pl);
+        Service.gI().sendThongBao(pl, "Đưa vật phẩm lên trang đầu thành công");
 
         ConsignShopManager.gI().listItem.sort(Comparator.comparingInt((ConsignItem it) -> it.isUpTop).reversed());
 
@@ -267,7 +274,7 @@ public class ConsignShopService {
         openShopKyGui(pl);
     }
 
-    public void claimOrDel(Player pl, byte action, int id) {
+    public synchronized void claimOrDel(Player pl, byte action, int id) {
         ConsignItem it = getItemBuy(pl, id);
         switch (action) {
             case 1: // hủy vật phẩm
@@ -278,6 +285,10 @@ public class ConsignShopService {
                 if (it.player_sell != pl.id) {
                     Service.gI().sendThongBao(pl, "Vật phẩm không thuộc quyền sở hữu");
                     openShopKyGui(pl);
+                    return;
+                }
+                if (InventoryService.gI().getCountEmptyBag(pl) <= 0) {
+                    Service.gI().sendThongBao(pl, "Hành trang không còn chỗ trống");
                     return;
                 }
                 Item item = ItemService.gI().createNewItem(it.itemId);
@@ -302,14 +313,23 @@ public class ConsignShopService {
                     openShopKyGui(pl);
                     return;
                 }
+                if (it.goldSell > 0 && InventoryService.gI().getCountEmptyBag(pl) <= 0
+                        && InventoryService.gI().findItemBag(pl, 457) == null) {
+                    Service.gI().sendThongBao(pl, "Hành trang không còn chỗ trống");
+                    return;
+                }
+                if (!ConsignShopManager.gI().listItem.remove(it)) {
+                    return;
+                }
                 if (it.goldSell > 0) {
                     Item tvAdd = ItemService.gI().createNewItem((short) 457);
                     tvAdd.quantity = it.goldSell - it.goldSell * 10 / 100;
                     InventoryService.gI().addItemBag(pl, tvAdd);
+                    InventoryService.gI().sendItemBags(pl);
                 } else if (it.gemSell > 0) {
-                    pl.inventory.gem += it.gemSell - it.gemSell * 10 / 100;
+                    pl.inventory.gem = (int) Math.min(Integer.MAX_VALUE, (long) pl.inventory.gem + it.gemSell - it.gemSell * 10L / 100);
                 }
-                if (ConsignShopManager.gI().listItem.remove(it)) {
+                {
                     Service.gI().sendMoney(pl);
                     ConsignShopManager.gI().save();
                     Service.gI().sendThongBao(pl, "Bạn đã bán vật phẩm thành công");
@@ -375,14 +395,18 @@ public class ConsignShopService {
         }
     }
 
-    public void KiGui(Player pl, int id, int money, byte moneyType, int quantity) {
+    public synchronized void KiGui(Player pl, int id, int money, byte moneyType, int quantity) {
         try {
-            if (!SubThoiVang(pl, 1)) {
-                Service.gI().sendThongBao(pl, "Bạn cần có ít nhất 1 thỏi vàng để làm phí đăng bán");
+            if (id < 0 || id >= pl.inventory.itemsBag.size()) {
                 return;
             }
-
-            Item it = ItemService.gI().copyItem(pl.inventory.itemsBag.get(id));
+            Item itemBag = pl.inventory.itemsBag.get(id);
+            if (!itemCanConsign(itemBag)) {
+                Service.gI().sendThongBao(pl, "Vật phẩm không thể kí gửi");
+                openShopKyGui(pl);
+                return;
+            }
+            Item it = ItemService.gI().copyItem(itemBag);
             for (Item.ItemOption daubuoi : it.itemOptions) {
                 if (daubuoi.optionTemplate.id == 30) {
                     Service.gI().sendThongBao(pl, "Vật phẩm không thể kí gửi");
@@ -390,22 +414,43 @@ public class ConsignShopService {
                     return;
                 }
             }
-            if (money <= 0 || quantity > it.quantity) {
+            if (money <= 0 || quantity <= 0 || quantity > it.quantity) {
                 openShopKyGui(pl);
                 return;
             }
 
-            if (quantity > 99 && quantity < 0) {
+            if (quantity > 99) {
                 Service.gI().sendThongBao(pl, "Ký gửi tối đa x99");
                 openShopKyGui(pl);
                 return;
             }
+            if ((moneyType == 0 && money > 100000) || (moneyType == 1 && money > 1000000)) {
+                Service.gI().sendThongBao(pl, moneyType == 0 ? "không thể ký gửi quá 100000 thỏi vàng" : "không thể ký gửi quá 1000000 ngọc");
+                openShopKyGui(pl);
+                return;
+            }
+            if (moneyType != 0 && moneyType != 1) {
+                Service.gI().sendThongBao(pl, "Có lỗi xảy ra");
+                openShopKyGui(pl);
+                return;
+            }
+            if (!SubThoiVang(pl, 1)) {
+                Service.gI().sendThongBao(pl, "Bạn cần có ít nhất 1 thỏi vàng để làm phí đăng bán");
+                return;
+            }
+            if (!pl.inventory.itemsBag.contains(itemBag)) {
+                // stack thỏi vàng vừa bị trừ phí chính là vật phẩm đem gửi
+                InventoryService.gI().sendItemBags(pl);
+                openShopKyGui(pl);
+                return;
+            }
+            if (quantity > itemBag.quantity) {
+                quantity = itemBag.quantity;
+            }
             switch (moneyType) {
                 case 0:// vàng
-                    if (money > 100000 && money < 0) {
-                        Service.gI().sendThongBao(pl, "không thể ký gửi quá 100000 thỏi vàng");
-                    } else {
-                        InventoryService.gI().subQuantityItemsBag(pl, pl.inventory.itemsBag.get(id), quantity);
+                    {
+                        InventoryService.gI().subQuantityItemsBag(pl, itemBag, quantity);
                         ConsignShopManager.gI().listItem.add(new ConsignItem(getMaxId() + 1, it.template.id, (int) pl.id, getTabKiGui(it), money, -1, quantity, (byte) 0, it.itemOptions, false));
                         InventoryService.gI().sendItemBags(pl);
                         openShopKyGui(pl);
@@ -415,10 +460,8 @@ public class ConsignShopService {
                     }
                     break;
                 case 1:// Ngọc Xanh
-                    if (money > 1000000 && money < 0) {
-                        Service.gI().sendThongBao(pl, "không thể ký gửi quá 1000000 ngọc");
-                    } else {
-                        InventoryService.gI().subQuantityItemsBag(pl, pl.inventory.itemsBag.get(id), quantity);
+                    {
+                        InventoryService.gI().subQuantityItemsBag(pl, itemBag, quantity);
                         ConsignShopManager.gI().listItem.add(new ConsignItem(getMaxId() + 1, it.template.id, (int) pl.id, getTabKiGui(it), -1, money, quantity, (byte) 0, it.itemOptions, false));
                         InventoryService.gI().sendItemBags(pl);
                         openShopKyGui(pl);

@@ -21,9 +21,13 @@ public class GiftCodeManager {
         return instance;
     }
 
-    public GiftCode checkUseGiftCode(Player player, String code) {
+    public synchronized GiftCode checkUseGiftCode(Player player, String code) {
         for (GiftCode giftCode : listGiftCode) {
             if (giftCode.code.equals(code)) {
+                if (giftCode.timeCode()) {
+                    Service.gI().sendThongBaoOK(player, "Code đã hết hạn");
+                    return null;
+                }
                 if (giftCode.countLeft <= 0) {
                     Service.gI().sendThongBaoOK(player, "Giftcode đã hết");
                     return null;
@@ -60,7 +64,9 @@ public class GiftCodeManager {
                     .append(giftCode.datecreate).append(", Ngày hết hạn: ").append(giftCode.dateexpired)
                     .append("\n");
         }
-        sb.deleteCharAt(sb.length() - 1);
+        if (sb.length() > 0) {
+            sb.deleteCharAt(sb.length() - 1);
+        }
         NpcService.gI().createTutorial(p, 5073, sb.toString());
     }
 

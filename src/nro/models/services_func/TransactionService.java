@@ -73,6 +73,9 @@ public class TransactionService implements Runnable {
                         return;
                     }
                     playerId = msg.reader().readInt();
+                    if (pl.zone == null || playerId == pl.id) {
+                        return;
+                    }
                     plMap = pl.zone.getPlayerInMap(playerId);
                     if (plMap != null && plMap.isPl()) {
                         if (plMap.tradeWVP) {
@@ -146,7 +149,7 @@ public class TransactionService implements Runnable {
                     }
                     break;
                 case LOCK_TRADE:
-                    if (Maintenance.isRunning) {
+                    if (trade != null && Maintenance.isRunning) {
                         trade.cancelTrade();
                         break;
                     }
@@ -155,12 +158,12 @@ public class TransactionService implements Runnable {
                     }
                     break;
                 case ACCEPT:
-                    if (Maintenance.isRunning) {
+                    if (trade != null && Maintenance.isRunning) {
                         trade.cancelTrade();
                         break;
                     }
                     if (trade != null) {
-                        trade.acceptTrade();
+                        trade.acceptTrade(pl);
                         if (trade.accept == 1) {
                             Service.gI().sendThongBao(pl, "Xin chờ đối phương đồng ý");
                         } else if (trade.accept == 2) {

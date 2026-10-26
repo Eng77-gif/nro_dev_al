@@ -199,6 +199,9 @@ public class InventoryService {
     }
 
     public void subQuantityItem(List<Item> items, Item item, int quantity) {
+        if (quantity <= 0) {
+            return; // số lượng âm sẽ biến phép trừ thành phép cộng (nhân bản vật phẩm)
+        }
         if (item != null) {
             for (Item it : items) {
                 if (item.equals(it)) {

@@ -27,6 +27,7 @@ public class GiftCode {
     }
 
     public boolean timeCode() {
-        return this.datecreate.getTime() > this.dateexpired.getTime();
+        // hết hạn khi thời điểm hiện tại đã vượt quá ngày hết hạn (trước đây so sánh ngày tạo với ngày hết hạn nên code không bao giờ hết hạn)
+        return this.dateexpired != null && System.currentTimeMillis() > this.dateexpired.getTime();
     }
 }

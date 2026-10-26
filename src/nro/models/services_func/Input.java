@@ -100,7 +100,16 @@ public class Input {
             for (int i = 0; i < text.length; i++) {
                 text[i] = msg.reader().readUTF();
             }
-            switch (player.idMark.getTypeInput()) {
+            int typeInput = player.idMark.getTypeInput();
+            switch (typeInput) {
+                case BOTITEM, BOTBOSS, BOTQUAI, BOTATTACKPLAYER, GIVE_IT, CHANGE_NAME, FIND_PLAYER -> {
+                    // các form này chỉ dành cho admin
+                    if (!player.isAdmin()) {
+                        return;
+                    }
+                }
+            }
+            switch (typeInput) {
                 case BOTITEM -> {
                     int slot = Integer.parseInt(text[0]);
                     int idBan = Integer.parseInt(text[1]);
@@ -155,7 +164,10 @@ public class Input {
                     if (player.getSession().vnd < cuantity1) {
                         Service.gI().sendThongBao(player, "Số dư không đủ, vui lòng nạp thêm");
                     } else {
-                        PlayerDAO.subvnd(player, cuantity1);
+                        if (!PlayerDAO.subvnd(player, cuantity1)) {
+                            Service.gI().sendThongBao(player, "Số dư không đủ, vui lòng nạp thêm");
+                            break;
+                        }
 
                         int soLuongThoiVang = (cuantity1 / 1000) * 4;
                         Item item457 = ItemService.gI().createNewItem((short) 457, soLuongThoiVang);
@@ -187,9 +199,12 @@ public class Input {
                     if (player.getSession().vnd < quantity) {
                         Service.gI().sendThongBao(player, "Số dư không đủ, vui lòng nạp thêm");
                     } else {
-                        PlayerDAO.subvnd(player, quantity);
+                        if (!PlayerDAO.subvnd(player, quantity)) {
+                            Service.gI().sendThongBao(player, "Số dư không đủ, vui lòng nạp thêm");
+                            break;
+                        }
 
-                        player.inventory.gem += quantity;
+                        player.inventory.gem = (int) Math.min(Integer.MAX_VALUE, (long) player.inventory.gem + quantity);
                         Service.gI().sendMoney(player);
 
                         int soLuongVe = (quantity / 10000) * 10;
@@ -359,8 +374,17 @@ public class Input {
                                 return;
                             }
 
+                            if (target == player || target.id == player.id) {
+                                Service.gI().sendThongBao(player, "Không thể tự tặng cho bản thân");
+                                return;
+                            }
                             int phi = (int) (soGem * 0.1); // Tính phí 10%
-                            int tongGem = soGem + phi;     // Tổng cần trừ
+                            long tongGemL = (long) soGem + phi; // dùng long tránh tràn số âm
+                            if (tongGemL > Integer.MAX_VALUE) {
+                                Service.gI().sendThongBao(player, "Số ngọc xanh không hợp lệ");
+                                return;
+                            }
+                            int tongGem = (int) tongGemL;     // Tổng cần trừ
 
                             if (player.inventory.gem < tongGem) {
                                 Service.gI().sendThongBao(player, "Bạn cần " + tongGem + " ngọc xanh để tặng (bao gồm phí 10%)");
@@ -379,7 +403,7 @@ public class Input {
 
                             int gemNhan = soGem;
                             int gemThucNhan = (int) (gemNhan * 0.9);
-                            target.inventory.gem += gemThucNhan;
+                            target.inventory.gem = (int) Math.min(Integer.MAX_VALUE, (long) target.inventory.gem + gemThucNhan);
 
                             Service.gI().sendMoney(player);
                             Service.gI().sendMoney(target);
@@ -493,7 +517,11 @@ public class Input {
                     }
                 }
                 case BANSLL -> {
-                    int sltv = Math.abs(Integer.parseInt(text[0]));
+                    int sltv = Integer.parseInt(text[0]);
+                    if (sltv <= 0) {
+                        Service.gI().sendThongBao(player, "Số lượng không hợp lệ");
+                        break;
+                    }
                     long cost = (long) sltv * 37000000;
                     Item ThoiVang = InventoryService.gI().findItemBag(player, 457);
                     if (ThoiVang != null) {
@@ -523,15 +551,20 @@ public class Input {
                     Player pl = Client.gI().getPlayer(text[0]);
                     int numruby = Integer.parseInt((text[1]));
                     if (pl != null) {
-                        if (numruby > 0 && player.inventory.ruby >= numruby) {
-                            Item item = InventoryService.gI().findItemBag(player, 2002);
-                            player.inventory.subGem(numruby);
+                        Item item = InventoryService.gI().findItemBag(player, 2002);
+                        if (pl == player) {
+                            Service.gI().sendThongBao(player, "Không thể tự tặng cho bản thân");
+                        } else if (item == null) {
+                            Service.gI().sendThongBao(player, "Bạn cần có vật phẩm để tặng ngọc");
+                        } else if (numruby > 0 && player.inventory.ruby >= numruby) {
+                            // kiểm tra hồng ngọc thì phải trừ hồng ngọc (trước đây trừ nhầm ngọc xanh)
+                            player.inventory.ruby -= numruby;
                             PlayerService.gI().sendInfoHpMpMoney(player);
-                            pl.inventory.ruby += numruby;
+                            pl.inventory.ruby = (int) Math.min(Integer.MAX_VALUE, (long) pl.inventory.ruby + numruby);
                             PlayerService.gI().sendInfoHpMpMoney(pl);
                             Service.gI().sendThongBao(player, "Tặng ngọc thành công");
                             Service.gI().sendThongBao(pl,
-                                    "Bạn được " + player.name + " tặng " + numruby + " ngọc xanh");
+                                    "Bạn được " + player.name + " tặng " + numruby + " hồng ngọc");
                             InventoryService.gI().subQuantityItemsBag(player, item, 1);
                             InventoryService.gI().sendItemBags(player);
                         } else {
@@ -564,7 +597,7 @@ public class Input {
                     Clan clan;
                     if (xacNhan.equalsIgnoreCase("OK")) {
                         clan = player.clan;
-                        if (clan.isLeader(player)) {
+                        if (clan != null && clan.isLeader(player)) {
                             clan.deleteDB(clan.id);
                             Manager.CLANS.remove(clan);
                             player.clan = null;

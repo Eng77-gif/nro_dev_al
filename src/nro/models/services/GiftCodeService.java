@@ -1,5 +1,8 @@
 package nro.models.services;
 
+import nro.models.player.Inventory;
+import java.util.ArrayList;
+
 import nro.models.managers.GiftCodeManager;
 import nro.models.player_system.GiftCode;
 import nro.models.item.Item;
@@ -49,15 +52,15 @@ public class GiftCodeService {
 
                 switch (idItem) {
                     case -1 -> {
-                        player.inventory.gold = Math.min(player.inventory.gold + (long) quantity, 2000000000L);
+                        player.inventory.gold = Math.min(player.inventory.gold + (long) quantity, Inventory.LIMIT_GOLD);
                         textGift += "|2|" + quantity + " vàng\b";
                     }
                     case -2 -> {
-                        player.inventory.gem = Math.min(player.inventory.gem + quantity, 200000000);
+                        player.inventory.gem = (int) Math.min((long) player.inventory.gem + quantity, Integer.MAX_VALUE);
                         textGift += "|3|" + quantity + " ngọc\b";
                     }
                     case -3 -> {
-                        player.inventory.ruby = Math.min(player.inventory.ruby + quantity, 200000000);
+                        player.inventory.ruby = (int) Math.min((long) player.inventory.ruby + quantity, Integer.MAX_VALUE);
                         textGift += "|4|" + quantity + " ngọc khóa\b";
                     }
                     default -> {
@@ -70,12 +73,12 @@ public class GiftCodeService {
                                 if (itemGift.template.id == 457) {
                                     itemGift.itemOptions.add(new Item.ItemOption(30, 0));
                                 } else {
-                                    itemGift.itemOptions = giftcode.option.get(key);
+                                    itemGift.itemOptions = giftcode.option.get(key) != null ? giftcode.option.get(key) : new ArrayList<>();
                                     itemGift.quantity = quantity;
                                     InventoryService.gI().addItemBag(player, itemGift);
                                 }
                             } else {
-                                itemGift.itemOptions = giftcode.option.get(key);
+                                itemGift.itemOptions = giftcode.option.get(key) != null ? giftcode.option.get(key) : new ArrayList<>();
                                 itemGift.quantity = quantity;
                                 InventoryService.gI().addItemBag(player, itemGift);
                             }
