@@ -251,7 +251,7 @@ public class ConsignShopService {
             return;
         }
         pl.idMark.setIdItemUpTop(id);
-        NpcService.gI().createMenuConMeo(pl, ConstNpc.UP_TOP_ITEM, -1, "Bạn có muốn đưa vật phẩm ['" + ItemService.gI().createNewItem(it.itemId).template.name + "'] của bản thân lên trang đầu?\nYêu cầu 2 thỏi vàng.", "Đồng ý", "Từ Chối");
+        NpcService.gI().createMenuConMeo(pl, ConstNpc.UP_TOP_ITEM, -1, "Bạn có muốn đưa vật phẩm ['" + ItemService.gI().createNewItem(it.itemId).template.name + "'] của bản thân lên trang đầu?\nYêu cầu 5 Ngọc Xanh.", "Đồng ý", "Từ Chối");
     }
 
     public synchronized void StartupItemToTop(Player pl) {

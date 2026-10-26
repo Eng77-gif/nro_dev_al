@@ -96,9 +96,20 @@ public class ChuyenHoaTrangBi_Vang {
     }
 
     public static void thucHienChuyenHoa(Player player) {
+        if (player.combineNew.itemsCombine.size() != 2) {
+            return;
+        }
         Item trangBiGoc = player.combineNew.itemsCombine.get(0);
         Item trangBiCanChuyenHoa = player.combineNew.itemsCombine.get(1);
         int goldChuyenHoa = 2_000_000_000;
+        if (trangBiCanChuyenHoa.itemOptions.isEmpty()) {
+            return;
+        }
+        // trước đây không kiểm tra số vàng nên có thể chuyển hóa khi vàng không đủ (vàng âm)
+        if (player.inventory.gold < goldChuyenHoa) {
+            Service.gI().sendThongBao(player, "Bạn không đủ vàng để chuyển hóa");
+            return;
+        }
 
         int levelTrangBi = 0;
         int soLanRotCap = 0;

@@ -688,7 +688,7 @@ public class NpcFactory {
                     }
                     case ConstNpc.UP_TOP_ITEM -> {
                         if (select == 0) {
-                            if (player.inventory.gem >= 50 && player.idMark.getIdItemUpTop() != -1) {
+                            if (player.inventory.gem >= 5 && player.idMark.getIdItemUpTop() != -1) {
                                 nro.models.shop_ky_gui.ConsignItem it = ConsignShopService.gI().getItemBuy(player.idMark.getIdItemUpTop());
                                 if (it == null || it.isBuy) {
                                     Service.gI().sendThongBao(player, "Vật phẩm không tồn tại hoặc đã được bán");
@@ -702,7 +702,9 @@ public class NpcFactory {
                                 player.inventory.gem -= 5;
                                 Service.gI().sendMoney(player);
                                 Service.gI().sendThongBao(player, "Thành công");
-                                it.isUpTop += 1;
+                                it.isUpTop = 1; // byte: cộng dồn sẽ tràn âm và tụt xuống cuối
+                                player.idMark.setIdItemUpTop(-1);
+                                nro.models.shop_ky_gui.ConsignShopManager.gI().save();
                                 ConsignShopService.gI().openShopKyGui(player);
                             } else {
                                 Service.gI().sendThongBao(player, "Bạn không đủ ngọc");

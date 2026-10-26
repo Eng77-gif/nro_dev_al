@@ -29,13 +29,18 @@ public class DeathOrAliveArenaService {
     public void startChallenge(Player player) {
         Zone zone = getMapChallenge(112);
         if (zone != null) {
-            if (player.inventory.gold >= player.thoiVangVoDaiSinhTu) {
-                player.inventory.gold -= player.thoiVangVoDaiSinhTu;
+            // phí hiển thị là "thỏi vàng" nên trừ thỏi vàng (457), trước đây trừ nhầm vàng thường
+            nro.models.item.Item thoiVang = InventoryService.gI().findItemBag(player, 457);
+            int fee = player.thoiVangVoDaiSinhTu;
+            if (fee <= 0 || (thoiVang != null && thoiVang.quantity >= fee)) {
+                if (fee > 0) {
+                    InventoryService.gI().subQuantityItemsBag(player, thoiVang, fee);
+                }
                 InventoryService.gI().sendItemBags(player);
                 player.thoiVangVoDaiSinhTu += 10;
                 player.lastTimePKVoDaiSinhTu = System.currentTimeMillis();
             } else {
-                Service.gI().sendThongBao(player, "Bạn không có đủ ngọc !");
+                Service.gI().sendThongBao(player, "Bạn không có đủ thỏi vàng !");
                 return;
             }
             if (!zone.equals(player.zone)) {
