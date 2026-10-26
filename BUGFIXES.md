@@ -263,4 +263,10 @@ Nguồn: `ItemTemplates.json` của DataNRO (TeaMobi), gồm 2103 vật phẩm, 
 
 File `sql/team2026.sql` được xuất lại từ DB đã đổi. `vsData` và `vsItem` tăng lên 14.
 
-**Lưu ý khi cập nhật server đang chạy:** nếu database đang có người chơi thật thì đừng import đè. Chạy `remap.py` và `remap_players.py` (có trong lịch sử phiên làm việc) trên database đó, để đổi luôn đồ trong hành trang và rương.
+**Lưu ý khi cập nhật server đang chạy:** nếu database đang có người chơi thật thì đừng import đè. Sao lưu database, rồi chạy trên chính database đó (đúng thứ tự):
+
+1. `python3 tools/remap.py tools/DataNRO_ItemTemplates.json <tên_db> out tools/remap_code_ids.txt`
+2. `mysql <tên_db> < out/remap.sql`
+3. `python3 tools/remap_players.py <tên_db> out/map.json`
+
+Bước 3 đổi luôn đồ trong hành trang, rương và trên người.
