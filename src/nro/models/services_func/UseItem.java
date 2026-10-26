@@ -2815,7 +2815,8 @@ public class UseItem {
             InventoryService.gI().subQuantityItemsBag(pl, item, 1);
             InventoryService.gI().sendItemBags(pl);
         } else {
-            if (card.Level >= 2) {
+            int maxLevel = Math.max(2, radarTemplate.Options.stream().mapToInt(o -> o.active).max().orElse(2));
+            if (card.Level >= maxLevel) {
                 Service.gI().sendThongBao(pl, "Thẻ này đã đạt cấp tối đa");
                 return;
             }

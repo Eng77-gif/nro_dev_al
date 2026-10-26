@@ -3367,7 +3367,8 @@ INSERT INTO `item_shop` VALUES
 (995,59,1567,1,1,1,999,14116,'2025-06-07 06:25:31'),
 (996,59,1608,1,1,1,9,14116,'2025-06-07 06:26:48'),
 (997,44,1297,1,1,1,2,0,'2025-06-07 11:24:08'),
-(998,45,1297,1,1,1,2,0,'2025-06-07 11:24:25');
+(998,45,1297,1,1,1,2,0,'2025-06-07 11:24:25'),
+(999,59,2040,1,1,1,8250,0,'2026-10-26 10:56:28');
 /*!40000 ALTER TABLE `item_shop` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `item_shop_option`;
@@ -3383,7 +3384,7 @@ CREATE TABLE `item_shop_option` (
   KEY `option_id` (`option_id`) USING BTREE,
   CONSTRAINT `item_shop_option_ibfk_1` FOREIGN KEY (`item_shop_id`) REFERENCES `item_shop` (`id`) ON DELETE CASCADE,
   CONSTRAINT `item_shop_option_ibfk_2` FOREIGN KEY (`option_id`) REFERENCES `item_option_template` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1801 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=1802 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `item_shop_option` WRITE;
@@ -4808,7 +4809,8 @@ INSERT INTO `item_shop_option` VALUES
 (1738,997,50,10),
 (1739,997,77,10),
 (1740,997,103,10),
-(1741,997,93,30);
+(1741,997,93,30),
+(1801,999,30,0);
 /*!40000 ALTER TABLE `item_shop_option` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `item_template`;
@@ -10011,7 +10013,8 @@ INSERT INTO `radar` VALUES
 (1204,11048,5,120,1,-1,'[{\"head\":1204, \"body\":1205, \"leg\":1206, \"bag\":-1}]','Thẻ Rồng Thần Namek','Rồng thần của Namếc do trưởng lão hành tinh này tạ...','[{\"id\": 50, \"param\": 5, \"activeCard\": 0},\r\n{\"id\": 77, \"param\": 5, \"activeCard\": 1},\r\n{\"id\": 103, \"param\": 5, \"activeCard\": 2}]',-1,0,1),
 (1771,14247,5,120,1,-1,'[{\"head\":1727, \"body\":1728, \"leg\":1729, \"bag\":-1}]','Thẻ Oozaru','Oorazu là một sinh vật khổng lồ, đó chính là hình dáng của người xayda khi họ nhìn thấy trăng tròn và biến đổi','[{\"id\": 14, \"param\": 5, \"activeCard\": 0},\r\n{\"id\": 50, \"param\": 5, \"activeCard\": 1},\r\n{\"id\": 77, \"param\": 10, \"activeCard\": 2},\r\n{\"id\": 103, \"param\": 5, \"activeCard\": 2},\r\n{\"id\": 94, \"param\": 3, \"activeCard\": 2}]',-1,0,2),
 (2104,14248,6,120,1,-1,'[{\"head\":1730, \"body\":1731, \"leg\":1732, \"bag\":-1}]','Thẻ Oozarun 1','Oorazu là một sinh vật khổng lồ, đó chính là hình dáng của người xayda khi họ nhìn thấy trăng tròn và biến đổi','[{\"id\": 14, \"param\": 5, \"activeCard\": 0},\r\n{\"id\": 50, \"param\": 7, \"activeCard\": 1},\r\n{\"id\": 77, \"param\": 12, \"activeCard\": 2},\r\n{\"id\": 103, \"param\": 7, \"activeCard\": 2},\r\n{\"id\": 94, \"param\": 7, \"activeCard\": 2}]',-1,0,3),
-(2105,14249,6,120,1,-1,'[{\"head\":1733, \"body\":1734, \"leg\":1735, \"bag\":-1}]','Thẻ Oozarun 2','Oorazu là một sinh vật khổng lồ, đó chính là hình dáng của người xayda khi họ nhìn thấy trăng tròn và biến đổi','[{\"id\": 14, \"param\": 5, \"activeCard\": 0},\r\n{\"id\": 50, \"param\": 10, \"activeCard\": 1},\r\n{\"id\": 77, \"param\": 15, \"activeCard\": 2},\r\n{\"id\": 103, \"param\": 10, \"activeCard\": 2},\r\n{\"id\": 94, \"param\": 7, \"activeCard\": 2}]',-1,0,4);
+(2105,14249,6,120,1,-1,'[{\"head\":1733, \"body\":1734, \"leg\":1735, \"bag\":-1}]','Thẻ Oozarun 2','Oorazu là một sinh vật khổng lồ, đó chính là hình dáng của người xayda khi họ nhìn thấy trăng tròn và biến đổi','[{\"id\": 14, \"param\": 5, \"activeCard\": 0},\r\n{\"id\": 50, \"param\": 10, \"activeCard\": 1},\r\n{\"id\": 77, \"param\": 15, \"activeCard\": 2},\r\n{\"id\": 103, \"param\": 10, \"activeCard\": 2},\r\n{\"id\": 94, \"param\": 7, \"activeCard\": 2}]',-1,0,4),
+(2040,16520,6,10,1,-1,'[{\"head\":1977, \"body\":1978, \"leg\":1979, \"bag\":-1}]','Thẻ khỉ con','Vật phẩm sự kiện','[{\"id\": 251, \"param\": 1, \"activeCard\": 0},\n{\"id\": 251, \"param\": 1, \"activeCard\": 1},\n{\"id\": 77, \"param\": 10, \"activeCard\": 1},\n{\"id\": 103, \"param\": 10, \"activeCard\": 1},\n{\"id\": 251, \"param\": 2, \"activeCard\": 2},\n{\"id\": 50, \"param\": 10, \"activeCard\": 2},\n{\"id\": 251, \"param\": 2, \"activeCard\": 3},\n{\"id\": 14, \"param\": 10, \"activeCard\": 3},\n{\"id\": 94, \"param\": 5, \"activeCard\": 3}]',-1,0,-1);
 /*!40000 ALTER TABLE `radar` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `settings`;

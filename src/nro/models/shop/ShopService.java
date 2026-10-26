@@ -787,6 +787,9 @@ public class ShopService {
                 case 1821:
                     eventPointPrice = 199;
                     break;
+                case 2040: // Mảnh hồn khỉ con (Thẻ khỉ con)
+                    eventPointPrice = 8250;
+                    break;
                 case 1757:
                     eventPointPrice = 99;
                     break;

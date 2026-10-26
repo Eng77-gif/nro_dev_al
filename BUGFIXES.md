@@ -276,3 +276,23 @@ Bước 3 đổi luôn đồ trong hành trang, rương và trên người.
 - Đã bù 79 icon mà vật phẩm, part, avatar, cờ hoặc thẻ radar đang dùng nhưng còn thiếu: 60 icon từ Icon11th7, 19 icon từ Hunr2025. Đã tạo đủ x1–x4.
 - Phần lớn là icon của các món mới thêm từ DataNRO, vd. Ván bay Magikarp, Bóng sinh nhật NRO, Pet Pikachu/Squirtle/MewTwo, Kochiro, Musashi, Thú cưỡi rồng.
 - Còn 574 icon thiếu (17410–17735 và 20097–32052) mà cả hai gói đều không có. Phần lớn thuộc các part riêng của source cũ.
+
+## Đợt 8: Thẻ khỉ con và bảng chỉ số (theo video)
+**Thẻ khỉ con** (radar id 2040, thẻ no.20):
+- Sưu tầm bằng Mảnh hồn khỉ con (id 2040). Cần 10 mảnh mỗi cấp, tối đa Lv.3. Hình thẻ là Goku GT Kid.
+- Chỉ số:
+  - Mở khóa: Sát thương cuối +1%.
+  - Sử dụng Lv.1: Sát thương cuối +1%, HP +10%, KI +10%.
+  - Sử dụng Lv.2: Sát thương cuối +2%, Sức đánh +10%.
+  - Sử dụng Lv.3: Sát thương cuối +2%, Chí mạng +10%, Giảm 5% sát thương.
+- Shop Đổi thưởng của Quy Lão bán Mảnh hồn khỉ con giá 8250 điểm sự kiện, không giao dịch được.
+
+**Đổi cách tính thẻ radar cho giống bản chính thức:**
+- Dòng "Mở khóa" (activeCard 0) nay có tác dụng với mọi thẻ đã sưu tầm, kể cả khi không dùng. Trước đây chỉ có tác dụng với thẻ đang dùng mà còn ở cấp đầu.
+- Dòng "Sử dụng Lv.x" có tác dụng khi đang dùng thẻ ở đúng cấp x.
+- Chỉ số của thẻ không có xử lý riêng (vd. Sát thương cuối) nay được cộng như chỉ số đồ.
+- Cấp tối đa của thẻ lấy theo cấp cao nhất ghi trong thẻ, tối thiểu là 2.
+
+**Bảng chỉ số chi tiết:** client là Unity đã biên dịch nên không thêm được bảng nổi như video. Thay vào đó:
+- Chat `chiso` để xem chỉ số của mình, `chiso de` để xem chỉ số đệ tử.
+- Bảng gồm: HP, MP, Sức đánh, Chí mạng, STCM, Giáp, Giảm sát thương, Sát thương chuẩn, Sát thương cuối, Sát thương Boss, Né đòn, Hút máu, Hút KI, TNSM, Vàng rơi từ quái, và các set đang kích hoạt.

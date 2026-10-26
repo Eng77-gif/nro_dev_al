@@ -269,6 +269,15 @@ parameterizedCommands.put("upp", (player, text) -> {
             }
         }
 
+        if (text.equals("chiso") || text.equals("chi so")) {
+            nro.models.services.StatsInfoService.gI().show(player, false);
+            return true;
+        }
+        if (text.equals("chiso de") || text.equals("chi so de")) {
+            nro.models.services.StatsInfoService.gI().show(player, true);
+            return true;
+        }
+
         if (text.equals("thao buoc chan")) {
             nro.models.services.Event2026Service.gI().unequipFoot(player);
             return true;

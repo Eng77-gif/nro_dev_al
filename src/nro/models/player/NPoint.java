@@ -271,10 +271,14 @@ public class NPoint {
             }
         }
 
-        Card card = player.Cards.stream().filter(r -> r != null && r.Used == 1).findFirst().orElse(null);
-        if (card != null) {
+        // thẻ radar: dòng "Mở khóa" (active 0) có tác dụng khi đã sưu tầm thẻ,
+        // dòng "Sử dụng Lv.x" chỉ khi đang dùng thẻ ở đúng cấp x
+        for (Card card : player.Cards) {
+            if (card == null || card.Level == 0) {
+                continue;
+            }
             for (OptionCard io : card.Options) {
-                if (io.active == card.Level || (card.Level == -1 && io.active == 0)) {
+                if (io.active == 0 || (card.Used == 1 && io.active == card.Level)) {
                     switch (io.id) {
                         case 0: //Tấn công +#
                             this.dameAdd += io.param;
@@ -432,6 +436,9 @@ public class NPoint {
                             break;
                         case 153: //% phát nổ sau khi chết
                             this.tlBom += io.param;
+                            break;
+                        default:
+                            addOption(new ItemOption(io.id, io.param));
                             break;
                     }
                 }
