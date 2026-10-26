@@ -240,8 +240,11 @@ public class UseItem {
                     Service.gI().point(player);
                     InventoryService.gI().sendItemBags(player);
                 }
-                case ACCEPT_USE_ITEM ->
-                    UseItem.gI().useItem(player, player.inventory.itemsBag.get(index), index);
+                case ACCEPT_USE_ITEM -> {
+                    if (index >= 0 && index < player.inventory.itemsBag.size()) {
+                        UseItem.gI().useItem(player, player.inventory.itemsBag.get(index), index);
+                    }
+                }
             }
         } catch (Exception e) {
             Logger.logException(UseItem.class, e);
@@ -251,6 +254,8 @@ public class UseItem {
             }
         }
     }
+
+    private static final java.util.Set<Integer> SELF_EQUIP_IDS = java.util.Set.of(892, 893, 908, 909, 910, 916, 917, 918, 919, 936, 942, 943, 944, 967, 1008, 1039, 1040, 1046, 1107, 1114, 1188, 1202, 1203, 1207, 1224, 1225, 1226, 1243, 1244, 1256, 1318, 1347, 1414, 1435, 1452, 1458, 1482, 1497, 1550, 1551, 1564, 1568, 1573, 1596, 1597, 1611, 1620, 1621, 1622, 1629, 1630, 1631, 1633, 1654, 1668, 1682, 1683, 1686, 1727, 1729, 1750, 1765, 1766, 1767, 1768, 1769, 1770, 1771, 1789);
 
     private void useItem(Player pl, Item item, int indexBag) {
         if (item != null && item.isNotNullItem()) {
@@ -286,7 +291,11 @@ public class UseItem {
                         Service.gI().sendFlagBag(pl);
                         break;
                     case 25: {
-                        InventoryService.gI().itemBagToBody(pl, indexBag);
+                        // Các id bên dưới tự mặc trong switch theo id; nếu mặc ở đây nữa thì
+                        // lần mặc thứ 2 sẽ mặc lại đồ cũ vừa bị tháo ra.
+                        if (!SELF_EQUIP_IDS.contains((int) item.template.id)) {
+                            InventoryService.gI().itemBagToBody(pl, indexBag);
+                        }
                     }
                     default:
                         switch (item.template.id) {

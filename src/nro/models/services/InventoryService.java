@@ -131,7 +131,7 @@ public class InventoryService {
                 sortItems(player.inventory.itemsBag);
                 sendItemBags(player);
             } else {
-                Service.gI().sendThongBao(player, "Bỏ cái địt mẹ mày thằng ngu");
+                Service.gI().sendThongBao(player, "Không thể bỏ vật phẩm này.");
             }
         }
         if (itemThrow == null) {
@@ -398,7 +398,7 @@ public class InventoryService {
     }
 
     public void itemBagToBody(Player player, int index) {
-        if (index < 0) {
+        if (index < 0 || index >= player.inventory.itemsBag.size()) {
             Service.gI().sendThongBao(player, "Không thể thực hiện");
             return;
         }
@@ -413,6 +413,9 @@ public class InventoryService {
     }
 
     public void itemBodyToBag(Player player, int index) {
+        if (index < 0 || index >= player.inventory.itemsBody.size()) {
+            return;
+        }
         Item item = player.inventory.itemsBody.get(index);
         if (item.isNotNullItem()) {
             if (index == 12) {
@@ -462,6 +465,9 @@ public class InventoryService {
     }
 
     public void itemPetBodyToBag(Player player, int index) {
+        if (player.pet == null || index < 0 || index >= player.pet.inventory.itemsBody.size()) {
+            return;
+        }
         Item item = player.pet.inventory.itemsBody.get(index);
         if (item.isNotNullItem()) {
             player.pet.inventory.itemsBody.set(index, putItemBag(player, item));
@@ -475,7 +481,7 @@ public class InventoryService {
     }
 
     public void itemBoxToBodyOrBag(Player player, int index) {
-        if (index < 0) {
+        if (index < 0 || index >= player.inventory.itemsBox.size()) {
             Service.gI().sendThongBao(player, "Không thể thực hiện");
             return;
         }
@@ -545,11 +551,11 @@ public class InventoryService {
     }
 
     public void itemBodyToBox(Player player, int index) {
-        if (index < 0 || index >= player.inventory.itemsBody.size()) {
+        if (index >= 0 && index < player.inventory.itemsBody.size()) {
             Item item = player.inventory.itemsBody.get(index);
             if (item.isNotNullItem()) {
                 player.inventory.itemsBody.set(index, putItemBox(player, item));
-                sortItems(player.inventory.itemsBag);
+                sortItems(player.inventory.itemsBox);
                 sendItemBody(player);
                 sendItemBox(player);
                 Service.gI().point(player);
@@ -756,7 +762,7 @@ public class InventoryService {
                     if (player.effectSkill.isChibi && player.typeChibi == 0) {
                         player.inventory.gold += item.quantity;
                     }
-                    player.inventory.gold += item.quantity;
+                    player.inventory.gold = Math.min(player.inventory.gold + item.quantity, Inventory.LIMIT_GOLD);
                     Service.gI().sendMoney(player);
                     return true;
                 } else {

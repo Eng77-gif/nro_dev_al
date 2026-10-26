@@ -638,7 +638,7 @@ public class Controller implements IMessageHandler {
                     messageSubCommand(_session, _msg);
                     break;
                 case -15: // về nhà
-                    if (player != null) {
+                    if (player != null && player.zone != null) {
                         int mapId = MapService.gI().isMapMaBu(player.zone.map.mapId) ? 114 : player.gender + 21;
                         ChangeMapService.gI().changeMapBySpaceShip(player, mapId, 0, -1);
                     }
@@ -690,7 +690,9 @@ public class Controller implements IMessageHandler {
 //                    short menuid
                     break;
                 case -76:
-                    AchievementService.gI().confirmAchievement(player, _msg.reader().readByte());
+                    if (player != null) {
+                        AchievementService.gI().confirmAchievement(player, _msg.reader().readByte());
+                    }
                     break;
                 default:
                     //Logger.log(Logger.YELLOW, "CMD: " + cmd + "\n");
@@ -862,6 +864,16 @@ public class Controller implements IMessageHandler {
                 String name = msg.reader().readUTF();
                 int gender = msg.reader().readByte();
                 int hair = msg.reader().readByte();
+                if (session.userId <= 0 || session.player != null || gender < 0 || gender > 2) {
+                    return;
+                }
+                rs = LocalManager.executeQuery("select id from player where account_id = ? limit 1", session.userId);
+                boolean hasChar = rs.first();
+                rs.dispose();
+                rs = null;
+                if (hasChar) {
+                    return; // mỗi tài khoản chỉ được 1 nhân vật
+                }
                 if (name.length() >= 5 && name.length() <= 10) {
                     rs = LocalManager.executeQuery("select * from player where name = ?", name);
                     if (rs.first()) {

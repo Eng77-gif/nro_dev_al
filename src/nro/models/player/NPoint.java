@@ -1876,7 +1876,7 @@ public class NPoint {
         long tiemNangUse;
         if (type == 0) {
             int pointHp = point * 20;
-            tiemNangUse = point * (2 * (this.hpg + 1000) + pointHp - 20) / 2;
+            tiemNangUse = (long) point * (2L * (this.hpg + 1000L) + pointHp - 20) / 2; // long: tránh tràn số int
             if ((this.hpg + pointHp) <= getHpMpLimit()) {
                 if (doUseTiemNang(tiemNangUse)) {
                     hpg += pointHp;
@@ -1888,7 +1888,7 @@ public class NPoint {
         }
         if (type == 1) {
             int pointMp = point * 20;
-            tiemNangUse = point * (2 * (this.mpg + 1000) + pointMp - 20) / 2;
+            tiemNangUse = (long) point * (2L * (this.mpg + 1000L) + pointMp - 20) / 2;
             if ((this.mpg + pointMp) <= getHpMpLimit()) {
                 if (doUseTiemNang(tiemNangUse)) {
                     mpg += pointMp;
@@ -1900,7 +1900,7 @@ public class NPoint {
         }
         if (type == 2) {
             TaskService.gI().checkDoneTaskNangCS(player);
-            tiemNangUse = point * (2 * this.dameg + point - 1) / 2 * 100;
+            tiemNangUse = (long) point * (2L * this.dameg + point - 1) / 2 * 100;
             if ((this.dameg + point) <= getDameLimit()) {
                 if (doUseTiemNang(tiemNangUse)) {
                     dameg += point;
@@ -1912,7 +1912,8 @@ public class NPoint {
             }
         }
         if (type == 3) {
-            tiemNangUse = 2 * (this.defg + 5) / 2 * 100000;
+            point = 1; // giá chỉ tính cho 1 điểm giáp
+            tiemNangUse = 2L * (this.defg + 5) / 2 * 100000;
             if ((this.defg + point) <= getDefLimit()) {
                 if (doUseTiemNang(tiemNangUse)) {
                     defg += point;
@@ -1923,6 +1924,7 @@ public class NPoint {
             }
         }
         if (type == 4) {
+            point = 1; // giá chỉ tính cho 1 điểm chí mạng
             tiemNangUse = 50000000L;
             for (int i = 0; i < this.critg; i++) {
                 tiemNangUse *= 5L;
