@@ -1,0 +1,12 @@
+# Build output
+build/
+dist/
+*.jar
+!lib/*.jar
+*.class
+nbproject/private/
+
+# Game resources (large, kept out of git)
+data/
+
+logs/
