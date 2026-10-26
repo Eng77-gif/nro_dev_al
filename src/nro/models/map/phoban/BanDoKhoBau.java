@@ -161,7 +161,7 @@ public class BanDoKhoBau implements Runnable {
         //Hồi sinh quái
         for (Zone zone : this.zones) {
             for (TrapMap trap : zone.trapMaps) {
-                trap.dame = this.level * 100000;
+                trap.dame = this.level * 100000L;
             }
 
             if (zone.map.mapId == 135 || zone.map.mapId == 136 || zone.map.mapId == 137) {
