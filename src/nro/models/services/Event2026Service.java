@@ -489,12 +489,12 @@ public class Event2026Service {
         return it;
     }
 
-    /** Dòng set Beerus (260), mô tả 2/4/5 món (261 - 263) và không giao dịch (30). */
+    /** Dòng set Beerus (115), mô tả 2/4/5 món (163, 167, 168) và không giao dịch (30). */
     public static void addSkhBeerusOptions(List<Item.ItemOption> options) {
-        options.add(new Item.ItemOption(260, 0));
-        options.add(new Item.ItemOption(261, 0));
-        options.add(new Item.ItemOption(262, 0));
-        options.add(new Item.ItemOption(263, 0));
+        options.add(new Item.ItemOption(115, 0));
+        options.add(new Item.ItemOption(163, 0));
+        options.add(new Item.ItemOption(167, 0));
+        options.add(new Item.ItemOption(168, 0));
         options.add(new Item.ItemOption(30, 0));
     }
 

@@ -363,3 +363,37 @@ python tools/res_import.py "D:/res team new 16th10" --db team2026 --apply
 - Thêm `--apply` để chạy SQL bằng lệnh `mysql`; không có thì chỉ ghi file `res_import.sql`.
 - `--parts 2064-2072` để chỉ nhập các part chỉ định; `--overwrite` để ghi đè file đã có.
 - Nhập xong nhớ tăng `vsData` để client tải lại part.
+
+## Đợt 11: giao diện web cho tool res, sửa 2 lỗi làm client đọc sai dữ liệu
+### `tools/res_web.py`: giao diện web
+Chạy `python tools/res_web.py` rồi mở `http://127.0.0.1:8765` (thêm `--bind 0.0.0.0` để máy khác trong mạng LAN mở được). Trang có 3 tab:
+- **Tải res:** điền host/port/tài khoản, chọn icon, part, mount, aura, effect, file res. Có ô "Server TeaMobi chính thức".
+- **Nhập res:** nhập thư mục gói, hoặc kéo thả file .zip để tải lên; chọn database rồi bấm Nhập.
+- **Xem:** duyệt icon, mount/aura, effect của một thư mục, có lọc theo tên/id.
+
+Mỗi lần chạy hiện nhật ký trực tiếp và có nút Dừng. Tool chỉ cần Python 3 và Pillow.
+
+### Lỗi 1: danh sách vật phẩm vượt 65.535 byte
+- Gói `-28` chỉ có 2 byte độ dài. Từ khi có 2112 vật phẩm, gói thứ hai (id 750–2111) bị cắt, client đọc lệch mọi gói sau đó.
+- Đã chia thành nhiều gói "thêm vật phẩm", mỗi gói dưới 60 KB.
+- Server giờ in cảnh báo nếu còn gói nào vượt 65.535 byte.
+
+### Lỗi 2: quá 255 dòng chỉ số
+- Server gửi số lượng dòng chỉ số bằng 1 byte, nên client LÂU CỒ chỉ đọc được tối đa 255 dòng. Có 266 dòng (id 0–265), client chỉ đọc được 10.
+- 11 dòng mới đã dời về các id trống hoặc chưa nơi nào dùng:
+
+| Dòng chỉ số | Id cũ → mới |
+|---|---|
+| Pet Cửu Vĩ Hồ | 255 → 172 |
+| Cờ Vạn Hoa Đồng | 256 → 39 |
+| Ảo Thuật | 257 → 90 |
+| Cờ World Cup | 258 → 91 |
+| Đi cùng SKH Beerus | 259 → 92 |
+| Set Beerus | 260 → 115 |
+| Mô tả [2] / [4] / [5] | 261 / 262 / 263 → 163 / 167 / 168 |
+| Pet Xên hoàn thiện | 264 → 169 |
+| Pet Xên Max | 265 → 42 |
+
+- Các dòng 251–254 giữ nguyên. Id ghi ở các đợt trên là id cũ.
+- **Database đang chạy thật:** chạy `python tools/migrate_option_ids.py --db <tên_db>`. Script đổi luôn chỉ số trong đồ người chơi, ký gửi, danh hiệu và thẻ radar.
+- `vsItem` tăng lên 15.

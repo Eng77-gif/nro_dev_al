@@ -68,6 +68,10 @@ public class MessageSendCollect implements IMessageSendCollect {
                     byte b4 = this.writeKey(session, (byte) (size >> 16));
                     dos.writeByte(b4 - 128);
                 } else if (session.sentKey()) {
+                    if (size > 65535) {
+                        // độ dài 2 byte bị cắt -> client đọc lệch toàn bộ gói sau
+                        System.err.println("Gói " + msg.command + " dài " + size + " byte, vượt 65535: client sẽ đọc lỗi");
+                    }
                     byte byte1 = this.writeKey(session, (byte) (size >> 8));
                     dos.writeByte(byte1);
                     byte byte2 = this.writeKey(session, (byte) (size & 0xFF));

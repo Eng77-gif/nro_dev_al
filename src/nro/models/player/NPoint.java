@@ -204,12 +204,12 @@ public class NPoint {
     public boolean isChongNLX; // option 252: chống năng lượng xấu (miễn hiệu ứng hôi/giảm HP xung quanh)
     public int tlTNSMDeTu; // option 253: +% TN, SM cho đệ tử khi sư phụ mặc
     public int tlAkazaRage; // option 254: % sức đánh khi HP dưới 50%
-    public int tlAoThuat; // option 257: % sức đánh của Ảo Thuật
+    public int tlAoThuat; // option 90: % sức đánh của Ảo Thuật
     public long rageUntil, lastTimeRage; // hiệu ứng Akaza
     public long aoThuatUntil, lastTimeAoThuat; // hiệu ứng Ảo Thuật
-    private int setHpWithPet, setSTCuoiWithFlag, setCritWithFlag; // option 255, 256, 258
-    private int setCritWithSkhBeerus, setSDCMWithXenHT, setGiapWithXenMax; // option 259, 264, 265
-    public int skhBeerus; // số món SKH Thần hủy diệt Beerus đang mặc (option 260)
+    private int setHpWithPet, setSTCuoiWithFlag, setCritWithFlag; // option 172, 39, 91
+    private int setCritWithSkhBeerus, setSDCMWithXenHT, setGiapWithXenMax; // option 92, 169, 42
+    public int skhBeerus; // số món SKH Thần hủy diệt Beerus đang mặc (option 115)
 
     public boolean isGogeta;
 
@@ -488,7 +488,7 @@ public class NPoint {
                     teleport = true;
                 }
                 for (ItemOption io : item.itemOptions) {
-                    if (io.optionTemplate.id == 260 && (this.player.inventory.itemsBody.indexOf(item) > 4)) {
+                    if (io.optionTemplate.id == 115 && (this.player.inventory.itemsBody.indexOf(item) > 4)) {
                         continue; // set kích hoạt chỉ tính trên 5 món trang bị
                     }
                     addOption(io);
@@ -601,28 +601,28 @@ public class NPoint {
             case 254: //Khi HP dưới 50% tăng #% sức đánh trong 3 giây
                 this.tlAkazaRage = Math.max(this.tlAkazaRage, io.param);
                 break;
-            case 255: //Đi cùng Pet Kuma tăng #% HP
+            case 172: //Đi cùng Pet Cửu Vĩ Hồ tăng #% HP
                 this.setHpWithPet += io.param;
                 break;
-            case 256: //Đi cùng Cờ Vạn Hoa Đồng tăng #% sát thương cuối
+            case 39: //Đi cùng Cờ Vạn Hoa Đồng tăng #% sát thương cuối
                 this.setSTCuoiWithFlag += io.param;
                 break;
-            case 257: //Ảo Thuật
+            case 90: //Ảo Thuật
                 this.tlAoThuat = Math.max(this.tlAoThuat, io.param);
                 break;
-            case 258: //Đi cùng Cờ World Cup 2026 tăng #% chí mạng
+            case 91: //Đi cùng Cờ World Cup 2026 tăng #% chí mạng
                 this.setCritWithFlag += io.param;
                 break;
-            case 259: //Đi cùng SKH Beerus tăng #% chí mạng
+            case 92: //Đi cùng SKH Beerus tăng #% chí mạng
                 this.setCritWithSkhBeerus += io.param;
                 break;
-            case 260: //Set Thần hủy diệt Beerus
+            case 115: //Set Thần hủy diệt Beerus
                 this.skhBeerus++;
                 break;
-            case 264: //Đi cùng Pet Xên hoàn thiện tăng #% sát thương chí mạng
+            case 169: //Đi cùng Pet Xên hoàn thiện tăng #% sát thương chí mạng
                 this.setSDCMWithXenHT += io.param;
                 break;
-            case 265: //Đi cùng Pet Xên Max tăng #% giảm sát thương
+            case 42: //Đi cùng Pet Xên Max tăng #% giảm sát thương
                 this.setGiapWithXenMax += io.param;
                 break;
             case 2: //HP, KI+#000

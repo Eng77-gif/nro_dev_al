@@ -13,7 +13,29 @@ public class ItemData {
         updateItemOptionItemplate(session);
         updateItemArrHead2FTemplate(session);
         updateItemTemplate(session, 750);
-        updateItemTemplate(session, 750, Manager.ITEM_TEMPLATES.size());
+        // độ dài gói -28 chỉ có 2 byte (tối đa 65535): chia phần còn lại thành nhiều gói "thêm vật phẩm"
+        int start = 750;
+        int size = Manager.ITEM_TEMPLATES.size();
+        while (start < size) {
+            int end = start;
+            int bytes = 0;
+            while (end < size && (end == start || bytes + itemSize(Manager.ITEM_TEMPLATES.get(end)) < MAX_ITEM_BYTES)) {
+                bytes += itemSize(Manager.ITEM_TEMPLATES.get(end));
+                end++;
+            }
+            updateItemTemplate(session, start, end);
+            start = end;
+        }
+    }
+
+    private static final int MAX_ITEM_BYTES = 60_000;
+
+    private static int itemSize(Template.ItemTemplate it) {
+        return 13 + utfLength(it.name) + utfLength(it.description);
+    }
+
+    private static int utfLength(String s) {
+        return s == null ? 2 : 2 + s.getBytes(java.nio.charset.StandardCharsets.UTF_8).length;
     }
 
     private static void updateItemOptionItemplate(MySession session) {

@@ -24,8 +24,8 @@ import struct
 import sys
 import time
 
-# lệnh có độ dài gói 3 byte
-BIG_SIZE_CMDS = {-32, -66, -74, 11, -67, -87, 66, 12}
+# lệnh có độ dài gói 3 byte (server TeaMobi chính thức dùng thêm lệnh 12: bật --official)
+BIG_SIZE_CMDS = {-32, -66, -74, 11, -67, -87, 66}
 PART_FRAMES = {0: 3, 1: 17, 2: 14}  # đầu / thân / chân
 
 
@@ -316,7 +316,10 @@ def main():
     p.add_argument('--batch', type=int, default=50, help='số yêu cầu gửi mỗi đợt')
     p.add_argument('--wait', type=float, default=1.5, help='giây chờ nhận sau mỗi đợt')
     p.add_argument('--delay', type=float, default=0.0, help='giây nghỉ giữa các yêu cầu')
+    p.add_argument('--official', action='store_true', help='server TeaMobi chính thức (lệnh 12 có độ dài 3 byte)')
     args = p.parse_args()
+    if args.official:
+        BIG_SIZE_CMDS.add(12)
     try:
         Downloader(args).run()
     except (OSError, EOFError, RuntimeError) as e:
