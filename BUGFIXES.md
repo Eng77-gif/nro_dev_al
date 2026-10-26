@@ -96,15 +96,15 @@ Commit `26569b3` là mã nguồn gốc. Mỗi commit sau đó gom một nhóm l�
 | 1963 | Cải trang Sasuke | cải trang |
 | 1964 | Cải trang Hề Xanh | cải trang |
 | 1965 | Cải trang Akatsuki | cải trang |
-| 1966 | Cải trang Cô Bé Mũ Đỏ | cải trang |
+| 1966 | Cải trang Pan Trung Thu (+100% KI) | cải trang |
 | 1967 | Cải trang Kính Vàng | cải trang |
 | 1968 | Cải trang Hồn Ma Tóc Xanh | cải trang |
 | 1969 | Cải trang Tóc Bạc | cải trang |
 | 1970 | Cải trang Tóc Trắng | cải trang |
 | 1971 | Cải trang Zamasu Hợp Thể | cải trang |
 | 1972 | Cải trang Akaza | cải trang |
-| 1973 | Cải trang Anubis (đầu động 3 frame) | cải trang |
-| 1974 | Cải trang Chiến Binh Sparta | cải trang |
+| 1973 | Cải trang Beerus (+70% sức đánh, đầu động 3 frame) | cải trang |
+| 1974 | Cải trang Nappa Aura (+100% HP) | cải trang |
 | 1975 | Pet Cửu Vĩ | pet đi theo |
 | 1976 | Pet Robot Đỏ | pet đi theo |
 | 1977 | Pet Cừu Bông | pet đi theo |
@@ -117,3 +117,5 @@ Commit `26569b3` là mã nguồn gốc. Mỗi commit sau đó gom một nhóm l�
 - Gói gốc thiếu 4 frame động tác (17275, 17281, 17369, 17386, thuộc thân bộ Tóc Bạc và thân/chân bộ Akaza). Mỗi frame thiếu được thay bằng frame liền trước.
 - Các icon 17232–17235 trên server cũ là ảnh trống, không dùng ở đâu; đã được thay bằng hình của bộ Hồn Ma Tóc Xanh.
 - Còn khoảng 80 icon trong gói không gắn với part nào (frame Sharingan 17054–17088, cúp World Cup, khóa, đèn lồng Doraemon, thỏ mặt trăng…). Mình đã chép các icon này vào `data/icon`, nhưng chưa tạo vật phẩm vì gói không có thông tin để biết chúng là gì.
+
+- Beerus, Nappa Aura và Pan Trung Thu được bán ở SHOP_VIP › tab Cải trang với giá 300 ngọc, giống các cải trang VIP khác. Chỉ số nằm trong `item_shop_option`, nên vật phẩm phát qua admin hoặc form tặng đồ cũng nhận đúng chỉ số này.

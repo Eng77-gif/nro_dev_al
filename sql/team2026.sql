@@ -12003,6 +12003,22 @@ INSERT INTO `head_avatar` (`head_id`, `avatar_id`) VALUES
 INSERT INTO `array_head_2_frames` (`id`, `data`) VALUES
 (52, '[2135,2136,2137]');
 
+
+-- Chỉ số cải trang mới: Beerus +70% sức đánh, Nappa Aura +100% HP, Pan Trung Thu +100% KI
+UPDATE `item_template` SET `NAME` = 'Cải trang Beerus' WHERE `id` = 1973;
+UPDATE `item_template` SET `NAME` = 'Cải trang Nappa Aura' WHERE `id` = 1974;
+UPDATE `item_template` SET `NAME` = 'Cải trang Pan Trung Thu' WHERE `id` = 1966;
+
+INSERT INTO `item_shop` (`id`, `tab_id`, `temp_id`, `is_new`, `is_sell`, `type_sell`, `cost`, `icon_spec`, `create_time`) VALUES
+(999, 52, 1973, 1, 1, 1, 300, 4028, '2026-10-26 00:00:00'),
+(1000, 52, 1974, 1, 1, 1, 300, 4028, '2026-10-26 00:00:00'),
+(1001, 52, 1966, 1, 1, 1, 300, 4028, '2026-10-26 00:00:00');
+
+INSERT INTO `item_shop_option` (`id`, `item_shop_id`, `option_id`, `param`) VALUES
+(1742, 999, 50, 70),
+(1743, 1000, 77, 100),
+(1744, 1001, 103, 100);
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
