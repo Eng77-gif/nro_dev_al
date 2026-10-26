@@ -650,7 +650,7 @@ public class Player implements Runnable {
         {870, 871, 872},
         {873, 874, 875},
         {867, 868, 869},
-        {1866, 1859, 1860}, //td btc3
+        {2170, 2173, 2174}, //td btc3: Goku Blue cầm kiếm (đầu động: array_head_2_frames 53)
         {1861, 1864, 1865}, //nm btc3
         {1856, 1859, 1860} 
     };
