@@ -1,12 +1,9 @@
-# Build output
+# Build output của NetBeans (tự sinh lại khi build)
 build/
 dist/
-*.jar
-!lib/*.jar
 *.class
 nbproject/private/
 
-# Game resources (large, kept out of git)
-data/
-
-logs/
+# Log khi chạy server
+log/
+admin/
