@@ -16,6 +16,8 @@ import nro.models.map.Zone;
 public class IDMark {
 
     private int idItemUpTop;
+    private int idClanInvited = -1; //id bang đã mời người chơi
+    private long lastTimeClanInvited;
     private int typeChangeMap; //capsule, ngọc rồng đen...
     private int indexMenu; //menu npc
     private int typeInput; //input

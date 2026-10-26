@@ -87,6 +87,9 @@ public class LuckyRound {
         try {
             msg.reader().readByte();
             byte count = msg.reader().readByte();
+            if (count <= 0 || count > 10) {
+                return; // số lần âm sẽ thành giá âm (cộng ngọc/vàng)
+            }
             switch (player.idMark.getTypeLuckyRound()) {
                 case USING_GEM:
                     openBallByGem(player, count);

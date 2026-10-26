@@ -186,7 +186,10 @@ public class ClanService {
                                     break;
                                 }
                             }
-                            if (pea != null) {
+                            if (pea != null && InventoryService.gI().getCountEmptyBag(plReceive) <= 0
+                                    && InventoryService.gI().findItemBag(plReceive, pea.template.id) == null) {
+                                Service.gI().sendThongBao(plGive, "Hành trang người nhận đã đầy");
+                            } else if (pea != null) {
                                 InventoryService.gI().subQuantityItem(plGive.inventory.itemsBox, pea, 1);
                                 Item peaCopy = ItemService.gI().createNewItem(pea.template.id);
                                 peaCopy.itemOptions = pea.itemOptions;
@@ -292,6 +295,8 @@ public class ClanService {
                     Service.gI().sendThongBao(player, pl.name + " đang giữ ngọc rồng sao đen, không thể mời");
                     return;
                 }
+                pl.idMark.setIdClanInvited(player.clan.id);
+                pl.idMark.setLastTimeClanInvited(System.currentTimeMillis());
                 Service.gI().sendThongBao(player, "Đã gửi lời mời đến " + pl.name);
                 Message msg;
                 try {
@@ -322,8 +327,15 @@ public class ClanService {
                 Service.gI().sendThongBao(player, "Bạn đang giữ ngọc rồng sao đen, không thể vào bang lúc này");
                 return;
             }
+            // chỉ được vào bang đã mời mình (trong 5 phút), tránh tự gửi clanId để vào bang bất kỳ
+            if (player.idMark.getIdClanInvited() != clanId
+                    || Util.canDoWithTime(player.idMark.getLastTimeClanInvited(), 300000)) {
+                Service.gI().sendThongBao(player, "Lời mời không hợp lệ hoặc đã hết hạn");
+                return;
+            }
             if (player.clan == null) {
                 Clan clan = getClanById(clanId);
+                player.idMark.setIdClanInvited(-1);
                 if (clan != null && clan.getCurrMembers() < clan.maxMember) {
                     clan.addClanMember(player, Clan.MEMBER);
                     clan.addMemberOnline(player);
@@ -354,6 +366,10 @@ public class ClanService {
         Clan clan = player.clan;
         if (clan != null && clan.isLeader(player)) {
             ClanMessage cmg = clan.getClanMessage(clanMessageId);
+            if (cmg == null || cmg.type != 2) {
+                Service.gI().sendThongBao(player, "Không thể thực hiện");
+                return;
+            }
             boolean existInClan = false;
             for (ClanMember cm : clan.members) {
                 if (cm.id == cmg.playerId) {
@@ -847,11 +863,48 @@ public class ClanService {
         }
     }
 
+    /**
+     * Giải tán bang: chỉ bang chủ, đồng thời gỡ bang khỏi mọi thành viên online/offline.
+     */
+    public void dissolveClan(Player player) {
+        Clan clan = player.clan;
+        if (clan == null || !clan.isLeader(player)) {
+            Service.gI().sendThongBao(player, "Chỉ bang chủ mới có thể giải tán bang");
+            return;
+        }
+        for (Player pl : new ArrayList<>(clan.membersInGame)) {
+            if (pl != null && pl != player) {
+                pl.clan = null;
+                pl.clanMember = null;
+                sendMyClan(pl);
+                sendClanId(pl);
+                Service.gI().sendFlagBag(pl);
+                Service.gI().sendThongBao(pl, "Bang hội đã bị giải tán");
+            }
+        }
+        try {
+            LocalManager.executeUpdate("update player set clan_id = -1 where clan_id = ?", clan.id);
+        } catch (Exception e) {
+            Logger.logException(ClanService.class, e, "Lỗi gỡ clan_id khi giải tán bang");
+        }
+        clan.deleteDB(clan.id);
+        Manager.CLANS.remove(clan);
+        player.clan = null;
+        player.clanMember = null;
+        sendMyClan(player);
+        sendClanId(player);
+        Service.gI().sendFlagBag(player);
+        Service.gI().sendThongBao(player, "Bang hội đã giải tán thành công.");
+    }
+
     //Đuổi khỏi bang
     public void kickOut(Player player, int memberId) {
         Clan clan = player.clan;
+        if (clan == null || memberId == player.id) {
+            return; // không thể tự đuổi chính mình (bang sẽ mất bang chủ)
+        }
         ClanMember cm = clan.getClanMember(memberId);
-        if (clan != null && cm != null
+        if (cm != null
                 && (clan.isLeader(player) || clan.isDeputy(player) && cm.role == MEMBER)) {
             Player plKicked = clan.getPlayerOnline(memberId);
             ClanMember cmKick = clan.getClanMember((int) player.id);
@@ -885,18 +938,13 @@ public class ClanService {
     }
 
     private void removeClanPlayer(int plId) {
-        PreparedStatement ps = null;
-        try (Connection con = LocalManager.getConnection();) {
-            ps = con.prepareStatement("update player set clan_id = -1 where id = " + plId);
+        try (Connection con = LocalManager.getConnection();
+                PreparedStatement ps = con.prepareStatement("update player set clan_id = -1 where id = ?")) {
+            ps.setInt(1, plId);
             ps.executeUpdate();
-            ps.close();
         } catch (Exception ex) {
-            removeClanPlayer(plId);
-        } finally {
-            try {
-                ps.close();
-            } catch (Exception e) {
-            }
+            // trước đây gọi đệ quy lại khi lỗi -> StackOverflowError nếu DB mất kết nối
+            Logger.logException(ClanService.class, ex, "Lỗi xóa clan_id của người chơi " + plId);
         }
     }
 

@@ -514,14 +514,7 @@ public class NpcFactory {
                     case ConstNpc.CONFIRM_DISSOLUTION_CLAN -> {
                         switch (select) {
                             case 0 -> {
-                                Clan clan = player.clan;
-                                clan.deleteDB(clan.id);
-                                Manager.CLANS.remove(clan);
-                                player.clan = null;
-                                player.clanMember = null;
-                                ClanService.gI().sendMyClan(player);
-                                ClanService.gI().sendClanId(player);
-                                Service.gI().sendThongBao(player, "Đã giải tán bang hội.");
+                                ClanService.gI().dissolveClan(player);
                             }
 
                         }
@@ -533,6 +526,13 @@ public class NpcFactory {
                                 var bb = ItemService.gI().getTemplate(player.LearnSkill.ItemTemplateSkillId);
                                 String[] subName = bb.name.split("");
                                 byte level = Byte.parseByte(subName[subName.length - 1]);
+                                if (player.LearnSkill.Time != -1 || level < 1 || level > time.length) {
+                                    break; // đã xác nhận rồi hoặc dữ liệu không hợp lệ
+                                }
+                                if (player.nPoint.tiemNang < player.LearnSkill.Potential) {
+                                    Service.gI().sendThongBao(player, "Bạn không đủ tiềm năng để học chiêu thức này");
+                                    break;
+                                }
                                 player.LearnSkill.Time = time[level - 1] + System.currentTimeMillis();
                                 player.nPoint.tiemNang -= player.LearnSkill.Potential;
                                 Service.gI().point(player);

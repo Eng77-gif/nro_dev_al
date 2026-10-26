@@ -128,6 +128,16 @@ public class QuyLaoKame extends Npc {
             case 12:
                 handleMenu12(player, select);
                 break;
+            case 13:
+                // huỷ học kỹ năng: trước đây menu này không được xử lý nên bấm "Ok" không có tác dụng
+                if (select == 0 && player.LearnSkill.Time != -1) {
+                    player.nPoint.tiemNang += player.LearnSkill.Potential / 2;
+                    player.LearnSkill.Time = -1;
+                    player.LearnSkill.Potential = 0;
+                    Service.gI().point(player);
+                    Service.gI().sendThongBao(player, "Đã huỷ học kỹ năng và hoàn lại 50% tiềm năng");
+                }
+                break;
             case 0:
                 handleMenu0(player, select);
                 break;
@@ -229,6 +239,9 @@ public class QuyLaoKame extends Npc {
     private void handleMenu12(Player player, int select) {
         switch (select) {
             case 0 -> {
+                if (player.LearnSkill.Time == -1) {
+                    return; // không có kỹ năng nào đang học
+                }
                 var time = player.LearnSkill.Time - System.currentTimeMillis();
                 var ngoc = 5;
                 if (time / 600_000 >= 2) {

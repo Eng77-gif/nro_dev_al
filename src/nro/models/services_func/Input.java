@@ -598,13 +598,7 @@ public class Input {
                     if (xacNhan.equalsIgnoreCase("OK")) {
                         clan = player.clan;
                         if (clan != null && clan.isLeader(player)) {
-                            clan.deleteDB(clan.id);
-                            Manager.CLANS.remove(clan);
-                            player.clan = null;
-                            player.clanMember = null;
-                            ClanService.gI().sendMyClan(player);
-                            ClanService.gI().sendClanId(player);
-                            Service.gI().sendThongBao(player, "Bang hội đã giải tán thành công.");
+                            ClanService.gI().dissolveClan(player);
                         }
                     }
                 }
