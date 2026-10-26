@@ -14,7 +14,7 @@ public class The23rdMartialArtCongressManager implements Runnable {
 
     private static The23rdMartialArtCongressManager instance;
     private long lastUpdate;
-    private static final List<The23rdMartialArtCongress> list = new ArrayList<>();
+    private static final List<The23rdMartialArtCongress> list = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     public static The23rdMartialArtCongressManager gI() {
         if (instance == null) {

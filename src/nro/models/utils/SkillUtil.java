@@ -187,6 +187,9 @@ public class SkillUtil {
                 skill = skillss.get(level - 1);
             }
         }
+        if (skill == null) {
+            return false;
+        }
         skill = new Skill(skill);
         if (index == 1) {
             skill.coolDown = 1000;

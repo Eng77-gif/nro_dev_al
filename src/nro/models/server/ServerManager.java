@@ -255,22 +255,13 @@ public class ServerManager {
     }
 
     public void resetNhanQuaHangNgay() {
-        String url = "jdbc:mysql://localhost:3306/ngocrong";
-        String username = "root";
-        String password = "";
         String resetJson = "[1,1,\"1970-01-01T00:00:00\"]";
-
-        try (Connection conn = DriverManager.getConnection(url, username, password)) {
-            String sql = "UPDATE player SET checkNhanQua = ? WHERE checkNhanQua != ?";
-            PreparedStatement statement = conn.prepareStatement(sql);
-
-            statement.setString(1, resetJson);
-            statement.setString(2, resetJson);
-
-            int rowsUpdated = statement.executeUpdate();
+        // dùng pool kết nối của server (trước đây kết nối cứng tới DB "ngocrong" nên không bao giờ reset đúng DB)
+        try {
+            int rowsUpdated = LocalManager.executeUpdate("UPDATE player SET checkNhanQua = ? WHERE checkNhanQua != ?", resetJson, resetJson);
             Logger.success("Đã reset nhận quà hằng ngày cho " + rowsUpdated + " người chơi với dữ liệu: " + resetJson);
-        } catch (SQLException e) {
-            System.err.println("Lỗi reset nhận quà hằng ngày: " + e.getMessage());
+        } catch (Exception e) {
+            Logger.logException(ServerManager.class, e, "Lỗi reset nhận quà hằng ngày");
         }
     }
 

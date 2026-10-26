@@ -185,7 +185,7 @@ public class Mabu extends Boss {
                 return 0;
             }
 
-            if (plAtt.isPl() && Util.isTrue(1, 5)) {
+            if (plAtt != null && plAtt.isPl() && Util.isTrue(1, 5)) {
                 plAtt.fightMabu.changePercentPoint((byte) 1);
             }
             if (damage >= 50000000) {

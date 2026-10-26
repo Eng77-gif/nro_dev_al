@@ -18,7 +18,7 @@ public class Shenron_Manager implements Runnable {
 
     private static Shenron_Manager instance;
     private long lastUpdate;
-    private static final List<Shenron_Event> list = new ArrayList<>();
+    private static final List<Shenron_Event> list = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     ;
 

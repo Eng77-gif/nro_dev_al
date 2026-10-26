@@ -2708,23 +2708,19 @@ public class Service {
     }
 
     public void updatePlayerTotalDamage(Player pl) {
-        java.sql.PreparedStatement ps = null;
-        try (java.sql.Connection con = LocalManager.getConnection();) {
-            ps = con.prepareStatement("update player SET total_damage_maydam = ? WHERE id = ?");
+        try (java.sql.Connection con = LocalManager.getConnection();
+                java.sql.PreparedStatement ps = con.prepareStatement("update player SET total_damage_maydam = ? WHERE id = ?")) {
             ps.setLong(1, pl.total_damage_maydam);
             ps.setLong(2, pl.id);
-
             ps.executeUpdate();
-
         } catch (Exception e) {
             Logger.logException(PlayerDAO.class, e, "Lỗi update Total dame");
         }
     }
 
     public void updatePlayerPointMayDam(Player pl) {
-        java.sql.PreparedStatement ps = null;
-        try (java.sql.Connection con = LocalManager.getConnection()) {
-            ps = con.prepareStatement("UPDATE player SET point_maydam = ? WHERE id = ?");
+        try (java.sql.Connection con = LocalManager.getConnection();
+                java.sql.PreparedStatement ps = con.prepareStatement("UPDATE player SET point_maydam = ? WHERE id = ?")) {
             ps.setInt(1, pl.point_maydam);
             ps.setLong(2, pl.id);
             ps.executeUpdate();

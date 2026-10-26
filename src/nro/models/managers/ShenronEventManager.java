@@ -13,7 +13,7 @@ public class ShenronEventManager implements Runnable {
 
     private static ShenronEventManager instance;
     private long lastUpdate;
-    private static final List<ShenronEvent> list = new ArrayList<>();
+    private static final List<ShenronEvent> list = new java.util.concurrent.CopyOnWriteArrayList<>();
     private boolean isRunning;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 

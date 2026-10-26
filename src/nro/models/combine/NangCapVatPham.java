@@ -84,7 +84,7 @@ public class NangCapVatPham {
                         }
                     }
                     npcSay += "|2|Sau khi nâng cấp (+" + (level + 1) + ")\n|7|"
-                            + option.replaceAll("#", String.valueOf(param))
+                            + (option != null ? option.replaceAll("#", String.valueOf(param)) : "")
                             + "\n|7|Tỉ lệ thành công: " + player.combineNew.ratioCombine + "%\n"
                             + (player.combineNew.countDaNangCap > itemDNC.quantity ? "|7|" : "|1|")
                             + "Cần " + player.combineNew.countDaNangCap + " " + itemDNC.template.name

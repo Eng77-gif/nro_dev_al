@@ -29,7 +29,7 @@ public class VuaHung extends Npc {
     private static final int DUA_HAU = 569;
     private static final int TEM = 1558;
     private static final int THOI_VANG = 457;
-    private static final List<Integer> nguoiDaTrong = new ArrayList<>();
+    private static final List<Integer> nguoiDaTrong = new java.util.concurrent.CopyOnWriteArrayList<>();
     private static final long START_TIME = System.currentTimeMillis();
     private static final long THOI_GIAN_TRONG_CAY_MS = 6 * 60 * 60 * 1000;
     private static final int SO_LUONG_TOI_DA = 10;
@@ -51,7 +51,7 @@ public class VuaHung extends Npc {
         boolean isSlotAvailable = nguoiDaTrong.size() < SO_LUONG_TOI_DA;
 
         boolean isDangTrong = player.DuaHauEgg != null && (now - player.DuaHauEgg.timeStart < THOI_GIAN_TRONG_CAY_MS);
-        boolean daTrongTrongPhase = nguoiDaTrong.contains(player.id);
+        boolean daTrongTrongPhase = nguoiDaTrong.contains((int) player.id); // list Integer: truyền long sẽ luôn false
         if (player.DuaHauEgg != null) {
             boolean hetThoiGian = (now - player.DuaHauEgg.timeStart >= THOI_GIAN_TRONG_CAY_MS);
             player.idMark.setIndexMenu(0);

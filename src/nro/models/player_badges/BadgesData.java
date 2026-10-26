@@ -35,7 +35,6 @@ public class BadgesData {
             }
         }
         isUse = true;
-        player.dataBadges.add(this);
     }
 
     @Override

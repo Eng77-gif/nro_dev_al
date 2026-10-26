@@ -229,8 +229,12 @@ public class ShenronEvent {
                 player.isShenronAppear = false;
                 select = -1;
             }
-            zone.shenronType = -1;
-            player.lastTimeShenronAppeared = System.currentTimeMillis();
+            if (zone != null) {
+                zone.shenronType = -1;
+            }
+            if (player != null) {
+                player.lastTimeShenronAppeared = System.currentTimeMillis();
+            }
             ShenronEventManager.gI().remove(this);
         }
     }

@@ -79,7 +79,9 @@ public class Clan {
     public long timeUpdateClan;
 
     public Clan() {
-        this.id = NEXT_ID++;
+        synchronized (Clan.class) {
+            this.id = NEXT_ID++; // tránh 2 bang tạo cùng lúc bị trùng id
+        }
         this.name = "";
         this.name2 = "";
         this.slogan = "";

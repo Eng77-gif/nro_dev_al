@@ -109,7 +109,7 @@ public class BuiBui extends Boss {
                 }
             }
 
-            if (plAtt.isPl() && Util.isTrue(1, 5)) {
+            if (plAtt != null && plAtt.isPl() && Util.isTrue(1, 5)) {
                 plAtt.fightMabu.changePercentPoint((byte) 1);
             }
             this.nPoint.subHP(damage);

@@ -12,7 +12,7 @@ public class DeathOrAliveArenaManager implements Runnable {
 
     private static DeathOrAliveArenaManager instance;
     private volatile long lastUpdate;
-    private static final List<DeathOrAliveArena> list = new ArrayList<>();
+    private static final List<DeathOrAliveArena> list = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     public static DeathOrAliveArenaManager gI() {
         if (instance == null) {

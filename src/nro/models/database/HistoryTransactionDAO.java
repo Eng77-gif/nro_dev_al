@@ -4,6 +4,7 @@ import nro.models.item.Item;
 import nro.models.player.Player;
 import nro.models.utils.TimeUtil;
 import java.sql.Connection;
+import nro.models.utils.Logger;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -83,18 +84,12 @@ public class HistoryTransactionDAO {
     }
 
     public static void deleteHistory() {
-        PreparedStatement ps = null;
-        try (Connection con = LocalManager.getConnection();) {
-            ps = con.prepareStatement("delete from history_transaction where time_tran < '"
-                    + TimeUtil.getTimeBeforeCurrent(3 * 24 * 60 * 60 * 1000, "yyyy-MM-dd") + "'");
+        try (Connection con = LocalManager.getConnection();
+                PreparedStatement ps = con.prepareStatement("delete from history_transaction where time_tran < ?")) {
+            ps.setTimestamp(1, new Timestamp(System.currentTimeMillis() - 3L * 24 * 60 * 60 * 1000));
             ps.executeUpdate();
-            ps.close();
         } catch (Exception e) {
-        } finally {
-            try {
-                ps.close();
-            } catch (SQLException ex) {
-            }
+            Logger.logException(HistoryTransactionDAO.class, e);
         }
     }
 

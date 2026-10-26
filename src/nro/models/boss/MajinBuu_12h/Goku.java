@@ -292,7 +292,7 @@ public class Goku extends Boss {
                 this.chat("Xí hụt");
                 return 0;
             }
-            if (plAtt.isPl() && Util.isTrue(1, 5)) {
+            if (plAtt != null && plAtt.isPl() && Util.isTrue(1, 5)) {
                 plAtt.fightMabu.changePoint((byte) 1);
             }
             if (damage >= 20000000) {

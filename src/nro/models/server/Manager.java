@@ -103,7 +103,7 @@ public final class Manager {
     public static final List<NClass> NCLASS = new ArrayList<>();
     public static final List<Npc> NPCS = new ArrayList<>();
     public static List<Shop> SHOPS = new ArrayList<>();
-    public static final List<Clan> CLANS = new ArrayList<>();
+    public static final List<Clan> CLANS = new java.util.concurrent.CopyOnWriteArrayList<>();
     public static final List<String> NOTIFY = new ArrayList<>();
     public static final List<BadgesTaskTemplate> TASKS_BADGES_TEMPLATE = new ArrayList<>();
     public static final List<BagesTemplate> BAGES_TEMPLATES = new ArrayList<>();
@@ -352,7 +352,7 @@ public final class Manager {
             Logger.success(Logger.PURPLE + "Successfully loaded arr head 2 frames (" + ARR_HEAD_2_FRAMES.size() + ")\n");
 
             //load clan
-            ps = ConnectionDatabase.prepareStatement("select * from clan");
+            ps = ConnectionDatabase.prepareStatement("select * from clan order by id");
             rs = ps.executeQuery();
             while (rs.next()) {
                 Clan clan = new Clan();

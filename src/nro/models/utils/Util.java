@@ -531,7 +531,7 @@ public class Util {
         return decimalFormat.format(number).replace(',', '.');
     }
 
-    public static String toDateString(Date date) {
+    public static synchronized String toDateString(Date date) { // SimpleDateFormat không an toàn đa luồng
         try {
             String a = Util.dateFormat.format(date);
             return a;
