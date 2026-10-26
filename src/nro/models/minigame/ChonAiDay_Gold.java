@@ -14,12 +14,12 @@ import nro.models.utils.Util;
  */
 public class ChonAiDay_Gold implements Runnable {
 
-    public int goldNormar;
-    public int goldVip;
+    public long goldNormar;
+    public long goldVip;
     public long lastTimeEnd;
     public static final int TIME_CHONAIDAY = 300000;
-    public List<Player> PlayersNormar = new ArrayList<>();
-    public List<Player> PlayersVIP = new ArrayList<>();
+    public List<Player> PlayersNormar = new java.util.concurrent.CopyOnWriteArrayList<>();
+    public List<Player> PlayersVIP = new java.util.concurrent.CopyOnWriteArrayList<>();
     private static ChonAiDay_Gold instance;
 
     public static ChonAiDay_Gold gI() {
@@ -65,11 +65,11 @@ public class ChonAiDay_Gold implements Runnable {
                         Player pl = listN.get(Util.nextInt(0, numWinners - 1));
                         if (pl != null) {
                             String chatMessage = pl.name + " đã chiến thắng Chọn ai đây giải thưởng";
-                            int goldC = goldNormar * 80 / 100;
+                            long goldC = (long) goldNormar * 80 / 100;
                             Service.gI().sendThongBao(pl, "Chúc mừng bạn đã dành chiến thắng và nhận được " + Util.numberToMoney(goldC) + " vàng");
-                            pl.inventory.gold += goldC;
+                            pl.inventory.gold = Math.min(pl.inventory.gold + goldC, nro.models.player.Inventory.LIMIT_GOLD);
                             Service.gI().sendMoney(pl);
-                            ChatGlobalService.gI().chat(pl, chatMessage);
+                            ChatGlobalService.gI().chatVip(pl, chatMessage); // không đi qua chat người chơi (bị trừ ngọc/giới hạn)
                         }
                     }
 
@@ -84,11 +84,11 @@ public class ChonAiDay_Gold implements Runnable {
                         Player pl = listN.get(Util.nextInt(0, numWinners - 1));
                         if (pl != null && pl.inventory != null) {
                             String chatMessage = pl.name + " đã chiến thắng Chọn ai đây giải VIP";
-                            int goldC = goldVip * 90 / 100;
+                            long goldC = (long) goldVip * 90 / 100;
                             Service.gI().sendThongBao(pl, "Chúc mừng bạn đã dành chiến thắng và nhận được " + Util.numberToMoney(goldC) + " vàng");
-                            pl.inventory.gold += goldC;
+                            pl.inventory.gold = Math.min(pl.inventory.gold + goldC, nro.models.player.Inventory.LIMIT_GOLD);
                             Service.gI().sendMoney(pl);
-                            ChatGlobalService.gI().chat(pl, chatMessage);
+                            ChatGlobalService.gI().chatVip(pl, chatMessage); // không đi qua chat người chơi (bị trừ ngọc/giới hạn)
                         }
                     }
 
