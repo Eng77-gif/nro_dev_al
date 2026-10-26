@@ -43,7 +43,7 @@ public class MapService {
     public int[][] readTileIndexTileType(int tileTypeFocus) {
         int[][] tileIndexTileType = null;
         try {
-            DataInputStream dis = new DataInputStream(new FileInputStream("data/map/tile_set_info"));
+            DataInputStream dis = new DataInputStream(new FileInputStream("data/map/tile_set_Info"));
             int numTileMap = dis.readByte();
             tileIndexTileType = new int[numTileMap][];
             for (int i = 0; i < numTileMap; i++) {

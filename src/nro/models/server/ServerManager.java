@@ -290,8 +290,8 @@ public class ServerManager {
 
     private static void activeCommandLine() {
         Scanner sc = new Scanner(System.in);
-        while (true) {
-            String line = sc.nextLine();
+        while (sc.hasNextLine()) { // không có console (chạy nền) thì thoát thay vì ném NoSuchElementException
+            String line = sc.nextLine().trim();
             switch (line) {
                 case "bt":
                     Maintenance.gI().startSeconds(5);
