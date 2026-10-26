@@ -233,7 +233,7 @@ Phần hình 3 cải trang Đường Phố là part 2158–2166, lấy từ `Nr_
 - Bù 6 icon đang thiếu: Đai lưng 1752–1754 (14523–14525), item 673 (15313) và 2 khung chân của part 2017 (15199, 15200).
 - Thêm Pet Charmander (id 1952, part 2167–2169) vào Hộp bánh Trung Thu 2026 và Hộp bánh chay (HSD 7/15/30 ngày, 5% vĩnh viễn). Ảnh chưa ghi chỉ số nên pet chưa có chỉ số.
 - `vsData` và `vsItem` tăng lên 13.
-- Gói thiếu icon 17662, là 1 khung chân của Cải trang Android 18 Đường Phố (part 2166). Khung đó sẽ trống cho tới khi có icon.
+- Icon 17662 (1 khung chân của Cải Trang Póc đường phố, part 2166) đã bổ sung từ gói `resteam`.
 - Hợp thể Bông tai cấp 3 của Trái Đất đổi sang Goku Blue cầm kiếm: 3 khung đầu động, part 2170–2174, array_head_2_frames 53. Trước đây Trái Đất dùng chung thân và chân với Xayda.
 - Thêm Cải trang Poc Thỏ Đen (id 1953, part 2175–2177) vào Hộp quà Trung Thu 2026 VIP (HSD 7/15/30 ngày, 20% vĩnh viễn vì có bảo hiểm). Ảnh chưa ghi chỉ số nên chưa có chỉ số.
 
