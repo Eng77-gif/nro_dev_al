@@ -17,6 +17,8 @@ public class IDMark {
 
     private int idItemUpTop;
     private int idClanInvited = -1; //id bang đã mời người chơi
+    private int wrongMbvCount; //số lần nhập sai mã bảo vệ
+    private long lastTimeWrongMbv;
     private long lastTimeClanInvited;
     private int typeChangeMap; //capsule, ngọc rồng đen...
     private int indexMenu; //menu npc

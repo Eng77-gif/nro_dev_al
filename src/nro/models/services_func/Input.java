@@ -503,16 +503,24 @@ public class Input {
                     int mbv = Integer.parseInt(text[0]);
                     int nmbv = Integer.parseInt(text[1]);
                     int rembv = Integer.parseInt(text[2]);
-                    if ((mbv + "").length() != 6 || (nmbv + "").length() != 6 || (rembv + "").length() != 6) {
-                        Service.gI().sendThongBao(player, "Trêu bố mày à?");
+                    if (player.idMark.getWrongMbvCount() >= 5 && !Util.canDoWithTime(player.idMark.getLastTimeWrongMbv(), 600000)) {
+                        Service.gI().sendThongBao(player, "Bạn đã nhập sai quá nhiều lần, vui lòng thử lại sau");
+                    } else if (mbv < 100000 || mbv > 999999 || nmbv < 100000 || nmbv > 999999 || rembv < 100000 || rembv > 999999) {
+                        Service.gI().sendThongBao(player, "Mã bảo vệ phải gồm 6 chữ số");
                     } else if (player.mbv == 0) {
                         Service.gI().sendThongBao(player, "Bạn chưa cài mã bảo vệ!");
                     } else if (player.mbv != mbv) {
+                        if (player.idMark.getWrongMbvCount() >= 5) {
+                            player.idMark.setWrongMbvCount(0);
+                        }
+                        player.idMark.setWrongMbvCount(player.idMark.getWrongMbvCount() + 1);
+                        player.idMark.setLastTimeWrongMbv(System.currentTimeMillis());
                         Service.gI().sendThongBao(player, "Mã bảo vệ không đúng");
                     } else if (nmbv != rembv) {
                         Service.gI().sendThongBao(player, "Mã bảo vệ không trùng khớp");
                     } else {
                         player.mbv = nmbv;
+                        player.idMark.setWrongMbvCount(0);
                         Service.gI().sendThongBao(player, "Đổi mã bảo vệ thành công!");
                     }
                 }
@@ -665,7 +673,7 @@ public class Input {
     }
 
     public void createFormMBV(Player pl) {
-        createForm(pl, MBV, "Đồ ngu! Đồ ăn hại! Cút mẹ mày đi!", new SubInput("Nhập Mã Bảo Vệ Đã Quên", NUMERIC), new SubInput("Nhập Mã Bảo Vệ Mới", NUMERIC), new SubInput("Nhập Lại Mã Bảo Vệ Mới", NUMERIC));
+        createForm(pl, MBV, "Đổi mã bảo vệ", new SubInput("Nhập Mã Bảo Vệ Đã Quên", NUMERIC), new SubInput("Nhập Mã Bảo Vệ Mới", NUMERIC), new SubInput("Nhập Lại Mã Bảo Vệ Mới", NUMERIC));
     }
 
     public void createFormBangHoi(Player pl) {

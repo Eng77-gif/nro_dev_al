@@ -1939,14 +1939,26 @@ public class Service {
     }
 
     public void mabaove(Player player, int mbv) {
-        if (Integer.toString(mbv).length() != 6) {
+        // chống dò mã: sai 5 lần thì khóa 10 phút
+        if (player.idMark.getWrongMbvCount() >= 5) {
+            if (!Util.canDoWithTime(player.idMark.getLastTimeWrongMbv(), 600000)) {
+                Service.gI().sendThongBaoOK(player, "Bạn đã nhập sai quá nhiều lần, vui lòng thử lại sau "
+                        + TimeUtil.getTimeLeft(player.idMark.getLastTimeWrongMbv(), 600));
+                return;
+            }
+            player.idMark.setWrongMbvCount(0);
+        }
+        if (mbv < 100000 || mbv > 999999) {
             Service.gI().sendThongBaoOK(player, "Mã bảo vệ phải có độ dài là 6 số.");
         } else if (player.mbv == 0) {
             player.idMark.setMbv(mbv);
             NpcService.gI().createMenuConMeo(player, ConstNpc.MA_BAO_VE, -1, "Bạn chưa từng kích hoạt chức năng mã bảo vệ để kích hoạt bạn cần có 30K vàng, mật khẩu của bạn là: " + mbv, "Đồng ý", "Từ chối");
         } else if (player.mbv != mbv) {
+            player.idMark.setWrongMbvCount(player.idMark.getWrongMbvCount() + 1);
+            player.idMark.setLastTimeWrongMbv(System.currentTimeMillis());
             Service.gI().sendThongBao(player, "Mật khẩu không đúng. Vui lòng kiểm tra lại");
         } else {
+            player.idMark.setWrongMbvCount(0);
             if (player.baovetaikhoan) {
                 NpcService.gI().createMenuConMeo(player, ConstNpc.MA_BAO_VE, -1, "Tài khoản đang được bảo vệ\nBạn có muốn tắt bảo vệ không?", "Đồng ý", "Từ chối");
             } else {
