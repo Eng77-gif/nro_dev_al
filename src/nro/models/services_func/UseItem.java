@@ -937,6 +937,15 @@ public class UseItem {
                                 }
                             }
                             break;
+                            default:
+                                // pet (type 27) chưa có case riêng: mặc vào và tạo pet theo part trong item_template
+                                if (item.template.type == 27 && item.template.head >= 0 && item.template.body >= 0 && item.template.leg >= 0) {
+                                    int h = item.template.head, b = item.template.body, l = item.template.leg;
+                                    InventoryService.gI().itemBagToBody(pl, indexBag);
+                                    PetService.Pet2(pl, h, b, l);
+                                    Service.gI().point(pl);
+                                }
+                                break;
                         }
                         break;
                 }

@@ -84,3 +84,36 @@ Commit `26569b3` là mã nguồn gốc. Mỗi commit sau đó gom một nhóm l�
 - SpotBugs chạy lại: tất cả lỗi mức High/Correctness liên quan đã biến mất, không có cảnh báo mới.
 - Đã khởi động thật với MariaDB và `team2026.sql`: tải đủ dữ liệu, server lắng nghe cổng 14445, không có exception.
 - Client test theo giao thức game: đăng nhập, tạo nhân vật (giới tính sai bị từ chối), một bên bấm đồng ý giao dịch 2 lần thì bị chặn, giao dịch hợp lệ chuyển đúng 5.000.000 vàng, đưa ra số vàng nhiều hơn số đang có thì giao dịch bị hủy.
+
+## Vật phẩm mới (gói res team 18th7 / 22th8 / 18th9)
+
+Đã thêm 542 icon cho cả 4 mức zoom (x1–x3 tự thu nhỏ từ x4), 59 part mới (id 2099–2157) và 19 vật phẩm vào các slot trống id 1961–1979 trong `sql/team2026.sql`:
+
+| Id | Tên | Loại |
+|---|---|---|
+| 1961 | Cải trang Broly Xanh | cải trang |
+| 1962 | Cải trang Naruto | cải trang |
+| 1963 | Cải trang Sasuke | cải trang |
+| 1964 | Cải trang Hề Xanh | cải trang |
+| 1965 | Cải trang Akatsuki | cải trang |
+| 1966 | Cải trang Cô Bé Mũ Đỏ | cải trang |
+| 1967 | Cải trang Kính Vàng | cải trang |
+| 1968 | Cải trang Hồn Ma Tóc Xanh | cải trang |
+| 1969 | Cải trang Tóc Bạc | cải trang |
+| 1970 | Cải trang Tóc Trắng | cải trang |
+| 1971 | Cải trang Zamasu Hợp Thể | cải trang |
+| 1972 | Cải trang Akaza | cải trang |
+| 1973 | Cải trang Anubis (đầu động 3 frame) | cải trang |
+| 1974 | Cải trang Chiến Binh Sparta | cải trang |
+| 1975 | Pet Cửu Vĩ | pet đi theo |
+| 1976 | Pet Robot Đỏ | pet đi theo |
+| 1977 | Pet Cừu Bông | pet đi theo |
+| 1978 | Pet Hề Súng Nước | pet đi theo |
+| 1979 | Pet Ngựa Gỗ | pet đi theo |
+
+- Tên do mình đặt theo hình, hãy đổi lại trong bảng `item_template` nếu cần. Vật phẩm chưa có chỉ số (option) và chưa được bán ở shop nào. Hãy thêm qua admin, giftcode hoặc `item_shop`.
+- Pet loại 27 giờ tự hoạt động theo part trong `item_template`, không cần thêm `case` trong code. Thay đổi này cũng sửa pet Ghost Rider (1900) trước đây không bao giờ hiện ra.
+- `vsData` và `vsItem` được tăng lên 10 để client tải lại dữ liệu vật phẩm và part.
+- Gói gốc thiếu 4 frame động tác (17275, 17281, 17369, 17386, thuộc thân bộ Tóc Bạc và thân/chân bộ Akaza). Mỗi frame thiếu được thay bằng frame liền trước.
+- Các icon 17232–17235 trên server cũ là ảnh trống, không dùng ở đâu; đã được thay bằng hình của bộ Hồn Ma Tóc Xanh.
+- Còn khoảng 80 icon trong gói không gắn với part nào (frame Sharingan 17054–17088, cúp World Cup, khóa, đèn lồng Doraemon, thỏ mặt trăng…). Mình đã chép các icon này vào `data/icon`, nhưng chưa tạo vật phẩm vì gói không có thông tin để biết chúng là gì.

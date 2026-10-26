@@ -1606,6 +1606,13 @@ public class Player implements Runnable {
                         PetService.Pet2(this, 1680, 1681, 1682);
                         Service.gI().point(this);
                     }
+                    default -> {
+                        // pet (type 27) lấy part đầu/thân/chân từ item_template, không cần thêm case cho từng id
+                        if (it.template.type == 27 && it.template.head >= 0 && it.template.body >= 0 && it.template.leg >= 0) {
+                            PetService.Pet2(this, it.template.head, it.template.body, it.template.leg);
+                            Service.gI().point(this);
+                        }
+                    }
                 }
             }
         }
