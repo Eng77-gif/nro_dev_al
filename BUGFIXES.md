@@ -270,3 +270,9 @@ File `sql/team2026.sql` được xuất lại từ DB đã đổi. `vsData` và 
 3. `python3 tools/remap_players.py <tên_db> out/map.json`
 
 Bước 3 đổi luôn đồ trong hành trang, rương và trên người.
+
+## Đợt 7: bù icon từ gói Hunr2025 và Icon11th7
+- Gói Hunr2025 chỉ có 12.550 icon x4 (`Small0`–`Small32249`). Phần lớn giống icon server đã có; những icon id lớn còn lại thuộc server khác, không có vật phẩm nào dùng nên không lấy.
+- Đã bù 79 icon mà vật phẩm, part, avatar, cờ hoặc thẻ radar đang dùng nhưng còn thiếu: 60 icon từ Icon11th7, 19 icon từ Hunr2025. Đã tạo đủ x1–x4.
+- Phần lớn là icon của các món mới thêm từ DataNRO, vd. Ván bay Magikarp, Bóng sinh nhật NRO, Pet Pikachu/Squirtle/MewTwo, Kochiro, Musashi, Thú cưỡi rồng.
+- Còn 574 icon thiếu (17410–17735 và 20097–32052) mà cả hai gói đều không có. Phần lớn thuộc các part riêng của source cũ.
