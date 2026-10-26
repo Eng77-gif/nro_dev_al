@@ -2,6 +2,7 @@ package nro.models.combine;
 
 import nro.models.consts.ConstNpc;
 import nro.models.item.Item;
+import nro.models.services.Service;
 import nro.models.item.Item.ItemOption;
 import java.io.IOException;
 import nro.models.player.Player;
@@ -85,8 +86,16 @@ public class CombineService {
         }
         player.combineNew.clearItemCombine();
         if (index.length > 0) {
+            java.util.Set<Integer> used = new java.util.HashSet<>();
             for (int i = 0; i < index.length; i++) {
-                player.combineNew.itemsCombine.add(player.inventory.itemsBag.get(index[i]));
+                // bỏ qua ô không hợp lệ hoặc trùng lặp (gửi 1 ô 2 lần sẽ dùng 1 vật phẩm làm 2 nguyên liệu)
+                if (index[i] < 0 || index[i] >= player.inventory.itemsBag.size() || !used.add(index[i])) {
+                    continue;
+                }
+                Item it = player.inventory.itemsBag.get(index[i]);
+                if (it != null && it.isNotNullItem()) {
+                    player.combineNew.itemsCombine.add(it);
+                }
             }
         }
         switch (player.combineNew.typeCombine) {
@@ -170,7 +179,35 @@ public class CombineService {
      *
      * @param player
      */
+    /**
+     * Vật phẩm ghép phải còn nằm trong hành trang (đã chuyển vào rương/bán/vứt sau
+     * khi xem thông tin thì không cho ghép nữa, tránh nhận đồ mà không bị trừ nguyên liệu).
+     */
+    private boolean itemsCombineStillInBag(Player player) {
+        if (player.combineNew == null) {
+            return false;
+        }
+        for (Item it : player.combineNew.itemsCombine) {
+            boolean found = false;
+            for (Item bagItem : player.inventory.itemsBag) {
+                if (bagItem == it) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found || !it.isNotNullItem()) {
+                player.combineNew.clearItemCombine();
+                Service.gI().sendThongBao(player, "Vật phẩm không còn trong hành trang");
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void startCombine(Player player) {
+        if (!itemsCombineStillInBag(player)) {
+            return;
+        }
         switch (player.combineNew.typeCombine) {
             case EP_SAO_TRANG_BI:
                 EpSaoTrangBi.epSaoTrangBi(player);
@@ -253,6 +290,9 @@ public class CombineService {
     }
     
     public void startCombineVip(Player player, int n) {
+        if (!itemsCombineStillInBag(player)) {
+            return;
+        }
         switch (player.combineNew.typeCombine) {
             case PHA_LE_HOA_TRANG_BI:
                 PhaLeHoaTrangBi.phaLeHoa(player, n);

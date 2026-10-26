@@ -379,17 +379,12 @@ public class Zone {
                                     msg.cleanup();
                                     Service.gI().sendToAntherMePickItem(player, itemMapId);
 
-                                    // Mark item as picked up unless the item ID is 74
-                                    if (picked) {
-                                        if (itemMap.itemTemplate.id != 74) {
-                                            itemMap.isPickedUp = true;
-                                        }
-                                    }
-
                                     if (!(this.map.mapId >= 21 && this.map.mapId <= 23
                                             && itemMap.itemTemplate != null && itemMap.itemTemplate.id == 74
                                             || this.map.mapId >= 42 && this.map.mapId <= 44
                                             && itemMap.itemTemplate != null && itemMap.itemTemplate.id == 78)) {
+                                        // đánh dấu đã nhặt để gói nhặt thứ 2 (đang chờ lock) không nhận thêm lần nữa
+                                        itemMap.isPickedUp = true;
                                         removeItemMap(itemMap);
                                     }
                                 } catch (Exception e) {
