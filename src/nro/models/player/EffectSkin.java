@@ -217,7 +217,7 @@ public class EffectSkin {
                         List<Player> playersMap = this.player.zone.getNotBosses();
                         for (int i = playersMap.size() - 1; i >= 0; i--) {
                             Player pl = playersMap.get(i);
-                            if (pl != null && pl.nPoint != null && !this.player.equals(pl) && !pl.isBoss && !pl.isDie()
+                            if (pl != null && pl.nPoint != null && !this.player.equals(pl) && !pl.isBoss && !pl.isDie() && !pl.nPoint.isChongNLX
                                     && Util.getDistance(this.player, pl) <= 200) {
                                 int subHp = (int) ((long) pl.nPoint.hpMax * param / 100);
                                 if (subHp >= pl.nPoint.hp) {

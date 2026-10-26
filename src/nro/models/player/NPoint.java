@@ -198,6 +198,17 @@ public class NPoint {
 
     public short tlHpGiamODo;
 
+    public int tlSTChuan; // option 10: % sát thương bỏ qua giáp/né/giảm sát thương
+    public int tlDameBoss; // option 204: +% sát thương lên boss
+    public int tlSTCuoi; // option 251: +% sát thương cuối
+    public boolean isChongNLX; // option 252: chống năng lượng xấu (miễn hiệu ứng hôi/giảm HP xung quanh)
+    public int tlTNSMDeTu; // option 253: +% TN, SM cho đệ tử khi sư phụ mặc
+    public int tlAkazaRage; // option 254: % sức đánh khi HP dưới 50%
+    public int tlAoThuat; // option 257: % sức đánh của Ảo Thuật
+    public long rageUntil, lastTimeRage; // hiệu ứng Akaza
+    public long aoThuatUntil, lastTimeAoThuat; // hiệu ứng Ảo Thuật
+    private int setHpWithPet, setSTCuoiWithFlag, setCritWithFlag; // option 255, 256, 258
+
     public boolean isGogeta;
 
     public int tlSpeed;
@@ -246,6 +257,15 @@ public class NPoint {
         for (Item.ItemOption opt : options) {
             if (opt.optionTemplate.id == 108) {
                 tlNeDon += (tlNeDon * opt.param / 100L);
+            }
+        }
+        // các option khác của danh hiệu (chí mạng, sát thương chuẩn...) trước đây bị bỏ qua
+        for (Item.ItemOption opt : options) {
+            switch (opt.optionTemplate.id) {
+                case 50, 77, 103, 108, 93 -> {
+                }
+                default ->
+                    addOption(opt);
             }
         }
 
@@ -463,16 +483,96 @@ public class NPoint {
                 }
             }
         }
+        applySetBonus();
         setDameTrainArmor();
         setBasePoint();
         setOutfitFusion();
         setSpeed();
     }
 
+    public static final int PET_KUMA = 1975;
+    public static final int CO_VAN_HOA_DONG = 1982;
+    public static final int CO_WORLD_CUP_2026 = 1986;
+
+    private boolean isWearing(int templateId) {
+        for (Item it : this.player.inventory.itemsBody) {
+            if (it != null && it.isNotNullItem() && it.template.id == templateId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Hiệu ứng đi cùng: Naruto + Pet Kuma, Sasuke + Cờ Vạn Hoa Đồng, Ván bay WC 2026 + Cờ World Cup 2026.
+     */
+    private void applySetBonus() {
+        if (setHpWithPet > 0 && isWearing(PET_KUMA)) {
+            this.tlHp.add(setHpWithPet);
+        }
+        if (setSTCuoiWithFlag > 0 && isWearing(CO_VAN_HOA_DONG)) {
+            this.tlSTCuoi += setSTCuoiWithFlag;
+        }
+        if (setCritWithFlag > 0 && isWearing(CO_WORLD_CUP_2026)) {
+            this.critAdd += setCritWithFlag;
+        }
+    }
+
+    /**
+     * Gọi khi bị đánh: kích hoạt Akaza (HP dưới 50%, hồi 180s) và Ảo Thuật (hồi 120s), mỗi hiệu ứng kéo dài 3 giây.
+     */
+    public void onInjured() {
+        long now = System.currentTimeMillis();
+        if (tlAkazaRage > 0 && this.hp < this.hpMax / 2 && now - lastTimeRage >= 180_000) {
+            lastTimeRage = now;
+            rageUntil = now + 3000;
+            Service.gI().sendThongBao(this.player, "Nộ Akaza: +" + tlAkazaRage + "% sức đánh trong 3 giây");
+        }
+        if (tlAoThuat > 0 && now - lastTimeAoThuat >= 120_000) {
+            lastTimeAoThuat = now;
+            aoThuatUntil = now + 3000;
+            Service.gI().sendThongBao(this.player, "Ảo Thuật: +" + tlAoThuat + "% sức đánh, giảm 50% sát thương nhận vào trong 3 giây");
+        }
+    }
+
+    public boolean isAoThuat() {
+        return System.currentTimeMillis() < aoThuatUntil;
+    }
+
     private void addOption(ItemOption io) {
         switch (io.optionTemplate.id) {
             case 0: //Tấn công +#
                 this.dameAdd += io.param;
+                break;
+            case 10: //Sát thương chuẩn #%
+                this.tlSTChuan += io.param;
+                break;
+            case 204: //Tấn công+#% lên Boss
+                this.tlDameBoss += io.param;
+                break;
+            case 251: //Sát thương cuối +#%
+                this.tlSTCuoi += io.param;
+                break;
+            case 252: //Chống năng lượng xấu
+                this.isChongNLX = true;
+                break;
+            case 253: //+#% TN, SM cho đệ tử khi sư phụ mặc
+                this.tlTNSMDeTu += io.param;
+                break;
+            case 254: //Khi HP dưới 50% tăng #% sức đánh trong 3 giây
+                this.tlAkazaRage = Math.max(this.tlAkazaRage, io.param);
+                break;
+            case 255: //Đi cùng Pet Kuma tăng #% HP
+                this.setHpWithPet += io.param;
+                break;
+            case 256: //Đi cùng Cờ Vạn Hoa Đồng tăng #% sát thương cuối
+                this.setSTCuoiWithFlag += io.param;
+                break;
+            case 257: //Ảo Thuật
+                this.tlAoThuat = Math.max(this.tlAoThuat, io.param);
+                break;
+            case 258: //Đi cùng Cờ World Cup 2026 tăng #% chí mạng
+                this.setCritWithFlag += io.param;
                 break;
             case 2: //HP, KI+#000
                 this.hpAdd += io.param * 1000;
@@ -1284,6 +1384,16 @@ public class NPoint {
         this.tlSexyDame = 0;
         this.tlSubSD = 0;
         this.tlHpGiamODo = 0;
+        this.tlSTChuan = 0;
+        this.tlDameBoss = 0;
+        this.tlSTCuoi = 0;
+        this.isChongNLX = false;
+        this.tlTNSMDeTu = 0;
+        this.tlAkazaRage = 0;
+        this.tlAoThuat = 0;
+        this.setHpWithPet = 0;
+        this.setSTCuoiWithFlag = 0;
+        this.setCritWithFlag = 0;
         this.tlSpeed = 0;
         this.teleport = false;
         this.wearingVoHinh = false;
@@ -1529,6 +1639,17 @@ public class NPoint {
             player.effectSkin.isXDame = true;
             player.effectSkin.isXChuong = false;
             player.effectSkin.lastTimeXChuong = System.currentTimeMillis();
+        }
+
+        if (tlSTCuoi > 0) {
+            dameAttack += (long) dameAttack * tlSTCuoi / 100;
+        }
+        long nowBuff = System.currentTimeMillis();
+        if (tlAkazaRage > 0 && nowBuff < rageUntil) {
+            dameAttack += (long) dameAttack * tlAkazaRage / 100;
+        }
+        if (tlAoThuat > 0 && nowBuff < aoThuatUntil) {
+            dameAttack += (long) dameAttack * tlAoThuat / 100;
         }
 
         if (dameAttack

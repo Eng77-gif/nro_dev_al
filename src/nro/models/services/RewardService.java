@@ -34,9 +34,38 @@ public class RewardService {
     }
 
     //========================LUCKY ROUND========================
+    /**
+     * Vòng quay đặc biệt (Trung Thu / World Cup 2026): các vật phẩm này rơi từ vòng quay ngọc,
+     * tỷ lệ vĩnh viễn x3 so với vật phẩm thường (3% thay vì 1%).
+     */
+    public static final int[] SPECIAL_WHEEL_ITEMS = {
+        1972, 1962, 1963, 1965, 1973, 1974, 1966, // Akaza (Thượng Tam), Naruto, Sasuke, Akatsuki, Beerus, Nappa Aura, Pan Trung Thu
+        1975, 1979, 1989, 1990, 1991, 1992, // Pet Kuma, Ngựa Thành Troy, Minion 2026, 3 Pet Xên
+        1980, 1981, 1982, 1983, 1984, 1985, 1986, 1987, 1988, // Bóng Mờ, Lồng Đèn, Cờ Vạn Hoa Đồng, Đại Bàng (+VIP), Ván bay WC, Cờ WC, Ván bay TT, Bóng WC
+        1993 // Danh hiệu Phá Cổ Trung Thu
+    };
+    public static final int SPECIAL_WHEEL_RATE = 3; // % mỗi ô quay
+    public static final int SPECIAL_WHEEL_PERMANENT = 3; // % vĩnh viễn (x3)
+
+    public Item createSpecialWheelItem() {
+        int id = SPECIAL_WHEEL_ITEMS[Util.nextInt(0, SPECIAL_WHEEL_ITEMS.length - 1)];
+        Item it = ItemService.gI().createNewItem((short) id);
+        it.itemOptions.clear();
+        it.itemOptions.addAll(ItemService.gI().getListOptionItemShop((short) id));
+        if (!Util.isTrue(SPECIAL_WHEEL_PERMANENT, 100)) {
+            it.itemOptions.add(new Item.ItemOption(93, Util.nextInt(3, 15))); // HSD
+        }
+        it.quantity = 1;
+        return it;
+    }
+
     public List<Item> getListItemLuckyRound(Player player, int num, boolean vip) {
         List<Item> list = new ArrayList<>();
         for (int i = 0; i < num; i++) {
+            if (vip && Util.isTrue(SPECIAL_WHEEL_RATE, 100)) {
+                list.add(createSpecialWheelItem());
+                continue;
+            }
             Item it = ItemService.gI().createNewItem((short) 189); // Vàng mặc định
             it.quantity = Util.nextInt(5, 50) * 1000;
             boolean success = Util.isTrue(1, 2);

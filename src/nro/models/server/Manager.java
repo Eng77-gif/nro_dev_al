@@ -34,6 +34,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Connection;
+import nro.models.services.ItemService;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -282,6 +283,22 @@ public final class Manager {
         } catch (Exception e) {
             System.err.print("\nError at 299\n");
             e.printStackTrace();
+        }
+    }
+
+    private void loadTemplateOptions(Connection con) {
+        ItemService.TEMPLATE_OPTIONS.clear();
+        try (PreparedStatement p = con.prepareStatement("select template_id, option_id, param, param_max, chance, group_id from item_template_option order by id");
+                ResultSet r = p.executeQuery()) {
+            int n = 0;
+            while (r.next()) {
+                ItemService.TEMPLATE_OPTIONS.computeIfAbsent(r.getInt("template_id"), k -> new ArrayList<>())
+                        .add(new int[]{r.getInt("option_id"), r.getInt("param"), Math.max(r.getInt("param"), r.getInt("param_max")), r.getInt("chance"), r.getInt("group_id")});
+                n++;
+            }
+            Logger.success("Successfully loaded item template option (" + n + ")\n");
+        } catch (Exception e) {
+            Logger.error("Không tải được item_template_option: " + e.getMessage() + "\n");
         }
     }
 
@@ -657,6 +674,7 @@ public final class Manager {
                 }
 
                 Logger.success(Logger.RED + "Successfully loaded map item template (" + ITEM_TEMPLATES.size() + " items)\n");
+                loadTemplateOptions(ConnectionDatabase);
 
             } catch (SQLException e) {
                 Logger.error("Error loading item templates: " + e.getMessage());

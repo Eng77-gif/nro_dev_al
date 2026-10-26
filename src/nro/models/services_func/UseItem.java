@@ -944,6 +944,25 @@ public class UseItem {
                                     InventoryService.gI().itemBagToBody(pl, indexBag);
                                     PetService.Pet2(pl, h, b, l);
                                     Service.gI().point(pl);
+                                    nro.models.player_badges.BadgesService.checkPerfect(pl);
+                                } else if (item.template.type == 36) {
+                                    // vật phẩm danh hiệu: dùng để kích hoạt danh hiệu (theo hạn sử dụng của vật phẩm, không có thì vĩnh viễn)
+                                    int idEffect = nro.models.player_badges.BagesTemplate.fineIdEffectbyIdItem(item.template.id);
+                                    if (idEffect > 0) {
+                                        int days = 0;
+                                        for (Item.ItemOption io : item.itemOptions) {
+                                            if (io.optionTemplate.id == 93) {
+                                                days = io.param;
+                                            }
+                                        }
+                                        String badgeName = item.template.name; // item bị dispose khi trừ hết số lượng
+                                        InventoryService.gI().subQuantityItemsBag(pl, item, 1);
+                                        nro.models.player_badges.BadgesService.giveBadge(pl, idEffect, days);
+                                        Service.gI().point(pl);
+                                        Service.gI().sendThongBao(pl, "Đã kích hoạt " + badgeName + (days > 0 ? " (" + days + " ngày)" : " vĩnh viễn"));
+                                        InventoryService.gI().sendItemBags(pl);
+                                        return; // item đã bị dispose, không chạy tiếp checkDoneTaskUseItem
+                                    }
                                 }
                                 break;
                         }

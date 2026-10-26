@@ -949,10 +949,12 @@ public class Service {
         }
 
         if (player.isPet) {
+            Player master = ((Pet) player).master;
+            if (master != null && master.nPoint != null && master.nPoint.tlTNSMDeTu > 0) {
+                param += param * master.nPoint.tlTNSMDeTu / 100; // Ván bay Trung Thu 2026: +% TN, SM cho đệ tử
+            }
             player.nPoint.powerUp(param);
             player.nPoint.tiemNangUp(param);
-
-            Player master = ((Pet) player).master;
 
             long masterParam = (long) (param * 0.5);
             masterParam = master.nPoint.calSubTNSM(masterParam);

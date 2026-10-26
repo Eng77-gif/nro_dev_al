@@ -119,3 +119,66 @@ Commit `26569b3` là mã nguồn gốc. Mỗi commit sau đó gom một nhóm l�
 - Còn khoảng 80 icon trong gói không gắn với part nào (frame Sharingan 17054–17088, cúp World Cup, khóa, đèn lồng Doraemon, thỏ mặt trăng…). Mình đã chép các icon này vào `data/icon`, nhưng chưa tạo vật phẩm vì gói không có thông tin để biết chúng là gì.
 
 - Beerus, Nappa Aura và Pan Trung Thu được bán ở SHOP_VIP › tab Cải trang với giá 300 ngọc, giống các cải trang VIP khác. Chỉ số nằm trong `item_shop_option`, nên vật phẩm phát qua admin hoặc form tặng đồ cũng nhận đúng chỉ số này.
+
+## Đợt Trung Thu / World Cup 2026 (chỉ số, vật phẩm mới, vòng quay, boss)
+
+### Chỉ số mặc định theo vật phẩm
+Bảng mới `item_template_option` (template_id, option_id, param, param_max, chance, group_id) lưu chỉ số của từng vật phẩm, hỗ trợ:
+- khoảng ngẫu nhiên, ví dụ Pet Xên "17–23%";
+- tỉ lệ có dòng, ví dụ Pet Kuma "10% có chống lạnh";
+- nhóm chọn 1 dòng, ví dụ Lồng Đèn "1 dòng ẩn trong các dòng sau".
+
+Hàm `getListOptionItemShop` ưu tiên đọc bảng này, nên vòng quay, boss rơi đồ và lệnh admin/tặng đồ đều ra đúng chỉ số.
+
+### Chỉ số mới có tác dụng thật
+| Option | Tên | Cách tính |
+|---|---|---|
+| 10 | Sát thương chuẩn #% | Khi đánh người chơi, phần % này bỏ qua né, giáp % và giáp trừ. Khi đánh boss, cộng thẳng vào sát thương. |
+| 204 | Tấn công +#% lên Boss | Nhân thêm khi mục tiêu là boss |
+| 251 | Sát thương cuối +#% | Nhân vào sát thương cuối cùng |
+| 252 | Chống năng lượng xấu | Miễn hiệu ứng "hôi, giảm HP" của người xung quanh (ví dụ E10) |
+| 253 | +#% TN, SM cho đệ tử khi sư phụ mặc | Cộng vào TN, SM đệ tử nhận |
+| 254 | Akaza: HP dưới 50% tăng #% sức đánh 3 giây | Hồi chiêu 180 giây |
+| 255 / 256 / 258 | Hiệu ứng đi cùng | Naruto + Pet Kuma +7% HP; Sasuke + Cờ Vạn Hoa Đồng +1% sát thương cuối; Ván bay WC 2026 + Cờ World Cup 2026 +7% chí mạng |
+| 257 | Ảo Thuật (Cờ Vạn Hoa Đồng) | +50% sức đánh và giảm 50% sát thương nhận vào trong 3 giây, hồi chiêu 120 giây, tự kích hoạt khi bị đánh |
+
+Các option của danh hiệu (chí mạng, sát thương chuẩn…) trước đây bị bỏ qua, chỉ có sức đánh/HP/KI/né có tác dụng. Giờ mọi option của danh hiệu đều được tính. Đã sửa dữ liệu danh hiệu KOL bị ghi nhầm.
+
+### Vật phẩm
+- Chỉ số theo ảnh cho Akaza, Naruto, Sasuke, Akatsuki, Beerus, Nappa Aura, Pan Trung Thu 2026, Pet Kuma (đổi tên từ Pet Cửu Vĩ), Pet Ngựa Thành Troy. Hề Xanh đổi tên thành "Cải trang chú hề Picolo" theo DataNRO.
+- Vật phẩm mới, id 1980–1995:
+
+| Id | Tên | Ghi chú |
+|---|---|---|
+| 1980 | Bóng Mờ Trung Thu | |
+| 1981 | Lồng Đèn Dôremon | hình động đèn Doraemon trên lưng |
+| 1982 | Cờ Vạn Hoa Đồng | hình động Sharingan |
+| 1983–1984 | Đại Bàng Đất Sét Nổ, bản VIP | |
+| 1985 | Ván bay WC 2026 | |
+| 1986 | Cờ World Cup 2026 | |
+| 1987 | Ván bay Trung Thu 2026 | |
+| 1988 | Bóng WC 2026 | |
+| 1989 | Pet Minion 2026 | |
+| 1990–1992 | Pet Xên bọ hung con / hoàn thiện / Max | |
+| 1993–1995 | Danh hiệu Phá Cổ Trung Thu / VIP / Perfect | |
+
+- Vật phẩm danh hiệu (type 36) giờ dùng được để kích hoạt danh hiệu: hạn theo vật phẩm, không có hạn thì vĩnh viễn.
+- Có đủ 3 Pet Xên vĩnh viễn (trong hành trang, rương hoặc trên người) thì tự nhận danh hiệu Perfect khi vào game hoặc khi mặc Pet Xên.
+
+### Nguồn nhận
+- **Vòng quay ngọc/vé:** mỗi ô có 3% ra vật phẩm đặc biệt (danh sách trong `RewardService.SPECIAL_WHEEL_ITEMS`). Mỗi món có 3% vĩnh viễn (×3 so với 1% của vật phẩm thường), còn lại có hạn 3–15 ngày.
+- **Boss Super Broly:** giáp 65%. Rơi đá nâng cấp, item chí mạng, đồ thần linh (cả găng), ngọc rồng 1–4 sao, sao pha lê cấp 2 ×4–8, sao pha lê, đồ cấp 8–11 (3% ra đồ 8 sao), set Hủy Diệt (Champa) 1%, 1 triệu vàng 5%.
+
+### Phần tạm hoặc chưa làm được
+- Gói tài nguyên không có hình nên mình tạm mượn:
+  - Đại Bàng dùng hình bay của sao chổi trắng (mount 25).
+  - Ván bay WC 2026 dùng tàu vàng (33); Ván bay Trung Thu 2026 dùng mây vàng (34).
+  - 3 Pet Xên cùng dùng hình CT Xên nhí (chưa có bản xanh/xanh lá/đỏ).
+  - Pet Minion 2026 dùng hình Pet Minion.
+  - Bóng WC 2026 và Cờ World Cup 2026 dùng icon cúp.
+  - Bóng Mờ Trung Thu chưa có hình trên lưng.
+  - Danh hiệu mới chưa có hiệu ứng hình (idEffect 300–302).
+- Tỉ lệ rơi của boss và vòng quay do mình đặt (ảnh không ghi), chỉnh trong `SuperBroly.reward` và `RewardService`.
+- "Hộp đá cấp 9" và "Hộp NRO Xanh" chưa có trong database. Boss rơi đá nâng cấp thay cho hộp đá; Hộp NRO Xanh chưa rơi.
+- Tanjiro, Inosuke (2 bản), Zenitsu, Nezuko, Pet cậu vàng, "Cờ Mãi Dell Thành Công" chưa có hình nên chưa tạo. Thượng Tam = Akaza đã có.
+- "Hề Hước: +5% né cho người xung quanh" của chú hề Picolo mới chỉ là mô tả, chưa có hiệu ứng.

@@ -905,6 +905,13 @@ public class SkillService {
             plAtt.nPoint.isCrit100 = true;
         }
         long dameAttack = plAtt.nPoint.getDameAttack(false);
+        if (plInjure.isBoss && plAtt.nPoint != null) {
+            // boss tự tính phòng thủ riêng nên sát thương chuẩn được cộng thẳng, cùng với sát thương lên boss
+            int bonus = plAtt.nPoint.tlDameBoss + plAtt.nPoint.tlSTChuan;
+            if (bonus > 0) {
+                dameAttack += dameAttack * bonus / 100;
+            }
+        }
         if (plAtt.isPl() && plAtt.effectSkin != null && plAtt.effectSkin.isXDame) {
             plAtt.effectSkin.isXDame = false;
             if (plInjure.isBoss) {

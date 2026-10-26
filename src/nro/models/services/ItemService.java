@@ -657,7 +657,35 @@ public class ItemService {
         return lt;
     }
 
+    /**
+     * Chỉ số mặc định theo vật phẩm (bảng item_template_option):
+     * {option_id, param_min, param_max, chance %, group_id}. Các dòng cùng group_id > 0 chỉ chọn ngẫu nhiên 1.
+     */
+    public static final java.util.Map<Integer, List<int[]>> TEMPLATE_OPTIONS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * Ưu tiên chỉ số mặc định của vật phẩm (tung ngẫu nhiên trong khoảng), nếu không có thì lấy theo shop.
+     */
     public List<Item.ItemOption> getListOptionItemShop(short id) {
+        List<int[]> defaults = TEMPLATE_OPTIONS.get((int) id);
+        if (defaults != null && !defaults.isEmpty()) {
+            List<Item.ItemOption> rolled = new ArrayList<>();
+            java.util.Map<Integer, List<int[]>> groups = new java.util.LinkedHashMap<>();
+            for (int[] d : defaults) {
+                if (d[4] > 0) {
+                    groups.computeIfAbsent(d[4], k -> new ArrayList<>()).add(d);
+                } else if (d[3] >= 100 || Util.isTrue(d[3], 100)) {
+                    rolled.add(new Item.ItemOption(d[0], d[2] > d[1] ? Util.nextInt(d[1], d[2]) : d[1]));
+                }
+            }
+            for (List<int[]> g : groups.values()) {
+                int[] d = g.get(Util.nextInt(0, g.size() - 1));
+                if (d[3] >= 100 || Util.isTrue(d[3], 100)) {
+                    rolled.add(new Item.ItemOption(d[0], d[2] > d[1] ? Util.nextInt(d[1], d[2]) : d[1]));
+                }
+            }
+            return rolled;
+        }
         List<Item.ItemOption> list = new ArrayList<>();
         Manager.SHOPS.forEach(shop -> shop.tabShops.forEach(tabShop -> tabShop.itemShops.forEach(itemShop -> {
             if (itemShop.temp.id == id && list.isEmpty()) {

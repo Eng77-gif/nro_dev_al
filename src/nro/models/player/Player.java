@@ -1090,6 +1090,13 @@ public class Player implements Runnable {
                 }
             }
 
+            // sát thương chuẩn: phần này không bị né, giáp % hay giáp trừ
+            long trueDamage = 0;
+            if (plAtt != null && !isMobAttack && plAtt.nPoint != null && plAtt.nPoint.tlSTChuan > 0 && damage > 0) {
+                trueDamage = damage * Math.min(plAtt.nPoint.tlSTChuan, 100) / 100;
+                damage -= trueDamage;
+            }
+
             int tlGiap = this.nPoint.tlGiap;
             int tlNeDon = this.nPoint.tlNeDon;
             int tlNeDonXinbato = this.nPoint.tlNeDonXinbato;
@@ -1134,23 +1141,34 @@ public class Player implements Runnable {
                 tlGiap = 86;
             }
 
+            boolean dodged = false;
             if (Util.isTrue(tlNeDon, 100)) {
-                return 0;
+                if (trueDamage <= 0) {
+                    return 0;
+                }
+                dodged = true;
             }
             boolean hasXinbato = this.effectSkill != null && this.effectSkill.isXinbato;
-            if (hasXinbato) {
+            if (hasXinbato && !dodged) {
                 if (tlNeDonXinbato > 90) {
                     tlNeDonXinbato = 90;
                 }
                 if (Util.isTrue(tlNeDonXinbato, 100)) {
-                    return 0; // né thành công với Xinbato
+                    if (trueDamage <= 0) {
+                        return 0; // né thành công với Xinbato
+                    }
+                    dodged = true;
                 }
             }
 
-            damage -= ((damage / 100) * tlGiap);
+            if (dodged) {
+                damage = 0;
+            } else {
+                damage -= ((damage / 100) * tlGiap);
 
-            if (!piercing) {
-                damage = this.nPoint.subDameInjureWithDeff(damage);
+                if (!piercing) {
+                    damage = this.nPoint.subDameInjureWithDeff(damage);
+                }
             }
 
             boolean isUseGX = false;
@@ -1167,6 +1185,10 @@ public class Player implements Runnable {
                 if (this.itemTime.isUseGiapXen2) {
                     damage = damage / 100 * 40;
                 }
+            }
+            damage += trueDamage;
+            if (this.nPoint.isAoThuat()) {
+                damage /= 2; // Ảo Thuật: giảm 50% sát thương nhận vào
             }
 
             if (!piercing && effectSkill.isShielding && !isMobAttack) {
@@ -1200,6 +1222,9 @@ public class Player implements Runnable {
                 this.totalDamageTaken += damage;
             }
             this.nPoint.subHP(damage);
+            if (!isDie() && damage > 0) {
+                this.nPoint.onInjured();
+            }
             if ((plAtt != null || isMobAttack) && isDie() && !isBoss && !isNewPet && !isNewPet1) {
                 if (plAtt != null && this.isPl()) {
                     //TaskService.gI().checkDoneTaskPK(plAtt);
