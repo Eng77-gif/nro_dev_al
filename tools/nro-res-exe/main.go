@@ -44,7 +44,9 @@ type client struct {
 	key        []byte
 	curR, curW int
 	big        map[int8]bool
-	ch         chan msg
+	qmu        sync.Mutex
+	queue      []msg         // gói đã nhận, không giới hạn để luồng đọc không bao giờ bị chặn
+	notify     chan struct{} // báo có gói mới
 	closed     chan struct{}
 	closeErr   error
 	wmu        sync.Mutex
@@ -62,7 +64,7 @@ func dial(host string, port int, official bool) (*client, error) {
 	if official {
 		big[12] = true // server TeaMobi chính thức dùng độ dài 3 byte cho lệnh 12
 	}
-	return &client{conn: conn, r: bufio.NewReaderSize(conn, 1<<16), big: big, ch: make(chan msg, 4096), closed: make(chan struct{})}, nil
+	return &client{conn: conn, r: bufio.NewReaderSize(conn, 1<<16), big: big, notify: make(chan struct{}, 1), closed: make(chan struct{})}, nil
 }
 
 func (c *client) enc(b byte) byte {
@@ -90,7 +92,12 @@ func (c *client) send(cmd int8, data []byte) error {
 			p = append(p, c.enc(b))
 		}
 	}
+	// server ngừng nhận (bị chặn / treo) thì không treo theo: quá hạn coi như mất kết nối
+	c.conn.SetWriteDeadline(time.Now().Add(20 * time.Second))
 	_, err := c.conn.Write(p)
+	if err != nil {
+		c.conn.Close()
+	}
 	return err
 }
 
@@ -164,7 +171,13 @@ func (c *client) handshake() error {
 				c.closeErr = err
 				return
 			}
-			c.ch <- m
+			c.qmu.Lock()
+			c.queue = append(c.queue, m)
+			c.qmu.Unlock()
+			select {
+			case c.notify <- struct{}{}:
+			default:
+			}
 		}
 	}()
 	return nil
@@ -253,6 +266,7 @@ type options struct {
 	Parts    bool    `json:"parts"`
 	Res      bool    `json:"res"`
 	Official bool    `json:"official"`
+	Debug    bool    `json:"debug"`
 	Platform string  `json:"platform"`
 	Version  string  `json:"version"`
 	Batch    int     `json:"batch,string"`
@@ -268,12 +282,16 @@ type job struct {
 	lines   []string
 	stop    chan struct{}
 	stopped bool
+	file    *os.File
 }
 
 func (j *job) log(f string, a ...any) {
 	s := fmt.Sprintf(f, a...)
 	j.mu.Lock()
 	j.lines = append(j.lines, s)
+	if j.file != nil {
+		fmt.Fprintf(j.file, "%s  %s\n", time.Now().Format("15:04:05.000"), s)
+	}
 	j.mu.Unlock()
 	fmt.Println("[" + j.Title + "] " + s)
 }
@@ -316,6 +334,13 @@ func (d *downloader) write(rel string, data []byte) {
 }
 
 func (d *downloader) onMsg(m msg) {
+	if d.o.Debug {
+		head := m.data
+		if len(head) > 16 {
+			head = head[:16]
+		}
+		d.j.log("    [gói] lệnh %d, %d byte, đầu: % x", m.cmd, len(m.data), head)
+	}
 	r := &rd{d: m.data}
 	z := strconv.Itoa(d.o.Zoom)
 	switch m.cmd {
@@ -420,25 +445,36 @@ func (d *downloader) parseParts(blob []byte) {
 	d.parts, d.types = parts, types
 }
 
+// drain xử lý hết các gói đang chờ.
+func (d *downloader) drain() {
+	for {
+		d.c.qmu.Lock()
+		q := d.c.queue
+		d.c.queue = nil
+		d.c.qmu.Unlock()
+		if len(q) == 0 {
+			return
+		}
+		for _, m := range q {
+			d.onMsg(m)
+		}
+	}
+}
+
 func (d *downloader) pump(sec float64) {
 	deadline := time.After(time.Duration(sec * float64(time.Second)))
 	for {
+		d.drain()
 		select {
-		case m := <-d.c.ch:
-			d.onMsg(m)
+		case <-d.c.notify:
 		case <-deadline:
+			d.drain()
 			return
 		case <-d.j.stop:
 			return
 		case <-d.c.closed:
-			for {
-				select {
-				case m := <-d.c.ch:
-					d.onMsg(m)
-				default:
-					return
-				}
-			}
+			d.drain()
+			return
 		}
 	}
 }
@@ -572,7 +608,15 @@ func (d *downloader) connect() error {
 func (d *downloader) run() error {
 	o := &d.o
 	d.j.log("Kết nối %s:%d%s...", o.Host, o.Port, map[bool]string{true: " và đăng nhập", false: ""}[o.User != ""])
-	if err := d.connect(); err != nil {
+	var err error
+	for try := 1; try <= 3; try++ {
+		if err = d.connect(); err == nil {
+			break
+		}
+		d.j.log("  Kết nối thất bại (%v), thử lại...", err)
+		time.Sleep(time.Duration(try*2) * time.Second)
+	}
+	if err != nil {
 		return err
 	}
 	defer func() { d.c.conn.Close() }()
@@ -728,7 +772,18 @@ func startDownload(w http.ResponseWriter, r *http.Request) {
 	jobs[j.ID] = j
 	order = append(order, j.ID)
 	jobsMu.Unlock()
+	os.MkdirAll(o.Out, 0o755)
+	if f, err := os.Create(filepath.Join(o.Out, "nhat_ky.txt")); err == nil {
+		j.file = f
+		fmt.Fprintf(f, "NroResTool  %s  %s:%d  user=%v  official=%v  batch=%d  wait=%.1f  delay=%.2f  zoom=%d\n",
+			time.Now().Format("2006-01-02 15:04:05"), o.Host, o.Port, o.User != "", o.Official, o.Batch, o.Wait, o.Delay, o.Zoom)
+	}
 	go func() {
+		defer func() {
+			if j.file != nil {
+				j.file.Close()
+			}
+		}()
 		d := &downloader{o: o, j: j, stats: map[string]int{}, frames: map[string]int{}, got: map[string]bool{}}
 		err := d.run()
 		j.mu.Lock()
@@ -736,6 +791,9 @@ func startDownload(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case err != nil:
 			j.lines = append(j.lines, "Lỗi: "+err.Error())
+			if j.file != nil {
+				fmt.Fprintf(j.file, "Lỗi: %s\n", err.Error())
+			}
 			j.Status = "lỗi"
 		case j.isStopped():
 			j.Status = "đã dừng"

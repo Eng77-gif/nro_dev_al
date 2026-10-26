@@ -51,7 +51,7 @@ pre{margin:0;background:var(--log);color:var(--logtext);padding:10px 12px;max-he
     <label>Effect (id)<input type="text" id="d_effects" placeholder="0-1200"></label>
     <label>Ảnh khác theo tên<input type="text" id="d_names" placeholder="ten_anh_0,ten_anh_1"></label>
   </div>
-  <div class="checks"><label><input type="checkbox" id="d_parts" checked> Toàn bộ part</label><label><input type="checkbox" id="d_res"> File res (data/res)</label><label><input type="checkbox" id="d_official"> Server TeaMobi chính thức</label></div>
+  <div class="checks"><label><input type="checkbox" id="d_parts" checked> Toàn bộ part</label><label><input type="checkbox" id="d_res"> File res (data/res)</label><label><input type="checkbox" id="d_official"> Server TeaMobi chính thức</label><label><input type="checkbox" id="d_debug"> Ghi chẩn đoán (gửi file nhat_ky.txt khi báo lỗi)</label></div>
   <details><summary>Nâng cao</summary><div class="grid" style="margin-top:10px">
     <label>Platform|phiên bản<input type="text" id="d_platform" value="pc|2.3.3"></label>
     <label>Phiên bản đăng nhập<input type="text" id="d_version" value="2.3.3"></label>
@@ -109,8 +109,9 @@ function renderJob(id, j){
   el.querySelector('button').classList.toggle('hide', j.status !== 'running');
   if (j.lines && j.lines.length){ const pre = el.querySelector('pre'); pre.textContent += j.lines.join('\n') + '\n'; pre.scrollTop = pre.scrollHeight; }
 }
+$('d_official').onchange = () => { if ($('d_official').checked) { $('d_batch').value = 5; $('d_wait').value = 2.5; $('d_delay').value = 0.3; } else { $('d_batch').value = 50; $('d_wait').value = 1.5; $('d_delay').value = 0; } };
 $('btn_dl').onclick = async () => {
-  try { const f = form('d_', ['host','port','user','password','out','zoom','icons','mounts','auras','effects','names','parts','res','official','platform','version','batch','wait','delay']);
+  try { const f = form('d_', ['host','port','user','password','out','zoom','icons','mounts','auras','effects','names','parts','res','official','debug','platform','version','batch','wait','delay']);
     const r = await post('/api/download', JSON.stringify(f), {'Content-Type':'application/json'}); track(r.id);
     $('v_root').value = f.out; } catch(e){ alert(e.message) }
 };
