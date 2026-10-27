@@ -264,6 +264,7 @@ type options struct {
 	Auras    string  `json:"auras"`
 	Names    string  `json:"names"`
 	Effects  string  `json:"effects"`
+	Scan     string  `json:"scan"` // dò danh hiệu: danh sách khu cần đi qua, vd 0-15
 	Parts    bool    `json:"parts"`
 	Res      bool    `json:"res"`
 	Official bool    `json:"official"`
@@ -319,12 +320,17 @@ type downloader struct {
 	resEnd    bool
 	got       map[string]bool // các yêu cầu đã nhận được (để không gửi lại / đếm trùng)
 	hinted    bool
-	waitLogin int      // server bảo chờ bao nhiêu giây mới cho đăng nhập (lệnh 122)
-	inGame    bool     // đã vào bản đồ sau khi đăng nhập
-	sessBytes int      // dung lượng ảnh nhận được trong phiên hiện tại
-	recvCount int      // số gói ảnh/icon/effect nhận được (kể cả trùng)
-	canary    []byte   // yêu cầu một ảnh chắc chắn có, dùng để thử server còn trả lời không
-	probes    [][]byte // các ảnh đã có trên máy, chưa hỏi lại trong phiên này: dùng lần lượt làm ảnh kiểm tra
+	waitLogin int         // server bảo chờ bao nhiêu giây mới cho đăng nhập (lệnh 122)
+	inGame    bool        // đã vào bản đồ sau khi đăng nhập
+	sessBytes int         // dung lượng ảnh nhận được trong phiên hiện tại
+	recvCount int         // số gói ảnh/icon/effect nhận được (kể cả trùng)
+	canary    []byte      // yêu cầu một ảnh chắc chắn có, dùng để thử server còn trả lời không
+	probes    [][]byte    // các ảnh đã có trên máy, chưa hỏi lại trong phiên này: dùng lần lượt làm ảnh kiểm tra
+	scanning  bool        // đang dò danh hiệu
+	seenEff   map[int]int // effect người chơi khác đang đeo (lệnh 24 và -128) -> số lần thấy
+	seenTitle map[int]int // riêng danh hiệu (lệnh 24 loại 2)
+	cmdCount  map[int8]int
+	scanRaw   []string // gói -128 thô, để gửi lại khi cần phân tích
 }
 
 // mark ghi nhận đã nhận key; trả về true nếu là lần đầu.
@@ -343,6 +349,9 @@ func (d *downloader) write(rel string, data []byte) {
 }
 
 func (d *downloader) onMsg(m msg) {
+	if d.scanning {
+		d.cmdCount[m.cmd]++
+	}
 	if d.o.Debug {
 		head := m.data
 		if len(head) > 16 {
@@ -374,6 +383,35 @@ func (d *downloader) onMsg(m msg) {
 			d.frames[name] = int(nf)
 			if d.mark("img:" + name) {
 				d.stats[nameLabel(name)]++
+			}
+		}
+	case 24: // loại 2: danh hiệu của người chơi (int id, byte giây, short id effect), server gửi lại mỗi 10 giây
+		if d.scanning {
+			if t, err := r.i8(); err == nil && t == 2 {
+				_, e1 := r.i32()
+				_, e2 := r.i8()
+				eff, e3 := r.i16()
+				if e1 == nil && e2 == nil && e3 == nil && eff >= 0 {
+					d.seenTitle[int(eff)]++
+					d.seenEff[int(eff)]++
+				}
+			}
+		}
+	case -128: // gắn / gỡ effect trên nhân vật (hiệu ứng set đồ, cải trang...)
+		if d.scanning {
+			if len(d.scanRaw) < 400 {
+				head := m.data
+				if len(head) > 24 {
+					head = head[:24]
+				}
+				d.scanRaw = append(d.scanRaw, fmt.Sprintf("% x", head))
+			}
+			if t, err := r.i8(); err == nil && t == 0 {
+				_, e1 := r.i32()
+				eff, e2 := r.i16()
+				if e1 == nil && e2 == nil && eff >= 0 {
+					d.seenEff[int(eff)]++
+				}
 			}
 		}
 	case -66: // effect
@@ -1037,6 +1075,9 @@ func (d *downloader) run() error {
 			d.fetch("effect", reqs, keys, rels, -66)
 		}
 	}
+	if zones := parseRange(o.Scan); len(zones) > 0 && !d.j.isStopped() {
+		d.scan(zones)
+	}
 	keys := make([]string, 0, len(d.stats))
 	for k := range d.stats {
 		keys = append(keys, k)
@@ -1052,6 +1093,78 @@ func (d *downloader) run() error {
 	d.j.log("Xong. %s", strings.Join(sum, ", "))
 	d.j.log("Lưu tại: %s", o.Out)
 	return nil
+}
+
+// scan đi qua các khu của bản đồ đang đứng, ghi lại effect mà người chơi khác đang đeo (danh hiệu gửi bằng lệnh -128),
+// rồi tải đúng các effect đó. Số effect danh hiệu của server chính thức khác server lậu nên không đoán theo dải số được.
+func (d *downloader) scan(zones []int) {
+	o := &d.o
+	if o.User == "" {
+		d.j.log("Bỏ qua dò danh hiệu: cần tài khoản để vào game")
+		return
+	}
+	d.seenEff, d.seenTitle, d.cmdCount, d.scanning = map[int]int{}, map[int]int{}, map[int8]int{}, true
+	d.j.log("Dò danh hiệu: đi qua %d khu của bản đồ nhân vật đang đứng (nên để nhân vật ở map đông người, vd Làng Aru, Đảo Kame)", len(zones))
+	for _, z := range zones {
+		if d.j.isStopped() {
+			break
+		}
+		if d.isClosed() && !d.reconnect("") {
+			break
+		}
+		before := len(d.seenEff)
+		d.c.send(21, (&pkt{}).b(int8(z)).Bytes())
+		d.pump(12) // danh hiệu được gửi lại mỗi 10 giây; server cũng không cho đổi khu liên tục
+		d.j.log("  khu %d: thấy %d effect mới (tổng %d, trong đó %d danh hiệu)", z, len(d.seenEff)-before, len(d.seenEff), len(d.seenTitle))
+	}
+	d.scanning = false
+	ids := make([]int, 0, len(d.seenEff))
+	for id := range d.seenEff {
+		ids = append(ids, id)
+	}
+	sort.Ints(ids)
+	var sb strings.Builder
+	sb.WriteString("# effect người chơi khác đang đeo (id: số lần thấy), [danh hiệu] = gửi bằng lệnh 24\n")
+	for _, id := range ids {
+		tag := ""
+		if d.seenTitle[id] > 0 {
+			tag = "  [danh hiệu]"
+		}
+		fmt.Fprintf(&sb, "%d: %d%s\n", id, d.seenEff[id], tag)
+	}
+	sb.WriteString("\n# số gói theo lệnh trong lúc dò\n")
+	var cmds []int
+	for c := range d.cmdCount {
+		cmds = append(cmds, int(c))
+	}
+	sort.Ints(cmds)
+	for _, c := range cmds {
+		fmt.Fprintf(&sb, "lệnh %d: %d\n", c, d.cmdCount[int8(c)])
+	}
+	sb.WriteString("\n# gói -128 thô\n" + strings.Join(d.scanRaw, "\n") + "\n")
+	d.write("danh_hieu_do_duoc.txt", []byte(sb.String()))
+	if len(ids) == 0 {
+		d.j.log("  Không thấy effect nào (khu vắng người hoặc server gửi danh hiệu kiểu khác). Gửi file danh_hieu_do_duoc.txt để phân tích")
+		return
+	}
+	d.j.log("  Thấy %d effect: %s (chi tiết ở danh_hieu_do_duoc.txt)", len(ids), joinInts(ids))
+	z := strconv.Itoa(o.Zoom)
+	var reqs [][]byte
+	var keys, rels []string
+	for _, id := range ids {
+		reqs = append(reqs, (&pkt{}).s(int16(id)).Bytes())
+		keys = append(keys, "eff:"+strconv.Itoa(id))
+		rels = append(rels, "effect/x"+z+"/ImgEffect_"+strconv.Itoa(id)+".png")
+	}
+	d.fetch("effect", reqs, keys, rels, -66)
+}
+
+func joinInts(a []int) string {
+	s := make([]string, len(a))
+	for i, v := range a {
+		s[i] = strconv.Itoa(v)
+	}
+	return strings.Join(s, ", ")
 }
 
 // ------------------------------------------------------------------ web
@@ -1111,7 +1224,7 @@ func startDownload(w http.ResponseWriter, r *http.Request) {
 		on   bool
 		name string
 	}{{o.Res, "res"}, {o.Parts, "part"}, {strings.TrimSpace(o.Icons) != "", "icon"}, {strings.TrimSpace(o.Mounts) != "", "mount"},
-		{strings.TrimSpace(o.Auras) != "", "aura"}, {strings.TrimSpace(o.Names) != "", "ảnh theo tên"}, {strings.TrimSpace(o.Effects) != "", "effect"}} {
+		{strings.TrimSpace(o.Auras) != "", "aura"}, {strings.TrimSpace(o.Names) != "", "ảnh theo tên"}, {strings.TrimSpace(o.Effects) != "", "effect"}, {strings.TrimSpace(o.Scan) != "", "danh hiệu (dò)"}} {
 		if w.on {
 			what = append(what, w.name)
 		}
@@ -1239,7 +1352,7 @@ func openBrowser(url string) {
 }
 
 // version: ghi vào nhật ký và giao diện để biết đang chạy bản nào
-const version = "v7 (27/10 aura, mỗi lần kiểm tra một ảnh khác)"
+const version = "v8 (27/10 dò danh hiệu)"
 
 func main() {
 	port := flag.Int("port", 8765, "cổng giao diện web")

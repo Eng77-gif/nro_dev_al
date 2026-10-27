@@ -738,3 +738,13 @@ Cách test:
   - Lần sau so mã hash từng file, chỉ tải file mới / đã sửa.
   - Không ghi đè `Config.properties` và `maintenanceConfig.txt` nếu trên máy đã có.
   - Mã nguồn: `tools/repo-downloader`.
+
+## Đợt 28: NroResTool v8 dò danh hiệu
+- **Vì sao tool cũ không tìm được danh hiệu:**
+  - Danh hiệu dùng số effect của server chính thức. Số này khác bản server lậu (218–303), nên đoán theo dải 0–1200 không trúng.
+  - Server gửi danh hiệu bằng lệnh 24 loại 2 (id người chơi, giây, id effect), cứ 10 giây gửi lại. Tool cũ không đọc lệnh này.
+- **Mục mới "Dò danh hiệu":**
+  - Tool đăng nhập rồi đi qua các khu (vd `0-15`) của map nhân vật đang đứng, mỗi khu chờ 12 giây.
+  - Ghi lại số effect người khác đang đeo: danh hiệu (lệnh 24) và hiệu ứng set / cải trang (lệnh -128). Sau đó tự tải đúng các effect đó.
+  - Danh sách tìm được lưu ở `danh_hieu_do_duoc.txt`.
+  - Test trên server thử: nhân vật khác đeo danh hiệu 222 ở khu 3, tool tìm thấy và tải đúng ảnh và effdata.
