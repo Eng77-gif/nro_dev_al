@@ -548,3 +548,8 @@ Sự kiện tự bật và tắt theo lịch mỗi năm: Tết, Giỗ tổ, Trun
 - NPC đặt thêm (trừ Santa) chỉ mở các mục sự kiện của nó, nên không dính các chức năng gắn với bản đồ gốc. Santa mở được ở mọi map.
 - `Map.npcs` đổi sang CopyOnWriteArrayList để thêm/gỡ NPC lúc server đang chạy. NPC mặc định (không có menu riêng) mở menu qua `createOtherMenu`, nên cũng có nút sự kiện.
 - Người đang đứng trong map sẽ thấy NPC mới sau khi chuyển map hoặc đăng nhập lại.
+
+## Đợt 18: Bổ sung icon/res tải từ server chính thức (NroResTool)
+- Thêm 436 icon có trên server chính thức mà server chưa có, và 150 file res mới. Bản gốc x4, tự thu nhỏ ra x1/x2/x3.
+- `DataGame.vsRes` lên 2 để client tải lại res.
+- Không ghi đè 232 icon trùng số nhưng khác hình (ví dụ 11120, 11576–11655). Bộ part 1656–2081 của server này khác bản chính thức, nên thay ảnh sẽ làm lệch hình các đồ đang dùng. Cũng không nhập Nr_Part.sql chính thức, vì 434 part khác số với dữ liệu hiện tại.
