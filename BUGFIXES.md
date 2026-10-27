@@ -517,3 +517,24 @@ Sự kiện tự bật và tắt theo lịch mỗi năm: Tết, Giỗ tổ, Trun
 - **Zombie**: 10 triệu HP như trong game.
 - **Hình pet**: thêm part cho Pet Cerberus.
 - `season_event_drop` thêm cột `item_to` (rơi ngẫu nhiên trong khoảng id) và `need_item` (vật phẩm phải mang theo, mất 1 cái mỗi lần rơi).
+
+
+## Đợt 16: Mục sự kiện ở đúng NPC như bản chính thức
+- NPC nào có mục sự kiện đang diễn ra thì menu chính của NPC đó có thêm một nút ở cuối (tên sự kiện, ví dụ "Halloween"). Các nút cũ giữ nguyên vị trí. Bấm vào ra "<Sự kiện> vui vẻ / Ta có thể giúp gì cho con?" với các mục của NPC đó.
+- Santa vẫn có đủ mọi mục như trước.
+- Gán theo các bài thông báo và video:
+
+| Sự kiện | NPC | Mục |
+|---|---|---|
+| Halloween | Bà Hạt Mít | Làm Hộp Kẹo Ma Quỷ (x1 / x10 / hết), Đổi Hộp Kẹo lấy Kẹo mù, Ước bằng 50 ngọc, Ước miễn phí |
+| Halloween | Chi Chi | Shop sự kiện (Giỏ đựng kẹo, Giấy trang trí, Giỏ đựng ngọc bí, Máy dò, Capsule Halloween, Túi mù, Thiệp, Hòm, Rađa dò Zombie) |
+| Tết | Nồi Bánh / Chi Chi | Nấu bánh / Cửa hàng |
+| Valentine | Lý Tiểu Nương | Đổi quà |
+| 8/3 | Lý Tiểu Nương, Bà Hạt Mít, Bunma / Chi Chi | Tặng quà / Cửa hàng |
+| Cá tháng 4 | Chi Chi, Quy Lão | Hộp Cá Tháng Tư, Hộp Hề / Hộp Tháng Tư |
+| Giỗ tổ | Hùng Vương / Nồi Bánh / Chi Chi, Quy Lão | Dâng sính lễ, Dâng bánh / Nấu bánh / Cửa hàng, Hộp Hào Khí |
+| Hè | Quy Lão / Chi Chi | Xô cá, Vỏ ốc / Cửa hàng |
+| Trung Thu | NPC Trung Thu / Chi Chi | Làm bánh, Đổi bánh, Đổi quà / Hộp bánh |
+| Thiếu nhi, 20/11 | Chi Chi | Đổi quà |
+
+- Gán NPC bằng cột `npc` (danh sách id mẫu NPC) trong `season_event_exchange`. Sửa rồi gõ `sukien reload` là áp dụng.

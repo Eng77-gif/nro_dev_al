@@ -59,6 +59,9 @@ public class MenuController {
                     npc = player.zone.map.getNpc(player, npcId);
                 }
                 if (npc != null) {
+                    if (nro.models.services.SeasonEventService.gI().npcSelect(npc, player, select)) {
+                        return;
+                    }
                     npc.confirmMenu(player, select);
                 } else {
                     Service.gI().hideWaitDialog(player);

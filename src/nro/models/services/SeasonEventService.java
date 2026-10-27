@@ -60,6 +60,7 @@ public class SeasonEventService implements Runnable {
     public static final int MENU_EVENT = 83100; // + id sự kiện
     public static final int MENU_EXCHANGE = 84000; // + id công thức
     public static final int MENU_GROUP = 86000; // + id sự kiện * 50 + nhóm
+    public static final int MENU_NPC = 97000; // menu sự kiện ở NPC khác Santa
 
     public static class Season {
 
@@ -89,7 +90,7 @@ public class SeasonEventService implements Runnable {
         int id, gem, ruby, costPoint, rewardItem, rewardQty, rewardQtyMax, permRate, bonusItem, bonusRate, eventPoint, topId, topPoint;
         String name, group;
         int[][] need;
-        int[] rewardDays;
+        int[] rewardDays, npcs;
         long gold;
         boolean openNow;
         Season season;
@@ -201,6 +202,7 @@ public class SeasonEventService implements Runnable {
                     e.eventPoint = rs.getInt("event_point");
                     e.topId = rs.getInt("top_id");
                     e.topPoint = rs.getInt("top_point");
+                    e.npcs = parseInts(rs.getString("npc"));
                     e.season = s;
                     if (s != null && (e.openNow || validItem(e.rewardItem)) && (e.bonusItem <= 0 || validItem(e.bonusItem))) {
                         s.exchanges.add(e);
@@ -652,6 +654,76 @@ public class SeasonEventService implements Runnable {
             sb.append(i > 0 ? "/" : "").append(days[i]);
         }
         return sb.toString();
+    }
+
+    // ------------------------------------------------------------------ mục sự kiện ở NPC khác (Bà Hạt Mít, Chi Chi...)
+    /** playerId -> {tempId NPC, vị trí nút sự kiện trong menu chính} */
+    private final Map<Long, int[]> npcOption = new ConcurrentHashMap<>();
+
+    private List<Exchange> npcExchanges(int npcTemp) {
+        List<Exchange> list = new ArrayList<>();
+        for (Season s : seasons.values()) {
+            if (s.active) {
+                for (Exchange e : s.exchanges) {
+                    for (int n : e.npcs) {
+                        if (n == npcTemp) {
+                            list.add(e);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
+    /** Thêm nút sự kiện vào cuối menu chính của NPC nếu NPC có mục sự kiện đang diễn ra. */
+    public String[] withNpcOption(Npc npc, Player pl, String[] menu) {
+        List<Exchange> list = npcExchanges(npc.tempId);
+        if (list.isEmpty()) {
+            npcOption.remove(pl.id);
+            return menu;
+        }
+        Season s = list.get(0).season;
+        boolean one = list.stream().allMatch(e -> e.season == s);
+        String[] out = java.util.Arrays.copyOf(menu, menu.length + 1);
+        out[menu.length] = one ? s.name.replace(" ", "\n") : "Sự kiện";
+        npcOption.put(pl.id, new int[]{npc.tempId, menu.length});
+        return out;
+    }
+
+    /** Gọi trước confirmMenu của mọi NPC: xử lý nút sự kiện và các menu sự kiện. */
+    public boolean npcSelect(Npc npc, Player pl, int select) {
+        int menu = pl.idMark.getIndexMenu();
+        if (pl.idMark.isBaseMenu()) {
+            int[] o = npcOption.get(pl.id);
+            if (o != null && o[0] == npc.tempId && o[1] == select && npc.tempId != nro.models.consts.ConstNpc.SANTA) {
+                openNpcEvent(npc, pl);
+                return true;
+            }
+            return false;
+        }
+        if (menu == MENU_NPC) {
+            List<Exchange> list = npcExchanges(npc.tempId);
+            if (select >= 0 && select < list.size()) {
+                openExchange(npc, pl, list.get(select));
+            }
+            return true;
+        }
+        return confirmMenu(npc, pl, menu, select);
+    }
+
+    private void openNpcEvent(Npc npc, Player pl) {
+        List<Exchange> list = npcExchanges(npc.tempId);
+        if (list.isEmpty()) {
+            return;
+        }
+        Season s = list.get(0).season;
+        String[] opts = new String[list.size()];
+        for (int i = 0; i < opts.length; i++) {
+            opts[i] = list.get(i).name;
+        }
+        npc.createOtherMenu(pl, MENU_NPC, s.name + " vui vẻ\nTa có thể giúp gì cho con?", opts);
     }
 
     /** Xử lý chọn menu của sự kiện; trả về true nếu đúng menu sự kiện. */

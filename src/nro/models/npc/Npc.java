@@ -59,6 +59,10 @@ public abstract class Npc implements IAtionNpc {
     public void createOtherMenu(Player player, int indexMenu, String npcSay, String... menuSelect) {
         Message msg;
         try {
+            if (indexMenu == ConstNpc.BASE_MENU && this.tempId != ConstNpc.SANTA) {
+                // thêm nút sự kiện theo mùa vào cuối menu (nếu NPC này có mục sự kiện đang diễn ra)
+                menuSelect = nro.models.services.SeasonEventService.gI().withNpcOption(this, player, menuSelect);
+            }
             player.idMark.setIndexMenu(indexMenu);
             msg = new Message(32);
             msg.writer().writeShort(tempId);
