@@ -413,6 +413,10 @@ Mỗi lần chạy hiện nhật ký trực tiếp và có nút Dừng. Tool ch�
 - Ô "Server TeaMobi chính thức" bật thêm định dạng gói của server gốc. Nếu bị server chặn vì tải nhanh, chỉnh mục "Nâng cao" (số yêu cầu mỗi đợt, thời gian chờ).
 - Tab **Xem**: duyệt icon, mount/aura, effect vừa tải.
 - Kết quả lưu vào thư mục `res_out` cạnh file exe, cùng cấu trúc với `data/` của server: `icon/x4`, `img_by_name/x4`, `effect/x4`, `effdata`, `res/x4`, `Nr_Part.sql`, `img_by_name.json`.
+- Server chính thức giới hạn lưu lượng (ảnh aura, mount có thể gần 1 MB mỗi ảnh). Tool xử lý như sau:
+  - Tải mount/aura từng ảnh một.
+  - Khi server ngừng trả lời: chờ 30 giây, 1, 2, 5 rồi 10 phút và gửi lại đúng chỗ đó (sau lần chờ thứ 2 mở thêm phiên mới).
+  - Chỉ bỏ qua khi chờ hết các lần trên mà vẫn không có trả lời.
 - Chỉ dùng với server bạn có quyền tải dữ liệu.
 - Mã nguồn ở `tools/nro-res-exe` (Go). Build lại bằng: `cd tools/nro-res-exe && GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -o ../NroResTool.exe .`
 

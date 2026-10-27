@@ -12,6 +12,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math"
 	"net"
 	"net/http"
 	"os"
@@ -581,12 +582,19 @@ func (d *downloader) reconnect(why string) bool {
 
 func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8) {
 	d.j.log("Tải %s: %d yêu cầu...", label, len(reqs))
-	retries := 0
-	// Server chính thức ngừng trả lời sau ~100 yêu cầu mỗi phiên mà không ngắt kết nối:
-	// nếu 2 đợt liền không nhận được gì thì mở phiên mới và gửi lại từ chỗ bị bỏ.
-	stalls, stallAt, renewedAt, sessionSent := 0, -1, -1, 0
+	size, wait, delay := d.o.Batch, d.o.Wait, d.o.Delay
+	if d.o.Official && cmd == 66 {
+		// ảnh theo tên (mount, aura) rất nặng, server chính thức giới hạn lưu lượng: tải từng cái một
+		size, wait, delay = 1, math.Max(wait, 10), math.Max(delay, 1.5)
+		d.j.log("  Server chính thức: tải từng ảnh một, nghỉ %.1f giây giữa các ảnh", delay)
+	}
+	// Server chính thức có giới hạn tải: ngừng trả lời một lúc mà không ngắt kết nối.
+	// Khi một đợt không nhận được gì: chờ (30 giây, 1, 2, 5, 10 phút) rồi gửi lại đúng đợt đó;
+	// sau lần chờ thứ 2 mở thêm phiên mới. Hết các lần chờ vẫn không có thì mới bỏ qua.
+	cooldowns := []int{30, 60, 120, 300, 600}
+	retries, cool, stalls, stallAt, renewedAt, sessionSent := 0, 0, 0, -1, -1, 0
 	for k := 0; k < len(reqs) && !d.j.isStopped(); {
-		end := k + d.o.Batch
+		end := k + size
 		if end > len(reqs) {
 			end = len(reqs)
 		}
@@ -609,13 +617,13 @@ func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8)
 				break
 			}
 			sent++
-			if d.o.Delay > 0 {
-				time.Sleep(time.Duration(d.o.Delay * float64(time.Second)))
+			if delay > 0 {
+				time.Sleep(time.Duration(delay * float64(time.Second)))
 			}
 		}
 		sessionSent += sent
 		if ok {
-			d.pump(d.o.Wait)
+			d.waitKeys(keys[k:end], wait)
 		}
 		if !ok || d.isClosed() {
 			retries++
@@ -627,16 +635,41 @@ func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8)
 			continue // gửi lại đợt vừa mất
 		}
 		d.j.log("  %d/%d  đã nhận %d", end, len(reqs), d.stats[label])
-		if sent > 0 && len(d.got) == before {
-			if stalls == 0 {
-				stallAt = k
+		if sent == 0 || len(d.got) > before {
+			cool, stalls = 0, 0
+			if d.o.Official && d.missing(keys[k:end]) > 0 && len(d.got) > before {
+				continue // nhận được một phần: gửi lại phần còn thiếu
 			}
-			stalls++
-		} else {
-			stalls = 0
+			k = end
+			continue
 		}
+		if d.o.Official {
+			if cool < len(cooldowns) {
+				sec := cooldowns[cool]
+				cool++
+				d.j.log("  Server tạm ngừng trả lời (giới hạn tải), chờ %d giây rồi thử lại (lần %d/%d)...", sec, cool, len(cooldowns))
+				d.pump(float64(sec))
+				if cool == 2 {
+					if !d.reconnect("Thử phiên mới") {
+						d.j.log("  Dừng: không kết nối lại được server (đã tải %d/%d)", k, len(reqs))
+						return
+					}
+					sessionSent = 0
+				}
+				continue
+			}
+			d.j.log("  Bỏ qua %d yêu cầu không có trả lời", d.missing(keys[k:end]))
+			cool = 0
+			k = end
+			continue
+		}
+		// server thường: 2 đợt liền không nhận được gì thì mở phiên mới và gửi lại;
+		// tắc tiếp thì coi như các id đó không có dữ liệu
+		if stalls == 0 {
+			stallAt = k
+		}
+		stalls++
 		if stalls >= 2 && stallAt != renewedAt {
-			// lần đầu tắc ở chỗ này: mở phiên mới rồi gửi lại; tắc tiếp thì coi như các id đó không có dữ liệu
 			if !d.reconnect("Server ngừng trả lời") {
 				d.j.log("  Dừng: không kết nối lại được server (đã tải %d/%d)", stallAt, len(reqs))
 				return
@@ -648,6 +681,27 @@ func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8)
 		k = end
 	}
 	d.pump(d.o.Wait * 2)
+}
+
+func (d *downloader) missing(keys []string) int {
+	n := 0
+	for _, k := range keys {
+		if !d.got[k] {
+			n++
+		}
+	}
+	return n
+}
+
+// waitKeys chờ đến khi nhận đủ các key hoặc hết thời gian chờ.
+func (d *downloader) waitKeys(keys []string, sec float64) {
+	deadline := time.Now().Add(time.Duration(sec * float64(time.Second)))
+	for time.Now().Before(deadline) && !d.j.isStopped() && !d.isClosed() {
+		d.pump(0.3)
+		if d.missing(keys) == 0 {
+			return
+		}
+	}
 }
 
 // connect: kết nối, nhận khoá, chọn loại client và đăng nhập (nếu có tài khoản).
