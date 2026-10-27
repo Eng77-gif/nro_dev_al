@@ -757,3 +757,12 @@ Cách test:
   - ảnh theo tên (`danhhieu_`, `danh_hieu_`, `title_`, `Title_`, `dh_`, `ImgEffect_` + id).
 - Tool ghi mọi gói server trả về trong lúc thử vào cuối `danh_hieu_do_duoc.txt` (bỏ gói di chuyển / chiến đấu) để phân tích.
 - **Gói effect định dạng lạ:** tool lấy ảnh PNG nằm cuối gói. Không đọc được thì lưu nguyên gói vào `effect_loi/goi_<id>.bin`.
+
+## Đợt 30: NroResTool v10 giả client 2.5.2
+- **Đã kiểm tra client chính thức Dragonboy252** (đóng gói Enigma Virtual Box, đã bung ra):
+  - Trong client không có sẵn ảnh danh hiệu, chỉ có effect cũ e_0–28.
+  - Client không tải ảnh qua web.
+  - Danh sách lệnh -111 lúc đăng nhập chỉ là các file res (ô gạch bản đồ), repo đã có đủ.
+- **Server đọc phiên bản client từ chuỗi platform** lúc đăng nhập (`pc|2.3.3` → 233). Tool trước báo là 2.3.3, nên server chính thức có thể không gửi effect / danh hiệu mới.
+  - Nay mặc định `pc|2.5.2` / `2.5.2` cho khớp client chính thức (sửa được ở mục Nâng cao).
+- **Dự phòng:** client chính thức lưu dữ liệu đã tải ở `%USERPROFILE%\AppData\LocalLow\Team\Dragonboy252`. Nén thư mục này gửi lên để lấy ảnh danh hiệu client đã tải.

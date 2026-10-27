@@ -1280,7 +1280,7 @@ func resolve(p string) string {
 }
 
 func startDownload(w http.ResponseWriter, r *http.Request) {
-	o := options{Port: 14445, Zoom: 4, Batch: 50, Wait: 1.5, Platform: "pc|2.3.3", Version: "2.3.3"}
+	o := options{Port: 14445, Zoom: 4, Batch: 50, Wait: 1.5, Platform: "pc|2.5.2", Version: "2.5.2"}
 	if err := json.NewDecoder(r.Body).Decode(&o); err != nil {
 		writeJSON(w, 400, map[string]string{"error": "Dữ liệu không hợp lệ: " + err.Error()})
 		return
@@ -1299,10 +1299,10 @@ func startDownload(w http.ResponseWriter, r *http.Request) {
 		o.Wait = 1.5
 	}
 	if o.Platform == "" {
-		o.Platform = "pc|2.3.3"
+		o.Platform = "pc|2.5.2"
 	}
 	if o.Version == "" {
-		o.Version = "2.3.3"
+		o.Version = "2.5.2"
 	}
 	o.Out = resolve(o.Out)
 	var what []string
@@ -1438,7 +1438,7 @@ func openBrowser(url string) {
 }
 
 // version: ghi vào nhật ký và giao diện để biết đang chạy bản nào
-const version = "v9 (27/10 dò danh hiệu, thử các kiểu hỏi)"
+const version = "v10 (27/10 giả client 2.5.2)"
 
 func main() {
 	port := flag.Int("port", 8765, "cổng giao diện web")
