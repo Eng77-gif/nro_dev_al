@@ -415,3 +415,43 @@ Mỗi lần chạy hiện nhật ký trực tiếp và có nút Dừng. Tool ch�
 - Kết quả lưu vào thư mục `res_out` cạnh file exe, cùng cấu trúc với `data/` của server: `icon/x4`, `img_by_name/x4`, `effect/x4`, `effdata`, `res/x4`, `Nr_Part.sql`, `img_by_name.json`.
 - Chỉ dùng với server bạn có quyền tải dữ liệu.
 - Mã nguồn ở `tools/nro-res-exe` (Go). Build lại bằng: `cd tools/nro-res-exe && GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -o ../NroResTool.exe .`
+
+
+## Đợt 13: Sự kiện theo mùa (theo các bài thông báo sự kiện chính thức)
+Sự kiện tự bật và tắt theo lịch mỗi năm: Tết, Giỗ tổ, Trung Thu tính theo âm lịch (thuật toán Hồ Ngọc Đức), các sự kiện khác theo dương lịch. Tất cả tham gia ở **NPC Santa** (Đảo Kamê, Đảo Guru, Vách núi đen), nút đầu tiên "Sự kiện".
+
+| id | Sự kiện | Thời gian | Nội dung chính |
+|---|---|---|---|
+| 1 | Tết Nguyên Đán | mùng 1 Tết đến +17 ngày | Nấu bánh chưng, bánh tét (nhận thêm Capsule Tết 2026); top Lì xì 2026, Pháo hoa, Hộp Nón Tết; boss Lân con |
+| 2 | Valentine | 10/2 - 17/2 | Hoa hồng giấy, Sôcôla đổi hộp quà |
+| 3 | Phái đẹp 8/3 | 6/3 - 31/3 | Giấy màu, Hộp đựng quà, Hộp quà Nhẹ Nhàng / Chỉn Chu, tặng quà, trồng hoa hồng; top tặng hộp Chỉn Chu (danh hiệu Em xinh em đẹp) |
+| 10 | Cá tháng 4 | 1/4 - 20/4 | Hộp Cá Tháng Tư (ngọc), Hộp Tháng Tư (điểm sự kiện), 2 top |
+| 4 | Giỗ tổ Hùng Vương | 8/3 âm - 14/4 âm | Dâng sính lễ (Ngà voi, Cựa gà, Hồng mao), nấu và dâng Bánh chưng Lang Liêu, Bánh dầy, Hộp Hào Khí; 3 top; boss Sơn Tinh, Thủy Tinh |
+| 11 | Quốc tế Thiếu nhi | 1/6 - 15/6 | Phiếu bé ngoan đổi Hộp quà thiếu nhi |
+| 5 | Sự kiện Hè | 16/6 - 18/8 | Săn cá (Cá nóc, Cá bảy màu, Cá diêu hồng, Xô cá), tìm vỏ ốc, nước mía, vé World Cup; 2 top. Thức ăn cho Thần (Tayaki...) chỉ rơi trong Hè |
+| 6 | Trung Thu | 21/8 - 18/10 (theo rằm tháng 8) | Làm bánh Gà Quay / hảo hạng (30% thêm Thập Cẩm) / Hạt Sen, đổi Pet Thỏ xám, Thỏ trắng, Mèo đen; Đuôi khỉ, Cà rốt; top Hộp bánh 2026 và Chay; boss Khỉ đột, Nguyệt thần |
+| 7 | Halloween | 29/10 - 19/11 | Kẹo bàn tay chế Hộp Kẹo Ma Quỷ, đổi Kẹo mù, Ngọc bí ngô gọi Rồng Xương, ước nguyện 50 ngọc; 3 top; boss Bí ma, Ma trơi, Dơi |
+| 8 | Nhà giáo 20/11 | 15/11 - 22/11 | Bông hoa, Thiệp chúc, Sách giáo khoa |
+| 9 | Giáng sinh | 18/12 - 1/1 | Chuông, Kẹo giáng sinh, Tất; boss Ông già Noel |
+
+- **Dữ liệu** nằm trong các bảng, sửa xong gõ `sukien reload` là áp dụng, không cần khởi động lại:
+  - `season_event`: lịch (dương/âm, số ngày trước/sau ngày chính), boss gọi ra.
+  - `season_event_drop`: vật phẩm rơi từ quái hoặc boss, tỉ lệ /10000, giới hạn mỗi ngày, lọc theo mẫu quái / boss / bản đồ.
+  - `season_event_exchange`: công thức (nhóm nút, nguyên liệu, vàng/ngọc/hồng ngọc/điểm sự kiện); quà có HSD hoặc vĩnh viễn, quà thêm theo tỉ lệ, "mở ngay" (tặng quà NPC), điểm sự kiện, điểm top.
+  - `season_event_top` + `season_event_top_reward`: đua top và quà theo hạng.
+  - `item_box_reward`: quà trong hộp.
+- **Đua top**:
+  - Tự chốt khi hết sự kiện, quà vào hành trang khi người chơi vào game.
+  - Admin chốt sớm bằng `sukien chottop <id>`, xem danh sách id bằng `sukien top`.
+- **Lệnh admin**:
+  - `sukien`: xem trạng thái các sự kiện.
+  - `sukien bat|tat|tudong <id>`: bật tay, tắt tay, hoặc trả về theo lịch.
+  - `sukien ngay yyyy-mm-dd`: giả lập ngày để thử; `sukien ngay` trả về ngày thật.
+  - `sukien reload`: nạp lại dữ liệu.
+- **Sửa lỗi kèm theo**:
+  - Các luồng boss sự kiện (Tết, Hùng Vương, Trung Thu, Halloween, Noel) trước đây không chạy nên boss đứng im; giờ đã chạy.
+  - Hộp quà giáng sinh (648) và Hộp quà giỗ tổ (1823, 1824) dùng id vật phẩm cũ trước khi xếp lại id; giờ lấy quà từ `item_box_reward`.
+  - Menu Santa xếp lại theo danh sách chức năng, không còn lệch nút khi có Phiếu giảm giá.
+- **Phần đơn giản hóa so với bản chính thức**:
+  - Nguyên liệu lấy từ võ đài, nhiệm vụ Bò Mộng, phó bản được chuyển thành rơi khi đánh quái, có giới hạn mỗi ngày.
+  - Không làm các phần sau: Ra Đa Ngọc Rồng VIP (không có vật phẩm), KOL, Ngựa ăn cỏ, Hái lộc, Zombie, Ngũ Hành Sơn, Thành Cổ, rước đèn, thời gian chờ trồng hoa.

@@ -607,6 +607,8 @@ public class Mob {
         }
 
         if (this.tempId == 0) {
+            // Mộc nhân: chỉ rơi vật phẩm sự kiện (vd Hoa hồng giấy 8/3)
+            nro.models.services.SeasonEventService.gI().addMobDrops(list, player, zone, x, yEnd, this.tempId);
             return list;
         }
         int mapid = player.zone.map.mapId;
@@ -690,7 +692,7 @@ public class Mob {
                 player.event.luotNhanNgocMienPhi = 0;
             }
         }
-        if (MapService.gI().AllMap(mapid)) {
+        if (MapService.gI().AllMap(mapid) && nro.models.services.SeasonEventService.gI().isActive(nro.models.services.SeasonEventService.SUMMER)) {
             if (Util.isTrue(5, 100)) {
                 ItemMap it = new ItemMap(zone, 1857, 1, x, yEnd, player.id);
                 list.add(it);
@@ -1066,7 +1068,7 @@ public class Mob {
             }
         }
 
-        nro.models.services.SeasonEventService.gI().addMobDrops(list, player, zone, x, yEnd);
+        nro.models.services.SeasonEventService.gI().addMobDrops(list, player, zone, x, yEnd, this.tempId);
         return list;
 
     }

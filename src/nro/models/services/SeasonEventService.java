@@ -6,10 +6,11 @@ import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import nro.models.boss.Boss;
@@ -28,6 +29,7 @@ import nro.models.map.service.ChangeMapService;
 import nro.models.map.service.NpcService;
 import nro.models.npc.Npc;
 import nro.models.player.Player;
+import nro.models.server.Client;
 import nro.models.server.ServerManager;
 import nro.models.server.ServerNotify;
 import nro.models.utils.Logger;
@@ -35,10 +37,10 @@ import nro.models.utils.LunarCalendar;
 import nro.models.utils.Util;
 
 /**
- * Sự kiện theo mùa (Tết, Valentine, 8/3, Giỗ tổ, Hè, Trung Thu, Halloween, 20/11, Giáng sinh...).
- * Lịch, vật phẩm rơi và công thức đổi quà nằm trong các bảng season_event, season_event_drop,
- * season_event_exchange; quà trong hộp nằm ở item_box_reward. Sự kiện tự bật/tắt theo ngày
- * (dương lịch hoặc âm lịch), admin bật/tắt tay bằng lệnh "sukien".
+ * Sự kiện theo mùa (Tết, Valentine, 8/3, Cá tháng 4, Giỗ tổ, Hè, Trung Thu, Halloween, 20/11, Giáng sinh...).
+ * Lịch, vật phẩm rơi, công thức đổi quà và đua top nằm trong các bảng season_event*, quà trong hộp
+ * nằm ở item_box_reward. Sự kiện tự bật/tắt theo ngày (dương lịch hoặc âm lịch), admin bật/tắt tay
+ * bằng lệnh "sukien". Tất cả nằm ở NPC Santa (Đảo Kamê, Đảo Guru, Vách núi đen).
  */
 public class SeasonEventService implements Runnable {
 
@@ -51,10 +53,13 @@ public class SeasonEventService implements Runnable {
         return instance;
     }
 
+    public static final int SUMMER = 5;
+
     // chỉ số menu ở NPC Santa
     public static final int MENU_LIST = 83000;
     public static final int MENU_EVENT = 83100; // + id sự kiện
     public static final int MENU_EXCHANGE = 84000; // + id công thức
+    public static final int MENU_GROUP = 86000; // + id sự kiện * 50 + nhóm
 
     public static class Season {
 
@@ -65,6 +70,8 @@ public class SeasonEventService implements Runnable {
         public int[][] bosses = new int[0][];
         public List<Drop> drops = new ArrayList<>();
         public List<Exchange> exchanges = new ArrayList<>();
+        public List<String> groups = new ArrayList<>();
+        public List<Top> tops = new ArrayList<>();
         public LocalDate start, end;
         volatile boolean active;
         final List<Boss> spawned = new CopyOnWriteArrayList<>();
@@ -72,28 +79,46 @@ public class SeasonEventService implements Runnable {
 
     public static class Drop {
 
-        int itemId, rate, qtyMin, qtyMax;
+        int itemId, rate, qtyMin, qtyMax, dailyMax;
         boolean fromBoss;
+        Set<Integer> mobs = new HashSet<>(), maps = new HashSet<>();
     }
 
     public static class Exchange {
 
+        int id, gem, ruby, costPoint, rewardItem, rewardQty, rewardQtyMax, permRate, bonusItem, bonusRate, eventPoint, topId, topPoint;
+        String name, group;
+        int[][] need;
+        int[] rewardDays;
+        long gold;
+        boolean openNow;
+        Season season;
+    }
+
+    public static class Top {
+
         int id;
         String name;
-        int[][] need;
-        long gold;
-        int gem, ruby, rewardItem, rewardQty, eventPoint;
+        Season season;
+        List<int[]> rewards = new ArrayList<>(); // {rankFrom, rankTo, itemId, qty}
+        List<int[]> rewardDays = new ArrayList<>();
     }
 
     private final Map<Integer, Season> seasons = new LinkedHashMap<>();
+    private final Map<Integer, Exchange> exchanges = new ConcurrentHashMap<>();
+    private final Map<Integer, Top> tops = new ConcurrentHashMap<>();
     /** id sự kiện -> true bật tay / false tắt tay; không có = theo lịch */
     private final Map<Integer, Boolean> forced = new ConcurrentHashMap<>();
+    /** số vật phẩm đã nhặt trong ngày: "playerId:itemId" */
+    private final Map<String, Integer> daily = new ConcurrentHashMap<>();
+    private volatile LocalDate dailyDate;
     private volatile LocalDate testDate;
 
     // ------------------------------------------------------------------ nạp dữ liệu
     public synchronized void load() {
         Map<Integer, Season> map = new LinkedHashMap<>();
-        Map<Integer, Exchange> exchanges = new LinkedHashMap<>();
+        Map<Integer, Exchange> exMap = new LinkedHashMap<>();
+        Map<Integer, Top> topMap = new LinkedHashMap<>();
         try (Connection con = LocalManager.getConnection()) {
             try (PreparedStatement ps = con.prepareStatement("select * from season_event order by id"); ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -120,8 +145,34 @@ public class SeasonEventService implements Runnable {
                     d.qtyMin = Math.max(1, rs.getInt("qty_min"));
                     d.qtyMax = Math.max(d.qtyMin, rs.getInt("qty_max"));
                     d.fromBoss = "boss".equals(rs.getString("source"));
+                    d.dailyMax = rs.getInt("daily_max");
+                    d.mobs = parseSet(rs.getString("mobs"));
+                    d.maps = parseSet(rs.getString("maps"));
                     if (s != null && validItem(d.itemId)) {
                         s.drops.add(d);
+                    }
+                }
+            }
+            try (PreparedStatement ps = con.prepareStatement("select * from season_event_top order by id"); ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Season s = map.get(rs.getInt("event_id"));
+                    Top t = new Top();
+                    t.id = rs.getInt("id");
+                    t.name = rs.getString("name");
+                    t.season = s;
+                    if (s != null) {
+                        s.tops.add(t);
+                        topMap.put(t.id, t);
+                    }
+                }
+            }
+            try (PreparedStatement ps = con.prepareStatement("select * from season_event_top_reward order by id"); ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Top t = topMap.get(rs.getInt("top_id"));
+                    int item = rs.getInt("item_id");
+                    if (t != null && (item < 0 || validItem(item))) {
+                        t.rewards.add(new int[]{rs.getInt("rank_from"), rs.getInt("rank_to"), item, Math.max(1, rs.getInt("qty"))});
+                        t.rewardDays.add(parseInts(rs.getString("hsd_days")));
                     }
                 }
             }
@@ -131,16 +182,30 @@ public class SeasonEventService implements Runnable {
                     Exchange e = new Exchange();
                     e.id = rs.getInt("id");
                     e.name = rs.getString("name");
+                    e.group = rs.getString("grp");
                     e.need = parsePairs(rs.getString("need"));
                     e.gold = rs.getLong("gold");
                     e.gem = rs.getInt("gem");
                     e.ruby = rs.getInt("ruby");
+                    e.costPoint = rs.getInt("cost_point");
                     e.rewardItem = rs.getInt("reward_item");
                     e.rewardQty = Math.max(1, rs.getInt("reward_qty"));
+                    e.rewardQtyMax = Math.max(e.rewardQty, rs.getInt("reward_qty_max"));
+                    e.rewardDays = parseInts(rs.getString("reward_days"));
+                    e.permRate = rs.getInt("perm_rate");
+                    e.bonusItem = rs.getInt("bonus_item");
+                    e.bonusRate = rs.getInt("bonus_rate");
+                    e.openNow = rs.getInt("open_now") == 1;
                     e.eventPoint = rs.getInt("event_point");
-                    if (s != null && validItem(e.rewardItem)) {
+                    e.topId = rs.getInt("top_id");
+                    e.topPoint = rs.getInt("top_point");
+                    e.season = s;
+                    if (s != null && (e.openNow || validItem(e.rewardItem)) && (e.bonusItem <= 0 || validItem(e.bonusItem))) {
                         s.exchanges.add(e);
-                        exchanges.put(e.id, e);
+                        if (!s.groups.contains(e.group)) {
+                            s.groups.add(e.group);
+                        }
+                        exMap.put(e.id, e);
                     }
                 }
             }
@@ -153,6 +218,8 @@ public class SeasonEventService implements Runnable {
             Season old = seasons.get(s.id);
             if (old != null) {
                 s.active = old.active;
+                s.start = old.start;
+                s.end = old.end;
                 s.spawned.addAll(old.spawned);
             }
         }
@@ -163,7 +230,11 @@ public class SeasonEventService implements Runnable {
         }
         seasons.clear();
         seasons.putAll(map);
-        Logger.success("Successfully loaded season event (" + seasons.size() + " sự kiện, " + exchanges.size() + " công thức)\n");
+        exchanges.clear();
+        exchanges.putAll(exMap);
+        tops.clear();
+        tops.putAll(topMap);
+        Logger.success("Successfully loaded season event (" + seasons.size() + " sự kiện, " + exMap.size() + " công thức, " + topMap.size() + " đua top)\n");
     }
 
     private static boolean validItem(int id) {
@@ -188,23 +259,48 @@ public class SeasonEventService implements Runnable {
         return list.toArray(new int[0][]);
     }
 
+    private static int[] parseInts(String s) {
+        List<Integer> list = new ArrayList<>();
+        if (s != null) {
+            for (String p : s.split(",")) {
+                try {
+                    if (!p.isBlank()) {
+                        list.add(Integer.parseInt(p.trim()));
+                    }
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        }
+        return list.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    private static Set<Integer> parseSet(String s) {
+        Set<Integer> set = new HashSet<>();
+        for (int v : parseInts(s)) {
+            set.add(v);
+        }
+        return set;
+    }
+
     // ------------------------------------------------------------------ lịch
     public LocalDate today() {
         return testDate != null ? testDate : LocalDate.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
+    private static LocalDate anchor(Season s, int year) {
+        return s.lunar ? LunarCalendar.toSolar(s.day, s.month, year) : LocalDate.of(year, s.month, s.day);
+    }
+
     /** Khoảng ngày [bắt đầu, kết thúc] của đợt sự kiện chứa ngày d, hoặc null. */
     public static LocalDate[] window(Season s, LocalDate d) {
         for (int y = d.getYear() - 1; y <= d.getYear() + 1; y++) {
-            LocalDate anchor;
             try {
-                anchor = s.lunar ? LunarCalendar.toSolar(s.day, s.month, y) : LocalDate.of(y, s.month, s.day);
-            } catch (Exception e) {
-                continue;
-            }
-            LocalDate a = anchor.minusDays(s.daysBefore), b = anchor.plusDays(s.daysAfter);
-            if (!d.isBefore(a) && !d.isAfter(b)) {
-                return new LocalDate[]{a, b};
+                LocalDate a = anchor(s, y);
+                LocalDate from = a.minusDays(s.daysBefore), to = a.plusDays(s.daysAfter);
+                if (!d.isBefore(from) && !d.isAfter(to)) {
+                    return new LocalDate[]{from, to};
+                }
+            } catch (Exception ignored) {
             }
         }
         return null;
@@ -216,12 +312,11 @@ public class SeasonEventService implements Runnable {
         if (w != null) {
             return w;
         }
-        for (int y = d.getYear(); y <= d.getYear() + 1; y++) {
+        for (int y = d.getYear() - 1; y <= d.getYear() + 1; y++) {
             try {
-                LocalDate anchor = s.lunar ? LunarCalendar.toSolar(s.day, s.month, y) : LocalDate.of(y, s.month, s.day);
-                LocalDate a = anchor.minusDays(s.daysBefore);
-                if (a.isAfter(d)) {
-                    return new LocalDate[]{a, anchor.plusDays(s.daysAfter)};
+                LocalDate a = anchor(s, y);
+                if (a.minusDays(s.daysBefore).isAfter(d)) {
+                    return new LocalDate[]{a.minusDays(s.daysBefore), a.plusDays(s.daysAfter)};
                 }
             } catch (Exception ignored) {
             }
@@ -235,6 +330,11 @@ public class SeasonEventService implements Runnable {
             return f;
         }
         return s.enabled && window(s, d) != null;
+    }
+
+    public boolean isActive(int seasonId) {
+        Season s = seasons.get(seasonId);
+        return s != null && s.active;
     }
 
     public List<Season> activeSeasons() {
@@ -274,12 +374,18 @@ public class SeasonEventService implements Runnable {
                 s.active = true;
                 spawnBosses(s);
                 Logger.success("Bắt đầu sự kiện " + s.name + "\n");
-                ServerNotify.gI().notify("Sự kiện " + s.name + " đã bắt đầu! Gặp ông già Santa ở Đảo Kamê, Đảo Guru, Vách núi đen để đổi quà.");
+                ServerNotify.gI().notify("Sự kiện " + s.name + " đã bắt đầu! Gặp ông già Santa ở Đảo Kamê, Đảo Guru, Vách núi đen để tham gia.");
             } else if (!run && s.active) {
                 s.active = false;
                 removeBosses(s);
                 Logger.success("Kết thúc sự kiện " + s.name + "\n");
                 ServerNotify.gI().notify("Sự kiện " + s.name + " đã kết thúc. Hẹn gặp lại ở mùa sau!");
+                // hết sự kiện thật (không phải admin thử ngày / tắt tay) thì tự chốt top
+                if (testDate == null && !forced.containsKey(s.id)) {
+                    for (Top t : s.tops) {
+                        closeTop(t);
+                    }
+                }
             }
         }
     }
@@ -318,8 +424,34 @@ public class SeasonEventService implements Runnable {
     }
 
     // ------------------------------------------------------------------ vật phẩm rơi
+    /** Trả về số lượng được nhặt sau khi trừ giới hạn ngày (0 = đã đủ hôm nay). */
+    private int takeDaily(Player pl, Drop d, int qty) {
+        if (d.dailyMax <= 0) {
+            return qty;
+        }
+        LocalDate t = today();
+        if (!t.equals(dailyDate)) {
+            daily.clear();
+            dailyDate = t;
+        }
+        String key = pl.id + ":" + d.itemId;
+        int got = daily.getOrDefault(key, 0);
+        int n = Math.min(qty, d.dailyMax - got);
+        if (n > 0) {
+            daily.put(key, got + n);
+        }
+        return Math.max(0, n);
+    }
+
+    private boolean matches(Drop d, Player pl, int mobTemp) {
+        if (!d.mobs.isEmpty() && !d.mobs.contains(mobTemp)) {
+            return false;
+        }
+        return d.maps.isEmpty() || (pl.zone != null && d.maps.contains(pl.zone.map.mapId));
+    }
+
     /** Vật phẩm sự kiện rơi khi đánh quái. */
-    public void addMobDrops(List<ItemMap> list, Player pl, Zone zone, int x, int y) {
+    public void addMobDrops(List<ItemMap> list, Player pl, Zone zone, int x, int y, int mobTemp) {
         if (pl == null || !pl.isPl()) {
             return;
         }
@@ -328,14 +460,17 @@ public class SeasonEventService implements Runnable {
                 continue;
             }
             for (Drop d : s.drops) {
-                if (!d.fromBoss && Util.isTrue(d.rate, 10000)) {
-                    list.add(new ItemMap(zone, d.itemId, Util.nextInt(d.qtyMin, d.qtyMax), x, y, pl.id));
+                if (!d.fromBoss && matches(d, pl, mobTemp) && Util.isTrue(d.rate, 10000)) {
+                    int qty = takeDaily(pl, d, Util.nextInt(d.qtyMin, d.qtyMax));
+                    if (qty > 0) {
+                        list.add(new ItemMap(zone, d.itemId, qty, x, y, pl.id));
+                    }
                 }
             }
         }
     }
 
-    /** Vật phẩm sự kiện rơi khi hạ boss (mọi boss). */
+    /** Vật phẩm sự kiện rơi khi hạ boss (mọi boss, hoặc boss có id trong cột mobs). */
     public void onBossKilled(Boss boss, Player pl) {
         if (pl == null || boss == null || boss.zone == null || !pl.isPl()) {
             return;
@@ -345,9 +480,13 @@ public class SeasonEventService implements Runnable {
                 continue;
             }
             for (Drop d : s.drops) {
-                if (d.fromBoss && Util.isTrue(d.rate, 10000)) {
+                if (d.fromBoss && matches(d, pl, (int) boss.id) && Util.isTrue(d.rate, 10000)) {
+                    int qty = takeDaily(pl, d, Util.nextInt(d.qtyMin, d.qtyMax));
+                    if (qty <= 0) {
+                        continue;
+                    }
                     int x = boss.location.x + Util.nextInt(-20, 20);
-                    ItemMap it = new ItemMap(boss.zone, d.itemId, Util.nextInt(d.qtyMin, d.qtyMax), x,
+                    ItemMap it = new ItemMap(boss.zone, d.itemId, qty, x,
                             boss.zone.map.yPhysicInTop(x, boss.location.y - 24), pl.id);
                     Service.gI().dropItemMap(boss.zone, it);
                 }
@@ -357,12 +496,7 @@ public class SeasonEventService implements Runnable {
 
     // ------------------------------------------------------------------ NPC
     public boolean hasActive() {
-        for (Season s : seasons.values()) {
-            if (s.active) {
-                return true;
-            }
-        }
-        return false;
+        return !activeSeasons().isEmpty();
     }
 
     public String menuLabel() {
@@ -393,34 +527,50 @@ public class SeasonEventService implements Runnable {
             sb.append(ConstFont.BOLD_BLUE).append("Đến hết ngày ").append(fmt(s.end))
                     .append(left > 0 ? " (còn " + left + " ngày)" : " (ngày cuối)").append("\n");
         }
-        sb.append(ConstFont.BOLD_DARK).append("Điểm sự kiện: ").append(pl.event.getEventPoint()).append("\n");
-        for (int id : materialIds(s)) {
-            sb.append(ItemService.gI().getTemplate(id).name).append(": ").append(count(pl, id)).append("\n");
-        }
-        List<String> opts = new ArrayList<>();
-        for (Exchange e : s.exchanges) {
-            opts.add("Đổi\n" + e.name);
+        sb.append(ConstFont.BOLD_DARK).append("Điểm sự kiện: ").append(pl.event.getEventPoint());
+        List<String> opts = new ArrayList<>(s.groups);
+        for (Top t : s.tops) {
+            opts.add("Top\n" + t.name);
         }
         opts.add("Hướng\ndẫn");
         npc.createOtherMenu(pl, MENU_EVENT + s.id, sb.toString(), opts.toArray(new String[0]));
     }
 
-    private List<Integer> materialIds(Season s) {
-        List<Integer> ids = new ArrayList<>();
-        for (Exchange e : s.exchanges) {
-            for (int[] n : e.need) {
-                if (!ids.contains(n[0])) {
-                    ids.add(n[0]);
+    private List<Exchange> groupExchanges(Season s, int g) {
+        List<Exchange> list = new ArrayList<>();
+        if (g >= 0 && g < s.groups.size()) {
+            for (Exchange e : s.exchanges) {
+                if (e.group.equals(s.groups.get(g))) {
+                    list.add(e);
                 }
             }
         }
-        return ids;
+        return list;
+    }
+
+    private void openGroup(Npc npc, Player pl, Season s, int g) {
+        List<Exchange> list = groupExchanges(s, g);
+        StringBuilder sb = new StringBuilder(ConstFont.BOLD_RED + s.groups.get(g).replace("\n", " ") + "\n" + ConstFont.BOLD_DARK);
+        List<Integer> shown = new ArrayList<>();
+        for (Exchange e : list) {
+            for (int[] n : e.need) {
+                if (!shown.contains(n[0])) {
+                    shown.add(n[0]);
+                    sb.append(ItemService.gI().getTemplate(n[0]).name).append(": ").append(count(pl, n[0])).append("\n");
+                }
+            }
+        }
+        String[] opts = new String[list.size()];
+        for (int i = 0; i < opts.length; i++) {
+            opts[i] = list.get(i).name;
+        }
+        npc.createOtherMenu(pl, MENU_GROUP + s.id * 50 + g, sb.toString(), opts);
     }
 
     private void openExchange(Npc npc, Player pl, Exchange e) {
         StringBuilder sb = new StringBuilder();
-        sb.append(ConstFont.BOLD_GREEN).append("Đổi ").append(e.name).append("\n");
-        sb.append(ConstFont.BOLD_DARK).append("Cần cho 1 lần đổi:\n");
+        sb.append(ConstFont.BOLD_GREEN).append(e.name.replace("\n", " ")).append("\n");
+        sb.append(ConstFont.BOLD_DARK).append("Cần cho 1 lần:\n");
         for (int[] n : e.need) {
             int have = count(pl, n[0]);
             sb.append(have >= n[1] ? ConstFont.BOLD_BLUE : ConstFont.BOLD_RED)
@@ -435,13 +585,49 @@ public class SeasonEventService implements Runnable {
         if (e.ruby > 0) {
             sb.append(pl.inventory.ruby >= e.ruby ? ConstFont.BOLD_BLUE : ConstFont.BOLD_RED).append("Hồng ngọc: ").append(e.ruby).append("\n");
         }
-        sb.append(ConstFont.BOLD_DARK).append("Nhận: x").append(e.rewardQty).append(" ").append(ItemService.gI().getTemplate(e.rewardItem).name);
-        if (e.eventPoint > 0) {
-            sb.append(" và ").append(e.eventPoint).append(" điểm sự kiện");
+        if (e.costPoint > 0) {
+            sb.append(pl.event.getEventPoint() >= e.costPoint ? ConstFont.BOLD_BLUE : ConstFont.BOLD_RED).append("Điểm sự kiện: ").append(e.costPoint).append("\n");
         }
+        sb.append(ConstFont.BOLD_DARK).append("Nhận: ").append(rewardText(e));
         int max = maxTimes(pl, e);
         sb.append("\n").append(ConstFont.BOLD_GREEN).append("Có thể đổi: ").append(max).append(" lần");
         npc.createOtherMenu(pl, MENU_EXCHANGE + e.id, sb.toString(), "Đổi\nx1", "Đổi\nx10", "Đổi\nhết", "Từ chối");
+    }
+
+    private String rewardText(Exchange e) {
+        StringBuilder sb = new StringBuilder();
+        if (e.openNow) {
+            sb.append("1 phần quà ngẫu nhiên");
+        } else {
+            String name = ItemService.gI().getTemplate(e.rewardItem).name;
+            sb.append("x").append(e.rewardQty).append(e.rewardQtyMax > e.rewardQty ? "-" + e.rewardQtyMax : "").append(" ").append(name);
+            if (e.rewardDays.length > 0) {
+                sb.append(" (HSD ").append(joinDays(e.rewardDays)).append(" ngày");
+                if (e.permRate > 0) {
+                    sb.append(", ").append(e.permRate).append("% vĩnh viễn");
+                }
+                sb.append(")");
+            }
+        }
+        if (e.bonusItem > 0) {
+            sb.append(", ").append(e.bonusRate).append("% thêm ").append(ItemService.gI().getTemplate(e.bonusItem).name);
+        }
+        if (e.eventPoint > 0) {
+            sb.append(", ").append(e.eventPoint).append(" điểm sự kiện");
+        }
+        Top t = tops.get(e.topId);
+        if (t != null && e.topPoint > 0) {
+            sb.append(", ").append(e.topPoint).append(" điểm top ").append(t.name.replace("\n", " "));
+        }
+        return sb.toString();
+    }
+
+    private static String joinDays(int[] days) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < days.length; i++) {
+            sb.append(i > 0 ? "/" : "").append(days[i]);
+        }
+        return sb.toString();
     }
 
     /** Xử lý chọn menu của sự kiện; trả về true nếu đúng menu sự kiện. */
@@ -458,25 +644,30 @@ public class SeasonEventService implements Runnable {
             if (s == null || !s.active) {
                 return true;
             }
-            if (select >= 0 && select < s.exchanges.size()) {
-                openExchange(npc, pl, s.exchanges.get(select));
-            } else if (select == s.exchanges.size()) {
+            int g = s.groups.size(), t = s.tops.size();
+            if (select >= 0 && select < g) {
+                openGroup(npc, pl, s, select);
+            } else if (select >= g && select < g + t) {
+                NpcService.gI().createTutorial(pl, npc.tempId, npc.avartar, topText(s.tops.get(select - g), pl));
+            } else if (select == g + t) {
                 NpcService.gI().createTutorial(pl, npc.tempId, npc.avartar, guide(s));
             }
             return true;
         }
-        if (menu >= MENU_EXCHANGE && menu < MENU_EXCHANGE + 100000) {
-            Exchange e = null;
-            Season owner = null;
-            for (Season s : seasons.values()) {
-                for (Exchange x : s.exchanges) {
-                    if (x.id == menu - MENU_EXCHANGE) {
-                        e = x;
-                        owner = s;
-                    }
-                }
+        if (menu >= MENU_GROUP && menu < MENU_GROUP + 10000) {
+            Season s = seasons.get((menu - MENU_GROUP) / 50);
+            if (s == null || !s.active) {
+                return true;
             }
-            if (e == null || !owner.active) {
+            List<Exchange> list = groupExchanges(s, (menu - MENU_GROUP) % 50);
+            if (select >= 0 && select < list.size()) {
+                openExchange(npc, pl, list.get(select));
+            }
+            return true;
+        }
+        if (menu >= MENU_EXCHANGE && menu < MENU_GROUP) {
+            Exchange e = exchanges.get(menu - MENU_EXCHANGE);
+            if (e == null || !e.season.active) {
                 Service.gI().sendThongBao(pl, "Sự kiện đã kết thúc");
                 return true;
             }
@@ -506,25 +697,9 @@ public class SeasonEventService implements Runnable {
             sb.append(s.description.replace("\\n", "\n")).append("\n");
         }
         for (Drop d : s.drops) {
-            sb.append("- ").append(ItemService.gI().getTemplate(d.itemId).name)
-                    .append(d.fromBoss ? ": rơi khi hạ boss" : ": rơi khi đánh quái").append("\n");
-        }
-        for (Exchange e : s.exchanges) {
-            sb.append("- ").append(e.name).append(": ");
-            List<String> parts = new ArrayList<>();
-            for (int[] n : e.need) {
-                parts.add(n[1] + " " + ItemService.gI().getTemplate(n[0]).name);
-            }
-            if (e.gold > 0) {
-                parts.add(Util.numberToMoney(e.gold) + " vàng");
-            }
-            if (e.gem > 0) {
-                parts.add(e.gem + " ngọc xanh");
-            }
-            if (e.ruby > 0) {
-                parts.add(e.ruby + " hồng ngọc");
-            }
-            sb.append(String.join(", ", parts)).append("\n");
+            sb.append("- ").append(ItemService.gI().getTemplate(d.itemId).name).append(": ")
+                    .append(d.fromBoss ? "rơi khi hạ boss" : "rơi khi đánh quái")
+                    .append(d.dailyMax > 0 ? " (tối đa " + d.dailyMax + "/ngày)" : "").append("\n");
         }
         sb.append("Điểm sự kiện dùng để đổi đồ ở cửa hàng sự kiện.");
         return sb.toString();
@@ -555,7 +730,7 @@ public class SeasonEventService implements Runnable {
     }
 
     private static int maxTimes(Player pl, Exchange e) {
-        long max = 9999;
+        long max = 999;
         for (int[] n : e.need) {
             max = Math.min(max, count(pl, n[0]) / Math.max(1, n[1]));
         }
@@ -568,20 +743,30 @@ public class SeasonEventService implements Runnable {
         if (e.ruby > 0) {
             max = Math.min(max, pl.inventory.ruby / e.ruby);
         }
+        if (e.costPoint > 0) {
+            max = Math.min(max, pl.event.getEventPoint() / e.costPoint);
+        }
         return (int) Math.max(0, max);
     }
 
-    private synchronized void exchange(Player pl, Exchange e, int times) {
+    private void exchange(Player pl, Exchange e, int times) {
         synchronized (pl) {
-            if (maxTimes(pl, e) < times) {
-                Service.gI().sendThongBao(pl, "Không đủ nguyên liệu để đổi " + times + " lần");
+            String rewardName = e.openNow ? "" : ItemService.gI().getTemplate(e.rewardItem).name;
+            int empty = InventoryService.gI().getCountEmptyBag(pl);
+            boolean stack = !e.openNow && ItemService.gI().getTemplate(e.rewardItem).isUpToUp && e.rewardDays.length == 0;
+            if (e.openNow || !stack) {
+                // mỗi lần đổi ra 1 món riêng: không đổi quá số ô trống
+                int perTime = e.openNow ? 1 : e.rewardQtyMax;
+                times = Math.min(times, (empty - (e.bonusItem > 0 ? 1 : 0)) / Math.max(1, perTime));
+            } else if (empty < 1 + (e.bonusItem > 0 ? 1 : 0)) {
+                times = 0;
+            }
+            if (times <= 0) {
+                Service.gI().sendThongBao(pl, "Hành trang không đủ chỗ trống");
                 return;
             }
-            Item sample = ItemService.gI().createNewItem((short) e.rewardItem, 1);
-            boolean stack = sample.template.isUpToUp;
-            int slots = stack ? (InventoryService.gI().findItemBag(pl, e.rewardItem) != null ? 0 : 1) : e.rewardQty * times;
-            if (InventoryService.gI().getCountEmptyBag(pl) < slots) {
-                Service.gI().sendThongBao(pl, "Hành trang cần " + slots + " ô trống");
+            if (maxTimes(pl, e) < times) {
+                Service.gI().sendThongBao(pl, "Không đủ nguyên liệu để đổi " + times + " lần");
                 return;
             }
             for (int[] n : e.need) {
@@ -590,20 +775,227 @@ public class SeasonEventService implements Runnable {
             pl.inventory.gold -= e.gold * times;
             pl.inventory.gem -= e.gem * times;
             pl.inventory.ruby -= e.ruby * times;
-            if (stack) {
-                InventoryService.gI().addItemBag(pl, Event2026Service.gI().createItem(e.rewardItem, e.rewardQty * times, 0));
-            } else {
-                for (int i = 0; i < e.rewardQty * times; i++) {
-                    InventoryService.gI().addItemBag(pl, Event2026Service.gI().createItem(e.rewardItem, 1, 0));
+            if (e.costPoint > 0) {
+                pl.event.subEventPoint(e.costPoint * times);
+            }
+            List<String> got = new ArrayList<>();
+            int total = 0, bonus = 0;
+            for (int i = 0; i < times; i++) {
+                if (e.openNow) {
+                    String g = Event2026Service.gI().openBoxById(pl, e.rewardItem);
+                    if (g != null) {
+                        got.add(g);
+                    }
+                } else {
+                    int qty = Util.nextInt(e.rewardQty, e.rewardQtyMax);
+                    if (stack) {
+                        total += qty;
+                    } else {
+                        for (int k = 0; k < qty; k++) {
+                            int days = 0;
+                            if (e.rewardDays.length > 0 && !Util.isTrue(e.permRate, 100)) {
+                                days = e.rewardDays[Util.nextInt(0, e.rewardDays.length - 1)];
+                            }
+                            InventoryService.gI().addItemBag(pl, Event2026Service.gI().createItem(e.rewardItem, 1, days));
+                            got.add(rewardName + (e.rewardDays.length > 0 ? (days > 0 ? " (" + days + " ngày)" : " (vĩnh viễn)") : ""));
+                        }
+                    }
                 }
+                if (e.bonusItem > 0 && Util.isTrue(e.bonusRate, 100)) {
+                    bonus++;
+                }
+            }
+            if (total > 0) {
+                InventoryService.gI().addItemBag(pl, Event2026Service.gI().createItem(e.rewardItem, total, 0));
+                got.add("x" + total + " " + rewardName);
+            }
+            if (bonus > 0) {
+                InventoryService.gI().addItemBag(pl, Event2026Service.gI().createItem(e.bonusItem, bonus, 0));
+                got.add("x" + bonus + " " + ItemService.gI().getTemplate(e.bonusItem).name);
             }
             if (e.eventPoint > 0) {
                 pl.event.addEventPoint(e.eventPoint * times);
+                got.add(e.eventPoint * times + " điểm sự kiện");
+            }
+            Top t = tops.get(e.topId);
+            if (t != null && e.topPoint > 0) {
+                addTopPoint(t, pl, e.topPoint * times);
+                got.add(e.topPoint * times + " điểm top");
             }
             InventoryService.gI().sendItemBags(pl);
             Service.gI().sendMoney(pl);
-            Service.gI().sendThongBao(pl, "Đổi thành công x" + (e.rewardQty * times) + " " + sample.template.name
-                    + (e.eventPoint > 0 ? ", +" + (e.eventPoint * times) + " điểm sự kiện" : ""));
+            String text = String.join(", ", got);
+            Service.gI().sendThongBao(pl, "Nhận được " + (text.length() > 200 ? text.substring(0, 200) + "..." : text));
+        }
+    }
+
+    // ------------------------------------------------------------------ đua top
+    private void addTopPoint(Top t, Player pl, int pts) {
+        try {
+            LocalManager.executeUpdate("INSERT INTO season_event_point (top_id, player_id, name, points) VALUES (?, ?, ?, ?) "
+                    + "ON DUPLICATE KEY UPDATE points = points + VALUES(points), name = VALUES(name)", t.id, pl.id, pl.name, pts);
+        } catch (Exception e) {
+            Logger.error("Không lưu được điểm top: " + e.getMessage() + "\n");
+        }
+    }
+
+    private String topText(Top t, Player pl) {
+        StringBuilder sb = new StringBuilder("Đua top " + t.name.replace("\n", " ") + "\n");
+        int mine = 0;
+        try (Connection con = LocalManager.getConnection()) {
+            try (PreparedStatement ps = con.prepareStatement("select name, points from season_event_point where top_id = ? order by points desc, player_id limit 10")) {
+                ps.setInt(1, t.id);
+                try (ResultSet rs = ps.executeQuery()) {
+                    int rank = 0;
+                    while (rs.next()) {
+                        sb.append("Top ").append(++rank).append(": ").append(rs.getString("name")).append(" - ").append(rs.getInt("points")).append(" điểm\n");
+                    }
+                    if (rank == 0) {
+                        sb.append("Chưa có ai tham gia\n");
+                    }
+                }
+            }
+            try (PreparedStatement ps = con.prepareStatement("select points from season_event_point where top_id = ? and player_id = ?")) {
+                ps.setInt(1, t.id);
+                ps.setLong(2, pl.id);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        mine = rs.getInt("points");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            return "Không xem được top: " + e.getMessage();
+        }
+        sb.append("Điểm của bạn: ").append(mine).append("\n");
+        int lastFrom = -1;
+        for (int i = 0; i < t.rewards.size(); i++) {
+            int[] r = t.rewards.get(i);
+            if (r[0] != lastFrom) {
+                sb.append(lastFrom == -1 ? "" : "\n").append(r[0] == r[1] ? "Top " + r[0] : "Top " + r[0] + "-" + r[1]).append(":");
+                lastFrom = r[0];
+            } else {
+                sb.append(",");
+            }
+            sb.append(" ").append(rewardName(r[2], r[3], t.rewardDays.get(i)));
+        }
+        sb.append("\nTop chốt khi hết sự kiện, quà nhận khi vào game.");
+        return sb.toString();
+    }
+
+    private static String rewardName(int item, int qty, int[] days) {
+        String name = switch (item) {
+            case -1 -> Util.numberToMoney(qty) + " vàng";
+            case -2 -> qty + " ngọc xanh";
+            case -3 -> qty + " hồng ngọc";
+            default -> (qty > 1 ? qty + " " : "") + ItemService.gI().getTemplate(item).name;
+        };
+        if (item >= 0 && days.length > 0) {
+            name += " " + days[0] + " ngày";
+        } else if (item >= 0 && Set.of(5, 11, 18, 21, 23, 36, 72).contains((int) ItemService.gI().getTemplate(item).type)) {
+            name += " vĩnh viễn";
+        }
+        return name;
+    }
+
+    /** Chốt top: xếp hạng, lưu quà chờ nhận và xoá điểm cho mùa sau. */
+    public synchronized int closeTop(Top t) {
+        int maxRank = 0;
+        for (int[] r : t.rewards) {
+            maxRank = Math.max(maxRank, r[1]);
+        }
+        int n = 0;
+        try (Connection con = LocalManager.getConnection()) {
+            List<long[]> ranks = new ArrayList<>();
+            try (PreparedStatement ps = con.prepareStatement("select player_id from season_event_point where top_id = ? and points > 0 order by points desc, player_id limit ?")) {
+                ps.setInt(1, t.id);
+                ps.setInt(2, Math.max(1, maxRank));
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        ranks.add(new long[]{rs.getLong("player_id"), ++n});
+                    }
+                }
+            }
+            try (PreparedStatement ps = con.prepareStatement("insert into season_event_reward_pending (player_id, top_id, rank_no) values (?, ?, ?)")) {
+                for (long[] r : ranks) {
+                    ps.setLong(1, r[0]);
+                    ps.setInt(2, t.id);
+                    ps.setInt(3, (int) r[1]);
+                    ps.addBatch();
+                }
+                ps.executeBatch();
+            }
+            try (PreparedStatement ps = con.prepareStatement("delete from season_event_point where top_id = ?")) {
+                ps.setInt(1, t.id);
+                ps.executeUpdate();
+            }
+            for (long[] r : ranks) {
+                Player pl = Client.gI().getPlayer(r[0]);
+                if (pl != null) {
+                    deliverTopRewards(pl);
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("Lỗi chốt top " + t.name + ": " + e.getMessage() + "\n");
+        }
+        Logger.success("Chốt top " + t.name + ": " + n + " người\n");
+        return n;
+    }
+
+    /** Phát quà top đang chờ khi người chơi vào game. */
+    public void deliverTopRewards(Player pl) {
+        if (pl == null || !pl.isPl()) {
+            return;
+        }
+        synchronized (pl) {
+            try (Connection con = LocalManager.getConnection()) {
+                List<int[]> pend = new ArrayList<>();
+                try (PreparedStatement ps = con.prepareStatement("select id, top_id, rank_no from season_event_reward_pending where player_id = ?")) {
+                    ps.setLong(1, pl.id);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        while (rs.next()) {
+                            pend.add(new int[]{rs.getInt("id"), rs.getInt("top_id"), rs.getInt("rank_no")});
+                        }
+                    }
+                }
+                for (int[] p : pend) {
+                    Top t = tops.get(p[1]);
+                    List<Integer> idx = new ArrayList<>();
+                    if (t != null) {
+                        for (int i = 0; i < t.rewards.size(); i++) {
+                            int[] r = t.rewards.get(i);
+                            if (p[2] >= r[0] && p[2] <= r[1]) {
+                                idx.add(i);
+                            }
+                        }
+                    }
+                    int slots = (int) idx.stream().filter(i -> t.rewards.get(i)[2] >= 0).count();
+                    if (InventoryService.gI().getCountEmptyBag(pl) < slots) {
+                        Service.gI().sendThongBao(pl, "Bạn có quà đua top, cần " + slots + " ô trống trong hành trang để nhận");
+                        return;
+                    }
+                    for (int i : idx) {
+                        int[] r = t.rewards.get(i);
+                        int[] days = t.rewardDays.get(i);
+                        if (r[2] < 0) {
+                            Event2026Service.gI().giveCurrency(pl, r[2], r[3]);
+                        } else {
+                            InventoryService.gI().addItemBag(pl, Event2026Service.gI().createItem(r[2], r[3], days.length > 0 ? days[0] : 0));
+                        }
+                    }
+                    try (PreparedStatement ps = con.prepareStatement("delete from season_event_reward_pending where id = ?")) {
+                        ps.setInt(1, p[0]);
+                        ps.executeUpdate();
+                    }
+                    InventoryService.gI().sendItemBags(pl);
+                    Service.gI().sendMoney(pl);
+                    if (t != null) {
+                        Service.gI().sendThongBao(pl, "Bạn đạt Top " + p[2] + " " + t.name.replace("\n", " ") + ", quà đã vào hành trang");
+                    }
+                }
+            } catch (Exception e) {
+                Logger.error("Lỗi phát quà top: " + e.getMessage() + "\n");
+            }
         }
     }
 
@@ -638,6 +1030,20 @@ public class SeasonEventService implements Runnable {
                     testDate = a.length > 1 ? LocalDate.parse(a[1]) : null;
                     update();
                     return "Ngày sự kiện: " + today() + (testDate != null ? " (giả lập)" : "");
+                }
+                case "top" -> {
+                    StringBuilder sb = new StringBuilder("Các đua top (sukien chottop <id>):\n");
+                    for (Top t : tops.values()) {
+                        sb.append(t.id).append(". ").append(t.season.name).append(" - ").append(t.name.replace("\n", " ")).append("\n");
+                    }
+                    return sb.toString();
+                }
+                case "chottop" -> {
+                    Top t = tops.get(Integer.parseInt(a[1]));
+                    if (t == null) {
+                        return "Không có đua top id " + a[1];
+                    }
+                    return "Đã chốt top " + t.name.replace("\n", " ") + ": " + closeTop(t) + " người nhận quà";
                 }
                 default -> {
                 }
@@ -674,7 +1080,7 @@ public class SeasonEventService implements Runnable {
             }
             sb.append("\n");
         }
-        sb.append("Lệnh: sukien bat|tat|tudong <id>, sukien reload, sukien ngay yyyy-mm-dd");
+        sb.append("Lệnh: sukien bat|tat|tudong <id>, sukien reload, sukien ngay yyyy-mm-dd, sukien top, sukien chottop <id>");
         return sb.toString();
     }
 
@@ -694,9 +1100,5 @@ public class SeasonEventService implements Runnable {
 
     private static String fmt(LocalDate d) {
         return String.format("%02d/%02d/%d", d.getDayOfMonth(), d.getMonthValue(), d.getYear());
-    }
-
-    public List<Season> all() {
-        return Collections.unmodifiableList(new ArrayList<>(seasons.values()));
     }
 }

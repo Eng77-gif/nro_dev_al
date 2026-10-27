@@ -140,13 +140,23 @@ public class Event2026Service {
     }
 
     public void openBox(Player pl, Item box) {
-        List<BoxReward> list = boxes.get((int) box.template.id);
-        if (list == null || list.isEmpty()) {
-            return;
-        }
         if (InventoryService.gI().getCountEmptyBag(pl) <= 0) {
             Service.gI().sendThongBao(pl, "Hành trang không còn chỗ trống");
             return;
+        }
+        String got = openBoxById(pl, box.template.id);
+        if (got != null) {
+            InventoryService.gI().subQuantityItemsBag(pl, box, 1);
+            InventoryService.gI().sendItemBags(pl);
+            Service.gI().sendThongBao(pl, "Mở " + box.template.name + " nhận được " + got);
+        }
+    }
+
+    /** Rút 1 phần quà của hộp boxId và cho vào hành trang; trả về tên quà (null nếu hộp không có quà). */
+    public String openBoxById(Player pl, int boxId) {
+        List<BoxReward> list = boxes.get(boxId);
+        if (list == null || list.isEmpty()) {
+            return null;
         }
         int total = 0;
         for (BoxReward b : list) {
@@ -161,8 +171,6 @@ public class Event2026Service {
                 break;
             }
         }
-        String boxName = box.template.name;
-        InventoryService.gI().subQuantityItemsBag(pl, box, 1);
         int qty = Util.nextInt(pick.qtyMin, pick.qtyMax);
         String got;
         if (pick.itemId < 0) {
@@ -176,11 +184,10 @@ public class Event2026Service {
             InventoryService.gI().addItemBag(pl, it);
             got = (qty > 1 ? "x" + qty + " " : "") + it.template.name + (days > 0 ? " (" + days + " ngày)" : (pick.days.length > 0 ? " (vĩnh viễn)" : ""));
         }
-        InventoryService.gI().sendItemBags(pl);
-        Service.gI().sendThongBao(pl, "Mở " + boxName + " nhận được " + got);
+        return got;
     }
 
-    private String giveCurrency(Player pl, int type, int qty) {
+    public String giveCurrency(Player pl, int type, int qty) {
         switch (type) {
             case -1 -> {
                 pl.inventory.gold = Math.min(Inventory.LIMIT_GOLD, pl.inventory.gold + qty);

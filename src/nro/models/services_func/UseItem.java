@@ -701,10 +701,18 @@ public class UseItem {
                             }
                             break;
                             case 1823:
-                                UseItem.gI().OpenHopQuaThuong(pl, item.template.id);
+                                if (Event2026Service.gI().isBox(item)) {
+                                    Event2026Service.gI().openBox(pl, item);
+                                } else {
+                                    UseItem.gI().OpenHopQuaThuong(pl, item.template.id);
+                                }
                                 break;
                             case 1824:
-                                UseItem.gI().OpenHopQuaVip(pl, item.template.id);
+                                if (Event2026Service.gI().isBox(item)) {
+                                    Event2026Service.gI().openBox(pl, item);
+                                } else {
+                                    UseItem.gI().OpenHopQuaVip(pl, item.template.id);
+                                }
                                 break;
                             case 1592:
                                 UseItem.gI().OpenHopQuaGokuDay(pl, item.template.id);
