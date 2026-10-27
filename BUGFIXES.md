@@ -643,3 +643,17 @@ Sự kiện tự bật và tắt theo lịch mỗi năm: Tết, Giỗ tổ, Trun
   - Thỏ Ú, Ma cầu mưa, Khủng Long ngok
 - `vsData` lên 18 để client tải lại part.
 - Script: `pets_import.py` (bảng ghép vật phẩm → part chính thức nằm trong script).
+
+## Đợt 24: Hình đeo lưng còn thiếu
+- **Hình đeo lưng mới** (khung động lấy từ icon chính thức, thêm vào `flag_bag`):
+
+  | Món | flag_bag | Hình | Icon khung |
+  |---|---|---|---|
+  | Bóng WC 2026 | 159 | quả bóng nhỏ xoay | 32274–32277 (chép sang số mới vì số chính thức 16931–16934 trùng icon khác) |
+  | Cờ World Cup 2026 | 160 | cúp vàng nhỏ | 17089–17092 |
+  | Đeo lưng Mãi Dell thành công | 161 | ngựa "mã đáo thành công" | 16573–16576 |
+
+- **Icon vật phẩm** của Bóng WC 2026 (16935) và Pet đại bàng (16930) trước là ảnh trống 1×1, nay dùng ảnh chính thức.
+- **Chưa làm**:
+  - Bóng mờ Trung Thu chưa tìm thấy khung đeo lưng.
+  - Ván bay WC / Trung Thu là thú cưỡi, cần ảnh `mount_...` (mục Mount của NroResTool), vẫn đang mượn hình cũ.
