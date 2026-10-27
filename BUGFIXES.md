@@ -553,3 +553,9 @@ Sự kiện tự bật và tắt theo lịch mỗi năm: Tết, Giỗ tổ, Trun
 - Thêm 436 icon có trên server chính thức mà server chưa có, và 150 file res mới. Bản gốc x4, tự thu nhỏ ra x1/x2/x3.
 - `DataGame.vsRes` lên 2 để client tải lại res.
 - Không ghi đè 232 icon trùng số nhưng khác hình (ví dụ 11120, 11576–11655). Bộ part 1656–2081 của server này khác bản chính thức, nên thay ảnh sẽ làm lệch hình các đồ đang dùng. Cũng không nhập Nr_Part.sql chính thức, vì 434 part khác số với dữ liệu hiện tại.
+
+## Đợt 19: Xoá dữ liệu không có trên bản chính thức
+- 81 part (trong khoảng 1779–1942) dùng icon không tồn tại cả trên server lẫn bản chính thức (đa số số 20097 trở lên) được làm rỗng: mọi khung về `[0,0,0]`. Không xoá dòng, vì part được đánh số theo thứ tự dòng; xoá sẽ làm lệch mọi part phía sau. Các part này không vật phẩm, boss hay NPC nào dùng.
+- Xoá 11 dòng `head_avatar` của các part đầu đó.
+- 3 vật phẩm 2093 (Cải Trang Goku Ninja), 2094 (Pet ma dơi), 2099 (Cải Trang công chúa quỷ) không có icon và không có cách nhận: đổi tên thành "Vật phẩm đã xoá", icon 0. Giữ dòng để id các vật phẩm sau không lệch.
+- Sau khi dọn, không còn part, vật phẩm hay avatar nào trỏ tới icon bị thiếu. `vsData` lên 17 để client tải lại part.

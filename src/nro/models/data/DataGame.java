@@ -31,7 +31,7 @@ import nro.models.player_system.Template.BgItem;
 
 public class DataGame {
 
-    public static byte vsData = 16; // tăng khi thêm part/vật phẩm mới để client tải lại
+    public static byte vsData = 17; // tăng khi thêm part/vật phẩm mới để client tải lại
     public static byte vsMap = 2;
     public static byte vsSkill = 1;
     public static byte vsItem = 15;
