@@ -43,6 +43,8 @@ public class Whis extends Npc {
                         "Ta có thể giúp gì cho ngươi?", "Quay về", "Từ chối");
             case 48 ->
                 createOtherMenu(player, ConstNpc.BASE_MENU, "Coming Soon");
+            default -> // map khác (vd Võ Đài Siêu Cấp) trước đây không có menu, map lại không có lối ra
+                createOtherMenu(player, ConstNpc.BASE_MENU, "Ta có thể giúp gì cho ngươi?", "Về nhà", "Từ chối");
         }
     }
 
@@ -80,14 +82,26 @@ public class Whis extends Npc {
                             "Shop thiên sứ", "Chế tạo", "Từ chối");
                 } else if (this.mapId == 164) {
                     ChangeMapService.gI().changeMapInYard(player, 154, -1, 758);
+                } else if (this.mapId != 48) {
+                    ChangeMapService.gI().changeMapInYard(player, 21 + player.gender, -1, 300);
                 }
             }
-            case 2 ->
-                Service.gI().showListTop(player, Manager.Topwhis);
-            case 1 ->
-                showSkillLearningMenu(player, biKiepTuyetKy);
-            case 3 ->
-                TrainingService.gI().callBoss(player, BossID.WHIS, false);
+            // mục 1-3 chỉ có ở menu map 154 (map khác mục 1 là "Từ chối")
+            case 2 -> {
+                if (this.mapId == 154) {
+                    Service.gI().showListTop(player, Manager.Topwhis);
+                }
+            }
+            case 1 -> {
+                if (this.mapId == 154) {
+                    showSkillLearningMenu(player, biKiepTuyetKy);
+                }
+            }
+            case 3 -> {
+                if (this.mapId == 154) {
+                    TrainingService.gI().callBoss(player, BossID.WHIS, false);
+                }
+            }
         }
     }
 

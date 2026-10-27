@@ -258,6 +258,10 @@ public class ChangeMapService {
      */
     public void changeMapInYard(Player pl, int mapId, int zoneId, int x) {
         Zone zoneJoin = MapService.gI().getMapCanJoin(pl, mapId, zoneId);
+        if (zoneJoin != null && zoneJoin.map.tileMap == null) {
+            Service.gI().sendThongBao(pl, "Bản đồ này chưa mở");
+            return;
+        }
         if (zoneJoin != null) {
             if (zoneJoin.map.mapWidth - 100 < 100) {
                 x = x != -1 ? x : Util.nextInt(100, 700);
@@ -317,6 +321,12 @@ public class ChangeMapService {
     }
 
     private void changeMap(Player pl, Zone zoneJoin, int mapId, int zoneId, int x, int y, byte typeSpace) {
+        Map target = zoneJoin != null ? zoneJoin.map : (mapId >= 0 ? MapService.gI().getMapById(mapId) : null);
+        if (target != null && target.tileMap == null) { // map thiếu dữ liệu ô gạch: vào sẽ kẹt
+            resetPoint(pl);
+            Service.gI().sendThongBao(pl, "Bản đồ này chưa mở");
+            return;
+        }
         if (pl.idNRNM != -1 && !Util.canDoWithTime(pl.lastTimePickNRNM, 30000)) {
             resetPoint(pl);
             Service.gI().sendThongBao(pl, "Không thể chuyển map quá nhanh khi đeo Ngọc Rồng Namếc");

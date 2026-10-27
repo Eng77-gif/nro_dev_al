@@ -224,8 +224,8 @@ public class BaHatMit extends Npc {
                         if (DeathOrAliveArenaManager.gI().getVDST(player.zone) != null) {
                             if (DeathOrAliveArenaManager.gI().getVDST(player.zone).getPlayer().equals(player)) {
                                 switch (select) {
-                                    case 0 -> {
-                                    }
+                                    case 0 ->
+                                        showTopVDST(player);
                                     case 1 ->
                                         this.npcChat("Không thể thực hiện");
                                     case 2 -> {
@@ -236,8 +236,8 @@ public class BaHatMit extends Npc {
                                 return;
                             }
                             switch (select) {
-                                case 0 -> {
-                                }
+                                case 0 ->
+                                    showTopVDST(player);
                                 case 1 ->
                                     this.createOtherMenu(player, ConstNpc.DAT_CUOC_HAT_MIT,
                                             "Phí bình chọn là 1 triệu vàng\nkhi trận đấu kết thúc\n90% tổng tiền bình chọn sẽ chia đều cho phe bình chọn chính xác",
@@ -253,8 +253,8 @@ public class BaHatMit extends Npc {
                             return;
                         }
                         switch (select) {
-                            case 0 -> {
-                            }
+                            case 0 ->
+                                showTopVDST(player);
                             case 1 ->
                                 DeathOrAliveArenaService.gI().startChallenge(player);
                             case 2 -> {
@@ -453,5 +453,25 @@ public class BaHatMit extends Npc {
                 }
             }
         }
+    }
+
+    private static java.util.List<nro.models.matches.TOP> topVDST;
+    private static long lastTopVDST;
+
+    /** Top 100 võ đài sinh tử (trước đây nút "Top 100" không làm gì). Làm mới tối đa mỗi phút. */
+    private void showTopVDST(Player player) {
+        if (topVDST == null || System.currentTimeMillis() - lastTopVDST > 60_000) {
+            try (java.sql.Connection con = nro.models.data.LocalManager.gI().getConnection()) {
+                topVDST = nro.models.server.Manager.realTop(nro.models.server.Manager.queryTopVDST, con);
+                lastTopVDST = System.currentTimeMillis();
+            } catch (Exception e) {
+                nro.models.utils.Logger.logException(BaHatMit.class, e);
+            }
+        }
+        if (topVDST == null || topVDST.isEmpty()) {
+            Service.gI().sendThongBao(player, "Hôm nay chưa có ai thách đấu võ đài");
+            return;
+        }
+        Service.gI().showListTop(player, topVDST);
     }
 }

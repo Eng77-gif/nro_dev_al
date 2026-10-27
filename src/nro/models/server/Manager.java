@@ -118,6 +118,9 @@ public final class Manager {
     public static final String queryTopsukien1 = "SELECT id, point_sukien1 FROM player ORDER BY point_sukien1 DESC LIMIT 100";
     public static final String queryTopsukien2 = "SELECT id, point_sukien2 FROM player ORDER BY point_sukien2 DESC LIMIT 100";
     public static final String queryTopwhis = "SELECT id, thachdauwhis FROM player ORDER BY thachdauwhis DESC LIMIT 100";
+    // Võ đài sinh tử: lệ phí thỏi vàng tăng 10 sau mỗi lần thách đấu trong ngày => số lượt = phí / 10
+    public static final String queryTopVDST = "SELECT id, CAST(JSON_EXTRACT(vodaisinhtu, '$[1]') AS INT) DIV 10 AS luot FROM player"
+            + " WHERE JSON_VALID(vodaisinhtu) AND CAST(JSON_EXTRACT(vodaisinhtu, '$[1]') AS INT) > 0 ORDER BY luot DESC LIMIT 100";
     public static final String queryTopsukien = "SELECT id, point_sukien FROM player ORDER BY point_sukien DESC LIMIT 100";
     public static boolean isTopMaydamChanged = false;
     public static boolean isTopSukienChanged = false;
@@ -1034,6 +1037,10 @@ public final class Manager {
                     top.setInfo1(whis + " Level");
                     top.setInfo2(whis + " Level");
 
+                } else if (query.equals(Manager.queryTopVDST)) {
+                    int luot = rs.getInt("luot");
+                    top.setInfo1(luot + " lượt thách đấu hôm nay");
+                    top.setInfo2(luot + " lượt");
                 } else if (query.equals(Manager.queryTopmaydam)) {
                     int maydam = rs.getInt("point_maydam");
                     long totalDame = rs.getLong("total_damage_maydam");

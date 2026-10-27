@@ -293,6 +293,14 @@ public class MrBlue {
                     player.location.x = 359;
                     player.location.y = 408;
                 }
+                // map không có lối ra (Phòng thí nghiệm Myuu, Rừng nguyên sinh của Bản đồ truyền thuyết)
+                // hoặc map thiếu dữ liệu ô gạch: đăng nhập lại sẽ kẹt, đưa về nhà
+                nro.models.map.Map lm = MapService.gI().getMapById(mapId);
+                if (mapId == 166 || mapId == 186 || lm == null || lm.tileMap == null) {
+                    mapId = player.gender + 21;
+                    player.location.x = 300;
+                    player.location.y = 336;
+                }
 
                 player.zone = MapService.gI().getMapCanJoin(player, mapId, -1);
             } catch (Exception e) {

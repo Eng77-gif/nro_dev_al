@@ -780,3 +780,22 @@ Cách test:
   - Trả mặc định về `pc|2.3.3`.
   - Nếu với phiên bản đã chọn mà không vào được game, tool tự kết nối lại bằng 2.3.3.
   - Phần thử zoom x2 / x1 / x3 cho danh hiệu (v11) vẫn giữ.
+
+## Đợt 33: Kiểm tra icon, NPC, map
+**Icon item** (đối chiếu 2.112 item với file ảnh 4 mức zoom):
+- 125 item thiếu icon x1, khoảng 15 item có icon x1/x3 là ảnh trống 1x1. Đã tạo lại từ bản lớn nhất. Làm cho mọi icon trên ổ: thêm 1.566 file. Part cải trang / pet không còn thiếu file nào.
+- Icon thật cho Trực thăng thỏ đế, Pet hươu, Pet hổ (trước là ảnh trống).
+- Còn 13 item trống icon ở mọi zoom (abcd, TT, Đai lưng, CT Sida/Heles/Rumsshi/Mosco/Champa/Belmod/Fide chai/Test). Bản chính thức cũng trống; không có trong shop, hộp quà hay rơi đồ nên người chơi không gặp.
+
+**NPC:** test tự động 176 lượt NPC trên 91 map: mở menu, bấm từng lựa chọn cấp 1, theo dõi lỗi server.
+- **Boss luyện tập tự động:** `leaveMap` gây NullPointer lặp vô hạn (khoảng 1.200 lần trong một lần test). Server chậm hẳn, nhiều NPC bấm không phản hồi. Đã sửa.
+- **Quả trứng:** bấm khi chưa có trứng Mabư thì lỗi NullPointer. Nay báo "Bạn chưa có trứng Ma Bư!".
+- **Đại Thiên Sứ** (NPC 64, Võ Đài Siêu Cấp / Lãnh địa Fize): lớp rỗng, bấm không có gì, mà map không có cổng ra. Thêm menu "Về nhà".
+- **Whis:** ở map 164, nút "Từ chối" mở nhầm menu học tuyệt kỹ. Map khác chưa có menu nay có "Về nhà".
+- **Bà Hạt Mít, nút "Top 100" ở Võ đài:** trước không làm gì. Nay hiện top 100 lượt thách đấu võ đài trong ngày.
+- **NPC chưa có chức năng** (chỉ "Từ chối"): Rương Sưu Tầm (Nhà Bunma), Berry (Khu hang động); Ngộ Không, Đường Tăng ở map không vào được.
+
+**Map:** kiểm tra cổng, điểm đến, ô gạch; test thoát game ở từng map (170 map) rồi đăng nhập lại.
+- Phòng thí nghiệm Myuu (166) và Rừng nguyên sinh (186): đăng nhập lại vẫn ở đó, mà map không có lối ra → kẹt. Nay đưa về nhà.
+- 7 map thiếu dữ liệu ô gạch (78, 95, 101, 121, 125, 130, 134): vào là kẹt. Nay không cho dịch chuyển vào (báo "Bản đồ này chưa mở"); đăng nhập ở đó thì đưa về nhà.
+- Các map còn lại (phó bản, doanh trại, Ngọc Rồng Sao Đen, Bụng Mabư, kho báu…) đăng nhập lại đều được đưa ra đúng chỗ. Mọi cổng dẫn tới map có thật và có đất để đứng.
