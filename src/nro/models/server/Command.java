@@ -280,6 +280,34 @@ parameterizedCommands.put("upp", (player, text) -> {
             nro.models.services.StatsInfoService.gI().show(player, false);
             return true;
         }
+        if (text.equals("chisoraw") && player.isAdmin()) {
+            // admin: in mọi biến chỉ số (dùng để kiểm tra option có tác dụng hay không)
+            StringBuilder sb = new StringBuilder("RAW|");
+            for (java.lang.reflect.Field f : nro.models.player.NPoint.class.getDeclaredFields()) {
+                if (java.lang.reflect.Modifier.isStatic(f.getModifiers())) {
+                    continue;
+                }
+                try {
+                    f.setAccessible(true);
+                    Object v = f.get(player.nPoint);
+                    if (v instanceof Number || v instanceof Boolean) {
+                        sb.append(f.getName()).append('=').append(v).append(';');
+                    } else if (v instanceof java.util.List<?> l) {
+                        long sum = 0;
+                        for (Object o : l) {
+                            if (o instanceof Number n) {
+                                sum += n.longValue();
+                            }
+                        }
+                        sb.append(f.getName()).append('=').append(sum).append(';');
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+            sb.append("speed2=").append(player.nPoint.speed).append(';');
+            nro.models.services.Service.gI().sendThongBao(player, sb.toString());
+            return true;
+        }
         if (text.equals("chiso de") || text.equals("chi so de")) {
             nro.models.services.StatsInfoService.gI().show(player, true);
             return true;

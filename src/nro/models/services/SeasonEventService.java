@@ -665,6 +665,11 @@ public class SeasonEventService implements Runnable {
     }
 
     /** item_id..item_to: rơi ngẫu nhiên 1 món trong khoảng (vd Bí ngô 1-7 sao). */
+    /** option 206 / 207: tăng tỉ lệ rơi vật phẩm sự kiện theo % */
+    private static int rareRate(int rate, int bonus) {
+        return bonus > 0 ? (int) Math.min(10000, (long) rate * (100 + bonus) / 100) : rate;
+    }
+
     private static int pickItem(Drop d) {
         return d.itemTo > d.itemId ? Util.nextInt(d.itemId, d.itemTo) : d.itemId;
     }
@@ -695,7 +700,7 @@ public class SeasonEventService implements Runnable {
                 continue;
             }
             for (Drop d : s.drops) {
-                if (!d.fromBoss && matches(d, pl, mobTemp) && Util.isTrue(d.rate, 10000)) {
+                if (!d.fromBoss && matches(d, pl, mobTemp) && Util.isTrue(rareRate(d.rate, pl.nPoint.tlRareMob), 10000)) {
                     int qty = takeDaily(pl, d, Util.nextInt(d.qtyMin, d.qtyMax));
                     if (qty > 0 && useNeed(pl, d, qty)) {
                         list.add(new ItemMap(zone, pickItem(d), qty, x, y, pl.id));
@@ -715,7 +720,7 @@ public class SeasonEventService implements Runnable {
                 continue;
             }
             for (Drop d : s.drops) {
-                if (d.fromBoss && matches(d, pl, (int) boss.id) && Util.isTrue(d.rate, 10000)) {
+                if (d.fromBoss && matches(d, pl, (int) boss.id) && Util.isTrue(rareRate(d.rate, pl.nPoint.tlRareBoss), 10000)) {
                     int qty = takeDaily(pl, d, Util.nextInt(d.qtyMin, d.qtyMax));
                     if (qty <= 0 || !useNeed(pl, d, qty)) {
                         continue;

@@ -1066,6 +1066,35 @@ public class Player implements Runnable {
                     && Util.isTrue(this.nPoint.tlNeCrit, 100)) {
                 damage = damage * 100 / (100 + Math.max(0, plAtt.nPoint.tlSDCM)) / 2;
             }
+            if (this.nPoint != null) {
+                // option 198 / 199 / 200: giảm #% sát thương từ tộc Trái Đất / Namếc / Xayda
+                if (plAtt != null && plAtt.isPl()) {
+                    int g = plAtt.gender == 0 ? this.nPoint.giamSTTD : plAtt.gender == 1 ? this.nPoint.giamSTNM : this.nPoint.giamSTXD;
+                    if (g > 0) {
+                        damage -= damage * Math.min(90, g) / 100;
+                    }
+                }
+                // option 157: giảm #% mọi sát thương khi KI dưới 20%
+                if (this.nPoint.giamSTKhiItKi > 0 && this.nPoint.mp < this.nPoint.mpMax / 5) {
+                    damage -= damage * Math.min(90, this.nPoint.giamSTKhiItKi) / 100;
+                }
+                // option 4: hồi #% KI khi bị đánh
+                if (this.nPoint.kiHoiKhiBiDanh > 0 && damage > 0) {
+                    this.nPoint.addMp((int) Math.min(Integer.MAX_VALUE, (long) this.nPoint.mpMax * this.nPoint.kiHoiKhiBiDanh / 100));
+                }
+                // option 15: phản # sát thương khi bị đánh bằng chiêu cận chiến
+                if (this.nPoint.phanDonCanChien > 0 && plAtt != null && plAtt != this && !plAtt.isDie()
+                        && plAtt.playerSkill != null && plAtt.playerSkill.skillSelect != null) {
+                    int sk = plAtt.playerSkill.skillSelect.template.id;
+                    if (sk == Skill.DRAGON || sk == Skill.DEMON || sk == Skill.GALICK || sk == Skill.KAIOKEN || sk == Skill.LIEN_HOAN) {
+                        long hit = Math.min(this.nPoint.phanDonCanChien, Math.max(0, plAtt.nPoint.hp - 1));
+                        if (hit > 0) {
+                            plAtt.nPoint.subHP(hit);
+                            nro.models.services.PlayerService.gI().sendInfoHpMpMoney(plAtt);
+                        }
+                    }
+                }
+            }
             if (plAtt != null && !plAtt.equals(this)) {
                 setTemporaryEnemies(plAtt);
             }

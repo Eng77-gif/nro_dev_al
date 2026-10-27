@@ -507,10 +507,14 @@ public final class Manager {
             }
             Logger.success(Logger.PURPLE + "Successfully loaded flag bag (" + FLAGS_BAGS.size() + ")\n");
 
-            //load intrinsic
+            //load intrinsic (bảng có dòng lặp lại: mỗi id chỉ nạp 1 lần, nếu không mở nội tại có thể ra "Chưa kích hoạt")
             ps = ConnectionDatabase.prepareStatement("select * from intrinsic");
             rs = ps.executeQuery();
+            java.util.Set<Integer> loadedIntrinsic = new java.util.HashSet<>();
             while (rs.next()) {
+                if (!loadedIntrinsic.add(rs.getInt("id"))) {
+                    continue;
+                }
                 Intrinsic intrinsic = new Intrinsic();
                 intrinsic.id = rs.getByte("id");
                 intrinsic.name = rs.getString("name");
@@ -535,6 +539,11 @@ public final class Manager {
                 }
                 INTRINSICS.add(intrinsic);
             }
+            // vị trí 0 phải là "Chưa kích hoạt" (mở nội tại bốc ngẫu nhiên từ vị trí 1)
+            java.util.Comparator<Intrinsic> byId = java.util.Comparator.comparingInt(i -> i.id);
+            INTRINSIC_TD.sort(byId);
+            INTRINSIC_NM.sort(byId);
+            INTRINSIC_XD.sort(byId);
             Logger.success(Logger.RED + "Successfully loaded intrinsic (" + INTRINSICS.size() + ")\n");
 
             //load task

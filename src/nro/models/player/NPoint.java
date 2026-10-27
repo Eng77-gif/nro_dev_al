@@ -213,7 +213,17 @@ public class NPoint {
     public int tlNeCrit; // option 191: né chí mạng
     public int tlGiamHoiKhien; // option 183: giảm % thời gian hồi Khiên năng lượng
     public int tlGiamKhongChe; // option 227: giảm % thời gian bị khống chế khi đang dùng khiên
-    private int nearHauGaiDame; // option 256: +#% SĐ mỗi người ở gần mặc CT Lý Tiểu Nương hầu gái / bikini khác loại
+    public int tlRareMob, tlRareBoss; // option 206 / 207: +#% vật phẩm hiếm rơi từ quái / boss
+    public int giamSTTD, giamSTNM, giamSTXD; // option 198 / 199 / 200: giảm #% sát thương từ tộc Trái Đất / Namếc / Xayda
+    public int kiHoiKhiBiDanh; // option 4: hồi #% KI khi bị đánh
+    public int phanDonCanChien; // option 15: phản # sát thương khi bị đánh cận chiến
+    public boolean isSocolaXq; // option 29 / 186: biến sôcôla (kẹo) người xung quanh mỗi 30 giây
+    public int punchStackMax; // option 156: cộng dồn 1% SĐ mỗi đòn đấm liên tiếp, tối đa #%
+    private int punchStack;
+    public int giamSTKhiItKi; // option 157: giảm #% mọi sát thương khi KI dưới 20%
+    private int flyMobCotNha, flyMobGheBay; // option 166 / 170: +#% SĐ lên quái khi bay cùng cải trang
+    // hiệu ứng "ở gần cải trang khác loại" (145, 146, 150, 177, 179, 193, 196, 256), cập nhật mỗi 3 giây
+    public int nearDame, nearHp, nearKi, nearSpeed;
     public int skhBeerus; // số món SKH Thần hủy diệt Beerus đang mặc (option 115)
 
     public boolean isGogeta;
@@ -557,6 +567,16 @@ public class NPoint {
         if (setGiapWithXenMax > 0 && isWearing(PET_XEN_MAX)) {
             this.tlGiap += setGiapWithXenMax;
         }
+        if (nearDame > 0) {
+            this.tlDame.add(nearDame);
+        }
+        if (nearHp > 0) {
+            this.tlHp.add(nearHp);
+        }
+        if (nearKi > 0) {
+            this.tlMp.add(nearKi);
+        }
+        this.tlSpeed += nearSpeed;
         if (setSDCMWithLuoiHaiHong > 0 && isWearing(LUOI_HAI_HONG)) {
             this.tlDameCrit.add(setSDCMWithLuoiHaiHong);
             this.tlSDCM += setSDCMWithLuoiHaiHong;
@@ -580,27 +600,129 @@ public class NPoint {
         return ct != null && ct.isNotNullItem() ? ct.template.id : -1;
     }
 
-    /** % sức đánh cộng thêm khi đứng gần người mặc CT Lý Tiểu Nương khác loại (option 256, tối đa 12%). */
-    private int nearHauGaiBonus() {
-        if (nearHauGaiDame <= 0 || player.zone == null) {
-            return 0;
-        }
-        int mine = costumeId(player);
-        java.util.Set<Integer> kinds = new java.util.HashSet<>();
-        for (Player o : player.zone.getNotBosses()) {
-            if (o == player || o.isPet || Util.getDistance(player, o) > 200) {
-                continue;
+    // các nhóm cải trang "khác loại" (mỗi mảng con là 1 loại, gồm các bản biến thể)
+    private static final int[][] DR_SLUM = {{612, 914, 1982}, {613}, {614}};
+    private static final int[][] POC_PIC_KONG = {{583, 913, 1235, 1886, 1952, 2086}, {633, 1234, 1396}, {634, 1236}};
+    private static final int[] MABU_MAP = {937, 974, 1601};
+    private static final int[] DEMONS_FROST = {629, 630, 631, 632, 878, 879, 1205, 1599, 1839, 1913};
+    private static final int[][] CAU_THU = {{968}, {969}, {970}, {971}, {972}, {973}, {974}, {975}, {976}, {977}, {978}};
+    private static final int[][] THO = {{1041}, {1042}, {1043}};
+    private static final int[][] HAU_GAI = {{1503}, {1504}, {1512}};
+    private static final int CT_TAU_PAY_PAY = 284, COT_NHA = 744, GHE_BAY = 795;
+    private static final int[] NHA_FIDE = {629, 630, 631, 632, 878, 879, 1599, 1839, 1913};
+
+    private static boolean in(int[] arr, int v) {
+        for (int x : arr) {
+            if (x == v) {
+                return true;
             }
-            int c = costumeId(o);
-            if (c != mine) {
-                for (int id : LTN_HAU_GAI) {
-                    if (c == id) {
-                        kinds.add(c);
-                    }
+        }
+        return false;
+    }
+
+    private static int kindOf(int[][] groups, int ct) {
+        for (int i = 0; i < groups.length; i++) {
+            if (in(groups[i], ct)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private int optParam(Item it, int opt) {
+        if (it != null && it.isNotNullItem()) {
+            for (ItemOption io : it.itemOptions) {
+                if (io.optionTemplate.id == opt) {
+                    return Math.max(1, io.param);
                 }
             }
         }
-        return Math.min(12, nearHauGaiDame * kinds.size());
+        return 0;
+    }
+
+    /** Số loại khác loại của mình (theo nhóm) đang đứng gần trong 300px. */
+    private int otherKindsNear(int[][] groups, java.util.List<Player> near) {
+        int mine = kindOf(groups, costumeId(player));
+        java.util.Set<Integer> kinds = new java.util.HashSet<>();
+        for (Player o : near) {
+            int k = kindOf(groups, costumeId(o));
+            if (k >= 0 && k != mine) {
+                kinds.add(k);
+            }
+        }
+        return kinds.size();
+    }
+
+    /**
+     * Cập nhật hiệu ứng "ở gần cải trang khác loại" (gọi định kỳ từ EffectSkin). Trả về true nếu chỉ số thay đổi.
+     */
+    public boolean updateNearSets() {
+        int d = 0, h = 0, k = 0, sp = 0;
+        Item ct = player.inventory != null && player.inventory.itemsBody.size() > 5 ? player.inventory.itemsBody.get(5) : null;
+        if (ct != null && ct.isNotNullItem() && player.zone != null && !player.isPet) {
+            java.util.List<Player> near = new java.util.ArrayList<>();
+            for (Player o : player.zone.getNotBosses()) {
+                if (o != player && !o.isPet && !o.isNewPet && !o.isDie() && Util.getDistance(player, o) <= 300) {
+                    near.add(o);
+                }
+            }
+            if (optParam(ct, 145) > 0 || optParam(ct, 146) > 0) { // Dr Slum: gần 1 loại +20% SĐ +66% tốc độ, gần 2 loại +30% +100%
+                int n = otherKindsNear(DR_SLUM, near);
+                d += n >= 2 ? 30 : n == 1 ? 20 : 0;
+                sp += n >= 2 ? 100 : n == 1 ? 66 : 0;
+            }
+            if (optParam(ct, 150) > 0) { // Póc - Píc - King Kong: +10% SĐ, HP, KI mỗi loại khác ở gần
+                int n = otherKindsNear(POC_PIC_KONG, near);
+                d += 10 * n; h += 10 * n; k += 10 * n;
+            }
+            if (optParam(ct, 177) > 0) { // Gohan Bư: +2% tất cả khi ở gần Mabư mập
+                for (Player o : near) {
+                    if (in(MABU_MAP, costumeId(o))) {
+                        d += 2; h += 2; k += 2;
+                        break;
+                    }
+                }
+            }
+            if (optParam(ct, 179) > 0) { // tộc Demons Frost: +2% SĐ mỗi người, tối đa 10%
+                int n = 0;
+                for (Player o : near) {
+                    if (in(DEMONS_FROST, costumeId(o))) {
+                        n++;
+                    }
+                }
+                d += Math.min(10, 2 * n);
+            }
+            int p193 = optParam(ct, 193);
+            if (p193 > 0) {
+                d += Math.min(11, p193 * otherKindsNear(CAU_THU, near));
+            }
+            int p196 = optParam(ct, 196);
+            if (p196 > 0) {
+                d += Math.min(18, p196 * otherKindsNear(THO, near));
+            }
+            int p256 = optParam(ct, 256);
+            if (p256 > 0) {
+                d += Math.min(12, p256 * otherKindsNear(HAU_GAI, near));
+            }
+        }
+        if (d == nearDame && h == nearHp && k == nearKi && sp == nearSpeed) {
+            return false;
+        }
+        nearDame = d; nearHp = h; nearKi = k; nearSpeed = sp;
+        return true;
+    }
+
+    /** +% SĐ lên quái khi bay cùng cải trang (option 166 / 170): đang dùng ván bay đó và mặc đúng cải trang. */
+    private int flyMobBonus() {
+        int b = 0;
+        int ct = costumeId(player);
+        if (flyMobCotNha > 0 && ct == CT_TAU_PAY_PAY && isWearing(COT_NHA)) {
+            b += flyMobCotNha;
+        }
+        if (flyMobGheBay > 0 && in(NHA_FIDE, ct) && isWearing(GHE_BAY)) {
+            b += flyMobGheBay;
+        }
+        return b;
     }
 
     public static final int PET_XEN_HOAN_THIEN = 2036;
@@ -671,6 +793,43 @@ public class NPoint {
             case 169: //Đi cùng Pet Xên hoàn thiện tăng #% sát thương chí mạng
                 this.setSDCMWithXenHT += io.param;
                 break;
+            case 206: //Vật phẩm hiếm rơi từ quái (+#%)
+                this.tlRareMob += io.param;
+                break;
+            case 207: //Vật phẩm hiếm rơi từ boss (+#%)
+                this.tlRareBoss += io.param;
+                break;
+            case 198: //Giảm #% sát thương từ tộc Trái Đất
+                this.giamSTTD += io.param;
+                break;
+            case 199: //Giảm #% sát thương từ tộc Namếc
+                this.giamSTNM += io.param;
+                break;
+            case 200: //Giảm #% sát thương từ tộc Xayda
+                this.giamSTXD += io.param;
+                break;
+            case 4: //Hồi phục #% KI khi bị đánh
+                this.kiHoiKhiBiDanh += Math.min(100, io.param);
+                break;
+            case 15: //Phản đòn cận chiến+#
+                this.phanDonCanChien += io.param;
+                break;
+            case 29: //Biến Sôcôla mọi người xung quanh mỗi 30 giây
+            case 186: //Biến kẹo 30 giây
+                this.isSocolaXq = true;
+                break;
+            case 156: //Cộng dồn 1% sức đánh khi chỉ dùng chiêu đấm, tối đa #%
+                this.punchStackMax = Math.max(this.punchStackMax, io.param);
+                break;
+            case 157: //Giảm #% mọi sát thương khi KI dưới 20%
+                this.giamSTKhiItKi += io.param;
+                break;
+            case 166: //Ngầu +#% sức đánh lên quái khi bay với Cải Trang Tàu Pảy Pảy
+                this.flyMobCotNha += io.param;
+                break;
+            case 170: //Ngầu +#% sức đánh lên quái khi bay với Cải Trang nhà Fide
+                this.flyMobGheBay += io.param;
+                break;
             case 191: //Né chí mạng+#%
                 this.tlNeCrit += io.param;
                 break;
@@ -683,8 +842,7 @@ public class NPoint {
             case 255: //Đi cùng Lưỡi hái hồng tăng #% sát thương chí mạng
                 this.setSDCMWithLuoiHaiHong += io.param;
                 break;
-            case 256: //+#% sức đánh, tối đa 12% khi ở gần Lý Tiểu Nương : Hầu Gái xanh, hồng, bikini
-                this.nearHauGaiDame = Math.max(this.nearHauGaiDame, io.param);
+            case 256: //+#% sức đánh, tối đa 12% khi ở gần Lý Tiểu Nương : Hầu Gái xanh, hồng, bikini (tính trong updateNearSets)
                 break;
             case 42: //Đi cùng Pet Xên Max tăng #% giảm sát thương
                 this.setGiapWithXenMax += io.param;
@@ -866,7 +1024,7 @@ public class NPoint {
 
     private void setSpeed() {
         if (player.isPl()) {
-            speed = (byte) (8 + 8 * (tlSpeed / 100));
+            speed = (byte) Math.min(127, 8 + 8 * tlSpeed / 100); // trước đây chia nguyên trước nên +% dưới 100 không có tác dụng
         }
     }
 
@@ -1384,11 +1542,6 @@ public class NPoint {
         if (this.player.fusion.typeFusion != 0) {
             dame += this.player.pet.nPoint.dame;
         }
-        // CT Lý Tiểu Nương hầu gái / bikini: ở gần loại khác thì +% sức đánh
-        int hauGai = nearHauGaiBonus();
-        if (hauGai > 0) {
-            dame += dame * hauGai / 100L;
-        }
         // điều ước Rồng Xương: +15% sức đánh khi hợp thể bông tai Porata
         if (this.player.hlwDameUntil > System.currentTimeMillis() && nro.models.services.shenron.RongXuong.isPorata(this.player)) {
             dame += dame * 15 / 100;
@@ -1530,9 +1683,21 @@ public class NPoint {
         this.setSDCMWithXenHT = 0;
         this.setSDCMWithLuoiHaiHong = 0;
         this.tlNeCrit = 0;
+        this.kiHoiKhiBiDanh = 0;
+        this.tlRareMob = 0;
+        this.tlRareBoss = 0;
+        this.giamSTTD = 0;
+        this.giamSTNM = 0;
+        this.giamSTXD = 0;
+        this.phanDonCanChien = 0;
+        this.isSocolaXq = false;
+        this.punchStackMax = 0;
+        this.giamSTKhiItKi = 0;
+        this.flyMobCotNha = 0;
+        this.flyMobGheBay = 0;
         this.tlGiamHoiKhien = 0;
         this.tlGiamKhongChe = 0;
-        this.nearHauGaiDame = 0;
+
         this.setGiapWithXenMax = 0;
         this.skhBeerus = 0;
         this.tlSpeed = 0;
@@ -1765,6 +1930,23 @@ public class NPoint {
         }
 
         dameAttack += ((long) dameAttack * percentXDame / 100);
+        // option 156: chỉ dùng chiêu đấm thì mỗi đòn cộng dồn 1% sức đánh, tối đa #%
+        if (punchStackMax > 0) {
+            int sk = skillSelect.template.id;
+            if (sk == Skill.DRAGON || sk == Skill.DEMON || sk == Skill.GALICK) {
+                punchStack = Math.min(punchStackMax, punchStack + 1);
+                dameAttack += dameAttack * punchStack / 100;
+            } else {
+                punchStack = 0;
+            }
+        }
+        // option 166 / 170: bay cùng cải trang thì +% sức đánh lên quái
+        if (isAttackMob) {
+            int fly = flyMobBonus();
+            if (fly > 0) {
+                dameAttack += dameAttack * fly / 100;
+            }
+        }
 
         long tempDameAttack = (long) (dameAttack / 100L * 5L);
         if (tempDameAttack

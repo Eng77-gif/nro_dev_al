@@ -90,6 +90,8 @@ public class EffectSkin {
             updateXenHutXungQuanh();
             updateTanHinh();
             updateHoaDa();
+            updateSocolaXq();
+            updateNearSets();
             updateLamCham();
             updateXChuong();
 //            updateHalloween();
@@ -360,6 +362,44 @@ public class EffectSkin {
 
                     }
                     this.lastTimeHoaDa = System.currentTimeMillis();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private long lastTimeSocolaXq, lastTimeNearSets;
+
+    /** option 29 / 186: biến sôcôla (kẹo) người xung quanh mỗi 30 giây, mỗi lần 5 giây. */
+    private void updateSocolaXq() {
+        try {
+            if (this.player.nPoint != null && this.player.nPoint.isSocolaXq && Util.canDoWithTime(lastTimeSocolaXq, 30000)) {
+                List<Player> playersMap = this.player.zone.getNotBosses();
+                for (int i = playersMap.size() - 1; i >= 0; i--) {
+                    Player pl = playersMap.get(i);
+                    if (pl != null && pl.nPoint != null && !this.player.equals(pl) && !pl.isBoss && !pl.isDie()
+                            && !pl.effectSkill.isSocola && Util.getDistance(this.player, pl) <= 200) {
+                        EffectSkillService.gI().setSocola(pl, System.currentTimeMillis(), 5000);
+                        Service.gI().Send_Caitrang(pl);
+                        nro.models.services.ItemTimeService.gI().sendItemTime(pl, 4133, 5);
+                    }
+                }
+                this.lastTimeSocolaXq = System.currentTimeMillis();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** Hiệu ứng "ở gần cải trang khác loại": cập nhật mỗi 3 giây, đổi thì tính lại chỉ số. */
+    private void updateNearSets() {
+        try {
+            if (this.player.nPoint != null && !this.player.isPet && !this.player.isBoss && Util.canDoWithTime(lastTimeNearSets, 3000)) {
+                this.lastTimeNearSets = System.currentTimeMillis();
+                if (this.player.nPoint.updateNearSets()) {
+                    this.player.nPoint.calPoint();
+                    Service.gI().point(this.player);
                 }
             }
         } catch (Exception e) {

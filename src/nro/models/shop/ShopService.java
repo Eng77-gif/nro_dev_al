@@ -1040,6 +1040,17 @@ public class ShopService {
         return isBuy;
     }
 
+    private static boolean hasOption(Item item, int opt) {
+        if (item != null && item.isNotNullItem() && item.itemOptions != null) {
+            for (Item.ItemOption io : item.itemOptions) {
+                if (io.optionTemplate.id == opt) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public void showConfirmSellItem(Player pl, int where, int index) {
         Item item = null;
         if (where == 0) {
@@ -1059,7 +1070,7 @@ public class ShopService {
             item = pl.inventory.itemsBag.get(index);
         }
         if (item != null && item.isNotNullItem()) {
-            if (item.template.id == 570) {
+            if (item.template.id == 570 || hasOption(item, 154)) { // 154: Không thể bán lại
                 Service.gI().sendThongBao(pl, "Bạn không thể bán vật phẩm này");
                 return;
             }
@@ -1111,6 +1122,10 @@ public class ShopService {
         List<Item> sellList = where == 0 ? pl.inventory.itemsBody : pl.inventory.itemsBag;
         if (index >= sellList.size()) {
             Service.gI().sendThongBao(pl, "Không thể thực hiện");
+            return;
+        }
+        if (hasOption(sellList.get(index), 154)) {
+            Service.gI().sendThongBao(pl, "Bạn không thể bán vật phẩm này");
             return;
         }
         item = sellList.get(index);

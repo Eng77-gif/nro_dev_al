@@ -1111,14 +1111,21 @@ public class SkillService {
 
     private void setMpAffterUseSkill(Player player) {
         if (player.playerSkill.skillSelect != null) {
+            // nội tại 3: Thái Dương Hạ San -p2% KI tiêu hao
+            int subKi = 0;
+            Intrinsic it = player.playerIntrinsic != null ? player.playerIntrinsic.intrinsic : null;
+            if (it != null && it.id == 3 && player.playerSkill.skillSelect.template.id == Skill.THAI_DUONG_HA_SAN) {
+                subKi = Math.max(0, Math.min(100, it.param2));
+            }
             switch (player.playerSkill.skillSelect.template.manaUseType) {
                 case 0 -> {
-                    if (player.nPoint.mp >= player.playerSkill.skillSelect.manaUse) {
-                        player.nPoint.setMp(player.nPoint.mp - player.playerSkill.skillSelect.manaUse);
+                    int mpUse = player.playerSkill.skillSelect.manaUse * (100 - subKi) / 100;
+                    if (player.nPoint.mp >= mpUse) {
+                        player.nPoint.setMp(player.nPoint.mp - mpUse);
                     }
                 }
                 case 1 -> {
-                    int mpUse = (int) (player.nPoint.mpMax * player.playerSkill.skillSelect.manaUse / 100);
+                    int mpUse = (int) (player.nPoint.mpMax * player.playerSkill.skillSelect.manaUse / 100) * (100 - subKi) / 100;
                     if (player.nPoint.mp >= mpUse) {
                         player.nPoint.setMp(player.nPoint.mp - mpUse);
                     }

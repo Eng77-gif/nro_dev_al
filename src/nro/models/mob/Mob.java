@@ -586,6 +586,19 @@ public class Mob {
             if (itemTask != null) {
                 itemReward.add(itemTask);
             }
+            // +% vàng từ quái: option 100 / 155 và nội tại 23
+            int goldBonus = player.nPoint != null ? player.nPoint.tlGold : 0;
+            if (player.playerIntrinsic != null && player.playerIntrinsic.intrinsic != null && player.playerIntrinsic.intrinsic.id == 23) {
+                goldBonus += player.playerIntrinsic.intrinsic.param1;
+            }
+            if (goldBonus > 0) {
+                for (ItemMap it : itemReward) {
+                    int tid = it.itemTemplate.id;
+                    if (tid == 76 || tid == 188 || tid == 189 || tid == 190) {
+                        it.quantity = (int) Math.min(Integer.MAX_VALUE, it.quantity + (long) it.quantity * goldBonus / 100);
+                    }
+                }
+            }
             msg.writer().writeByte(itemReward.size());
             for (ItemMap itemMap : itemReward) {
                 msg.writer().writeShort(itemMap.itemMapId);
@@ -819,6 +832,7 @@ public class Mob {
 
             double percentFromOption236 = Math.pow(totalOption236Param / 100.0, 1.5) * 20.0; // max 20%
             tileDrop *= (1 + percentFromOption236 / 100.0);
+            tileDrop *= (1 + player.nPoint.tlRareMob / 100.0); // option 206: vật phẩm hiếm rơi từ quái
 
             if (player.itemTime.isUseCoBonLa) {
                 tileDrop *= 1.5;
@@ -866,6 +880,7 @@ public class Mob {
 
             double percentFromOption236 = Math.pow(totalOption236Param / 100.0, 1.5) * 20.0; // max 20%
             tileDrop *= (1 + percentFromOption236 / 100.0);
+            tileDrop *= (1 + player.nPoint.tlRareMob / 100.0); // option 206: vật phẩm hiếm rơi từ quái
 
             if (player.itemTime.isUseCoBonLa) {
                 tileDrop *= 1.5;
