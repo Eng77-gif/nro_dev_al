@@ -319,9 +319,11 @@ type downloader struct {
 	resEnd    bool
 	got       map[string]bool // các yêu cầu đã nhận được (để không gửi lại / đếm trùng)
 	hinted    bool
-	waitLogin int  // server bảo chờ bao nhiêu giây mới cho đăng nhập (lệnh 122)
-	inGame    bool // đã vào bản đồ sau khi đăng nhập
-	sessBytes int  // dung lượng ảnh nhận được trong phiên hiện tại
+	waitLogin int    // server bảo chờ bao nhiêu giây mới cho đăng nhập (lệnh 122)
+	inGame    bool   // đã vào bản đồ sau khi đăng nhập
+	sessBytes int    // dung lượng ảnh nhận được trong phiên hiện tại
+	recvCount int    // số gói ảnh/icon/effect nhận được (kể cả trùng)
+	canary    []byte // yêu cầu một ảnh chắc chắn có, dùng để thử server còn trả lời không
 }
 
 // mark ghi nhận đã nhận key; trả về true nếu là lần đầu.
@@ -351,6 +353,7 @@ func (d *downloader) onMsg(m msg) {
 	z := strconv.Itoa(d.o.Zoom)
 	switch m.cmd {
 	case -67: // icon
+		d.recvCount++
 		id, err := r.i32()
 		img, err2 := r.blob()
 		if err == nil && err2 == nil {
@@ -361,6 +364,7 @@ func (d *downloader) onMsg(m msg) {
 		}
 	case 66: // ảnh theo tên
 		d.sessBytes += len(m.data)
+		d.recvCount++
 		name, err := r.utf()
 		nf, _ := r.i8()
 		img, err2 := r.blob()
@@ -372,6 +376,7 @@ func (d *downloader) onMsg(m msg) {
 			}
 		}
 	case -66: // effect
+		d.recvCount++
 		id, err := r.i16()
 		eff, err2 := r.blob()
 		if err != nil || err2 != nil {
@@ -452,10 +457,14 @@ func (d *downloader) have(rel string) bool {
 func (d *downloader) fetch(label string, reqs [][]byte, keys, rels []string, cmd int8) {
 	var r2 [][]byte
 	var k2 []string
+	d.canary = nil
+	best := int64(-1)
 	for i := range reqs {
 		if !d.have(rels[i]) {
 			r2 = append(r2, reqs[i])
 			k2 = append(k2, keys[i])
+		} else if st, err := os.Stat(filepath.Join(d.o.Out, filepath.FromSlash(rels[i]))); err == nil && (best < 0 || st.Size() < best) {
+			best, d.canary = st.Size(), reqs[i]
 		}
 	}
 	if n := len(reqs) - len(r2); n > 0 {
@@ -596,7 +605,7 @@ func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8)
 	size, wait, delay := d.o.Batch, d.o.Wait, d.o.Delay
 	if d.o.Official && cmd == 66 {
 		// ảnh theo tên (mount, aura) rất nặng, server chính thức giới hạn lưu lượng: tải từng cái một
-		size, wait, delay = 1, math.Max(wait, 10), math.Max(delay, 1.5)
+		size, wait, delay = 1, math.Max(wait, 8), math.Max(delay, 1.5)
 		d.j.log("  Server chính thức: tải từng ảnh một, nghỉ %.1f giây giữa các ảnh", delay)
 	}
 	// Server chính thức chỉ trả một ít ảnh mỗi phiên rồi im (không ngắt kết nối).
@@ -609,6 +618,7 @@ func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8)
 	retries, cool, stalls, stallAt, renewedAt, sessionSent := 0, 0, 0, -1, -1, 0
 	consec := 0
 	var deferred []int
+	var absent []string
 	for k := 0; k < len(reqs) && !d.j.isStopped(); {
 		end := k + size
 		if end > len(reqs) {
@@ -653,11 +663,49 @@ func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8)
 		d.j.log("  %d/%d  đã nhận %d", end, len(reqs), d.stats[label])
 		if sent == 0 || len(d.got) > before {
 			cool, stalls, consec = 0, 0, 0
+			if d.canary == nil {
+				for i := k; i < end; i++ {
+					if d.got[keys[i]] {
+						d.canary = reqs[i]
+						break
+					}
+				}
+			}
 			if d.o.Official && d.missing(keys[k:end]) > 0 && len(d.got) > before {
 				continue // nhận được một phần: gửi lại phần còn thiếu
 			}
 			k = end
 			continue
+		}
+		if d.o.Official && d.canary != nil {
+			d.j.log("  %s không có trả lời, thử lại một ảnh đã có để kiểm tra server...", keyName(keys[k:end]...))
+			if d.alive(cmd, wait) {
+				// server vẫn trả lời bình thường: các yêu cầu này không có trên server
+				d.j.log("  Server vẫn trả lời: server không có %s, bỏ qua", keyName(keys[k:end]...))
+				for i := k; i < end; i++ {
+					absent = append(absent, keyName(keys[i]))
+				}
+				cool, consec = 0, 0
+				k = end
+				continue
+			}
+			d.j.log("  Server không trả lời cả ảnh kiểm tra: đang bị giới hạn")
+			if cool < len(cooldowns) {
+				sec := cooldowns[cool]
+				cool++
+				if sec > 0 {
+					d.j.log("  Chờ %d giây rồi thử lại (lần %d/%d)...", sec, cool, len(cooldowns))
+					d.pump(float64(sec))
+				}
+				if !d.reconnect(fmt.Sprintf("Bị giới hạn (lần %d/%d)", cool, len(cooldowns))) {
+					d.j.log("  Dừng: không kết nối lại được server (đã tải %d/%d)", k, len(reqs))
+					return
+				}
+				sessionSent = 0
+				continue
+			}
+			d.j.log("  Vẫn bị giới hạn sau nhiều lần chờ, dừng. Để vài giờ sau chạy lại mục này (tích Bỏ qua file đã có).")
+			return
 		}
 		if d.o.Official {
 			consec++
@@ -709,6 +757,11 @@ func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8)
 		k = end
 	}
 	d.pump(d.o.Wait * 2)
+	if len(absent) > 0 {
+		f := "khong_co_tren_server_" + strings.ReplaceAll(label, "/", "_") + ".txt"
+		d.write(f, []byte(strings.Join(absent, "\n")+"\n"))
+		d.j.log("Server không có %d %s (danh sách ở %s)", len(absent), label, f)
+	}
 	if len(deferred) > 0 && !d.j.isStopped() {
 		d.retryDeferred(label, reqs, keys, cmd, deferred, wait)
 	}
@@ -757,6 +810,22 @@ func (d *downloader) retryDeferred(label string, reqs [][]byte, keys []string, c
 		d.write(f, []byte(strings.Join(miss, "\n")+"\n"))
 		d.j.log("  Còn %d %s không tải được (server không có hoặc đang giới hạn), danh sách ở %s. Để vài giờ sau tải lại mục này (tích Bỏ qua file đã có).", len(miss), label, f)
 	}
+}
+
+// alive gửi lại ảnh kiểm tra (chắc chắn có) xem server còn trả lời không.
+func (d *downloader) alive(cmd int8, wait float64) bool {
+	before := d.recvCount
+	if d.c.send(cmd, d.canary) != nil {
+		return false
+	}
+	deadline := time.Now().Add(time.Duration(wait * float64(time.Second)))
+	for time.Now().Before(deadline) && !d.j.isStopped() && !d.isClosed() {
+		d.pump(0.3)
+		if d.recvCount > before {
+			return true
+		}
+	}
+	return false
 }
 
 // keyName bỏ tiền tố loại (icon:, img:, eff:) cho dễ đọc.
