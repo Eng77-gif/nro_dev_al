@@ -811,3 +811,13 @@ Theo ảnh bản chính thức:
   - Ô sau đắt thêm 10% giá gốc (ô 22: 1,65 tỷ…), tối đa 100 ô. Giá ô 22 trở đi tự đặt; sửa ở `CollectionService.BASE_PRICE`.
 - **Lưu dữ liệu:** cột mới `player_extra.collection`, không đụng rương đồ thường. Mở lại rương đồ ở nhà hoặc chuyển map là quay về rương đồ thường.
 - **Test trên server:** mở 20 ô → cất cải trang, pet được, đồ ăn bị từ chối → nâng cấp lên 21 ô → đăng nhập lại vẫn còn đồ → lấy về hành trang được. Rương đồ thường vẫn đúng 30 ô.
+
+## Đợt 35: Danh hiệu Perfect (effect 302) làm lại từ video
+- **Nguồn:** video quay danh hiệu "PERRFECT" (server ngocrong.net). Gồm chữ PERRFECT trên bệ tối, Xên hoàn thiện, 3 đầu Xên đỏ / xanh lá / xanh dương, kén tím lăn và nhịp chớp trắng.
+- **Cách làm:**
+  - Dựng ảnh nền sạch từ những lúc danh hiệu ẩn, rồi tách danh hiệu ra bằng cách so với nền.
+  - 1 vòng chuyển động khoảng 0,74 giây.
+  - Chia 3 vùng (trên / chữ + bệ / Xên phải), mỗi vùng chỉ lưu các trạng thái khác nhau.
+  - Canh lưới 1 px game để các mảnh ghép khít.
+- **Giới hạn:** tấm effect x1 tối đa 255x255 (toạ độ mảnh là 1 byte), nên dùng 11 khung, mỗi khung giữ 2 nhịp (vòng lặp vẫn dài như video). Tỉ lệ ước tính 2,5 px màn hình = 1 px game; ảnh x3/x4 phóng từ video nên hơi mềm.
+- **File:** `data/effdata/DataEffect_302`, `data/effect/x1..x4/ImgEffect_302.png` (26 mảnh, ảnh 256 màu). Đã test server gửi effect 302 cho client.
