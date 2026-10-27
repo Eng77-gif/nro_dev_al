@@ -39,6 +39,9 @@ public class TrainingService {
     }
 
     public Player getNonInteractiveNPC(Zone zone, int id) {
+        if (zone == null) {
+            return null;
+        }
         for (Player pl : zone.getNonInteractiveNPCs()) {
             if (pl != null && pl.id == id) {
                 return pl;
@@ -69,7 +72,7 @@ public class TrainingService {
     }
 
     public void luyenTapEnd(Player pl, int bossID) {
-        if (getNpc(bossID) != -1) {
+        if (pl != null && getNpc(bossID) != -1) {
             Service.gI().sendHideNpc(pl, getNpc(bossID), false);
         }
     }

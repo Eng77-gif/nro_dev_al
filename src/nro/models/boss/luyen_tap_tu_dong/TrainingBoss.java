@@ -1,5 +1,7 @@
 package nro.models.boss.luyen_tap_tu_dong;
 
+import nro.models.map.Zone;
+
 
 import nro.models.consts.ConstRatio;
 import nro.models.boss.Boss;
@@ -194,8 +196,9 @@ public abstract class TrainingBoss extends Boss {
 
     @Override
     public void leaveMap() {
+        Zone z = this.zone; // exitMap có thể làm zone = null; trước đây gây NullPointer lặp lại liên tục
         ChangeMapService.gI().exitMap(this);
-        Player npc = TrainingService.gI().getNonInteractiveNPC(zone, (int) this.id);
+        Player npc = z != null ? TrainingService.gI().getNonInteractiveNPC(z, (int) this.id) : null;
         if (npc != null) {
             this.nPoint.hp = this.nPoint.hpMax;
             Service.gI().Send_Info_NV(this);
@@ -205,7 +208,9 @@ public abstract class TrainingBoss extends Boss {
             try {
                 msg = new Message(-6);
                 msg.writer().writeInt((int) this.id);
-                playerAtt.sendMessage(msg);
+                if (playerAtt != null) {
+                    playerAtt.sendMessage(msg);
+                }
                 msg.cleanup();
                 this.zone = null;
             } catch (IOException e) {
