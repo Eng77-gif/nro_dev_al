@@ -309,16 +309,18 @@ func (j *job) isStopped() bool {
 }
 
 type downloader struct {
-	o      options
-	j      *job
-	c      *client
-	stats  map[string]int
-	frames map[string]int
-	parts  [][][3]int
-	types  []int
-	resEnd bool
-	got    map[string]bool // các yêu cầu đã nhận được (để không gửi lại / đếm trùng)
-	hinted bool
+	o         options
+	j         *job
+	c         *client
+	stats     map[string]int
+	frames    map[string]int
+	parts     [][][3]int
+	types     []int
+	resEnd    bool
+	got       map[string]bool // các yêu cầu đã nhận được (để không gửi lại / đếm trùng)
+	hinted    bool
+	waitLogin int  // server bảo chờ bao nhiêu giây mới cho đăng nhập (lệnh 122)
+	inGame    bool // đã vào bản đồ sau khi đăng nhập
 }
 
 // mark ghi nhận đã nhận key; trả về true nếu là lần đầu.
@@ -399,6 +401,12 @@ func (d *downloader) onMsg(m msg) {
 			}
 		}
 		d.parseParts(part)
+	case 122: // chờ N giây mới được đăng nhập (đăng nhập lại quá nhanh)
+		if n, err := r.i16(); err == nil {
+			d.waitLogin = int(n)
+		}
+	case -24: // thông tin bản đồ: đã vào game
+		d.inGame = true
 	case -26, -25:
 		if s, err := r.utf(); err == nil && strings.TrimSpace(s) != "" {
 			d.j.log("  Server: %s", strings.ReplaceAll(s, "\n", " "))
@@ -588,10 +596,11 @@ func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8)
 		size, wait, delay = 1, math.Max(wait, 10), math.Max(delay, 1.5)
 		d.j.log("  Server chính thức: tải từng ảnh một, nghỉ %.1f giây giữa các ảnh", delay)
 	}
-	// Server chính thức có giới hạn tải: ngừng trả lời một lúc mà không ngắt kết nối.
-	// Khi một đợt không nhận được gì: chờ (30 giây, 1, 2, 5, 10 phút) rồi gửi lại đúng đợt đó;
-	// sau lần chờ thứ 2 mở thêm phiên mới. Hết các lần chờ vẫn không có thì mới bỏ qua.
-	cooldowns := []int{30, 60, 120, 300, 600}
+	// Server chính thức chỉ trả một ít ảnh mỗi phiên rồi im (không ngắt kết nối).
+	// Khi một đợt không nhận được gì: mở phiên mới (đăng nhập lại) rồi gửi lại đúng đợt đó;
+	// nếu phiên mới vẫn im thì chờ lâu dần (1, 2, 5, 10 phút) trước khi mở phiên tiếp.
+	// Hết các lần thử vẫn không có thì mới bỏ qua.
+	cooldowns := []int{0, 60, 120, 300, 600}
 	retries, cool, stalls, stallAt, renewedAt, sessionSent := 0, 0, 0, -1, -1, 0
 	for k := 0; k < len(reqs) && !d.j.isStopped(); {
 		end := k + size
@@ -647,15 +656,15 @@ func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8)
 			if cool < len(cooldowns) {
 				sec := cooldowns[cool]
 				cool++
-				d.j.log("  Server tạm ngừng trả lời (giới hạn tải), chờ %d giây rồi thử lại (lần %d/%d)...", sec, cool, len(cooldowns))
-				d.pump(float64(sec))
-				if cool == 2 {
-					if !d.reconnect("Thử phiên mới") {
-						d.j.log("  Dừng: không kết nối lại được server (đã tải %d/%d)", k, len(reqs))
-						return
-					}
-					sessionSent = 0
+				if sec > 0 {
+					d.j.log("  Phiên mới vẫn không trả lời, chờ %d giây rồi thử lại (lần %d/%d)...", sec, cool, len(cooldowns))
+					d.pump(float64(sec))
 				}
+				if !d.reconnect(fmt.Sprintf("Server ngừng trả lời (lần %d/%d)", cool, len(cooldowns))) {
+					d.j.log("  Dừng: không kết nối lại được server (đã tải %d/%d)", k, len(reqs))
+					return
+				}
+				sessionSent = 0
 				continue
 			}
 			d.j.log("  Bỏ qua %d yêu cầu không có trả lời", d.missing(keys[k:end]))
@@ -720,13 +729,26 @@ func (d *downloader) connect() error {
 	c.send(-29, ct.Bytes())
 	d.pump(1.5)
 	if o.User != "" {
-		c.send(-29, (&pkt{}).b(0).u(o.User).u(o.Password).u(o.Version).bo(false).Bytes())
+		login := (&pkt{}).b(0).u(o.User).u(o.Password).u(o.Version).bo(false).Bytes()
+		d.waitLogin, d.inGame = 0, false
+		c.send(-29, login)
 		d.pump(3)
+		for try := 0; d.waitLogin > 0 && try < 3 && !d.j.isStopped() && !d.isClosed(); try++ {
+			w := d.waitLogin
+			d.waitLogin = 0
+			d.j.log("  Server bảo chờ %d giây mới cho đăng nhập lại, đang chờ...", w)
+			d.pump(float64(w + 2))
+			c.send(-29, login)
+			d.pump(4)
+		}
 		for _, sub := range []int8{6, 7, 8, 13} {
 			c.send(-28, (&pkt{}).b(sub).Bytes())
 		}
 		c.send(-38, nil)
 		d.pump(4)
+		if !d.inGame && !d.isClosed() {
+			d.j.log("  Cảnh báo: chưa thấy vào game sau khi đăng nhập (sai tài khoản, đang bị chờ hoặc nhân vật đang online ở máy khác)")
+		}
 	}
 	if d.isClosed() {
 		if c.closeErr != nil {
