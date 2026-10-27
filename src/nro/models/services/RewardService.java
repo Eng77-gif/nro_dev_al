@@ -61,32 +61,27 @@ public class RewardService {
 
     /**
      * Vòng quay Thượng Đế mùa Giỗ tổ Hùng Vương: khi sự kiện đang diễn ra, mỗi ô quay ngọc có cơ hội ra
-     * 1 trong các món dưới đây. Quay càng nhiều trong ngày, tỉ lệ ra đồ vĩnh viễn càng cao.
+     * 1 trong các món dưới đây. Quay càng nhiều, tỉ lệ ra đồ vĩnh viễn càng cao (cộng dồn đến hết sự kiện).
      */
     public static final int[] GIO_TO_WHEEL_ITEMS = {
         860, 1022, 1013, 1207, 1213, 1112, 1205, 1230, 1557 // Mị Nương, Búa Stormbreaker, Kiếm ánh sáng, Pet Minion, Mèo Hoàng Thượng, Cây nắp ấm, Drabura hóa băng, Hào quang rực rỡ, Hắc Mị Nương
     };
     public static final int GIO_TO_SEASON = 4;
     public static final int GIO_TO_WHEEL_RATE = 5; // % mỗi ô quay
-    private static final java.util.Map<Long, int[]> spinsToday = new java.util.concurrent.ConcurrentHashMap<>(); // playerId -> {ngày, số lần}
+    private static final int SPIN_COUNTER = 1; // bộ đếm số lần quay của mùa Giỗ tổ (lưu đến hết sự kiện)
 
-    private static int today() {
-        return (int) java.time.LocalDate.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).toEpochDay();
-    }
-
-    /** Số lần quay ngọc hôm nay của người chơi. */
-    public static int spinsToday(Player pl) {
-        int[] v = spinsToday.get(pl.id);
-        return v != null && v[0] == today() ? v[1] : 0;
+    /** Số lần quay vòng quay đặc biệt trong mùa Giỗ tổ hiện tại. */
+    public static int eventSpins(Player pl) {
+        return SeasonEventService.gI().getCounter(GIO_TO_SEASON, SPIN_COUNTER, pl);
     }
 
     private static void addSpins(Player pl, int n) {
-        spinsToday.compute(pl.id, (k, v) -> v == null || v[0] != today() ? new int[]{today(), n} : new int[]{v[0], v[1] + n});
+        SeasonEventService.gI().addCounter(GIO_TO_SEASON, SPIN_COUNTER, pl, n);
     }
 
-    /** Tỉ lệ (%) ra đồ vĩnh viễn: 1% + 1% mỗi 20 lần quay trong ngày, tối đa 10%. */
+    /** Tỉ lệ (%) ra đồ vĩnh viễn: 1% + 1% mỗi 20 lần quay trong mùa sự kiện, tối đa 10%. */
     public static int gioToPermRate(Player pl) {
-        return Math.min(10, 1 + spinsToday(pl) / 20);
+        return Math.min(10, 1 + eventSpins(pl) / 20);
     }
 
     public static boolean gioToWheelActive() {
@@ -108,9 +103,11 @@ public class RewardService {
     public List<Item> getListItemLuckyRound(Player player, int num, boolean vip) {
         List<Item> list = new ArrayList<>();
         boolean gioTo = vip && gioToWheelActive();
+        if (gioTo) {
+            addSpins(player, num);
+        }
         for (int i = 0; i < num; i++) {
             if (gioTo) {
-                addSpins(player, 1);
                 if (Util.isTrue(GIO_TO_WHEEL_RATE, 100)) {
                     list.add(createGioToWheelItem(player));
                     continue;

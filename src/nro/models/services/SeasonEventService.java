@@ -419,6 +419,7 @@ public class SeasonEventService implements Runnable {
                     for (Top t : s.tops) {
                         closeTop(t);
                     }
+                    clearCounters(s);
                 }
             }
         }
@@ -1147,6 +1148,56 @@ public class SeasonEventService implements Runnable {
             Service.gI().sendMoney(pl);
             String text = String.join(", ", got);
             Service.gI().sendThongBao(pl, "Nhận được " + (text.length() > 200 ? text.substring(0, 200) + "..." : text));
+        }
+    }
+
+    // ------------------------------------------------------------------ bộ đếm theo mùa
+    /** Bộ đếm riêng của người chơi trong một mùa sự kiện (lưu DB, xoá khi mùa kết thúc). Dùng top_id âm trong season_event_point. */
+    private final Map<String, Integer> counters = new ConcurrentHashMap<>();
+
+    private static int counterId(int seasonId, int key) {
+        return -(seasonId * 100 + key);
+    }
+
+    public int getCounter(int seasonId, int key, Player pl) {
+        int id = counterId(seasonId, key);
+        return counters.computeIfAbsent(id + ":" + pl.id, k -> {
+            try (Connection con = LocalManager.getConnection();
+                    PreparedStatement ps = con.prepareStatement("select points from season_event_point where top_id = ? and player_id = ?")) {
+                ps.setInt(1, id);
+                ps.setLong(2, pl.id);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next() ? rs.getInt(1) : 0;
+                }
+            } catch (Exception e) {
+                return 0;
+            }
+        });
+    }
+
+    public int addCounter(int seasonId, int key, Player pl, int n) {
+        int id = counterId(seasonId, key);
+        int v = getCounter(seasonId, key, pl) + n;
+        counters.put(id + ":" + pl.id, v);
+        try {
+            LocalManager.executeUpdate("INSERT INTO season_event_point (top_id, player_id, name, points) VALUES (?, ?, ?, ?) "
+                    + "ON DUPLICATE KEY UPDATE points = points + VALUES(points), name = VALUES(name)", id, pl.id, pl.name, n);
+        } catch (Exception e) {
+            Logger.error("Không lưu được bộ đếm sự kiện: " + e.getMessage() + "\n");
+        }
+        return v;
+    }
+
+    private void clearCounters(Season s) {
+        int hi = counterId(s.id, 0), lo = counterId(s.id, 99);
+        counters.keySet().removeIf(k -> {
+            int id = Integer.parseInt(k.substring(0, k.indexOf(':')));
+            return id >= lo && id <= hi;
+        });
+        try {
+            LocalManager.executeUpdate("DELETE FROM season_event_point WHERE top_id BETWEEN ? AND ?", lo, hi);
+        } catch (Exception e) {
+            Logger.error("Không xoá được bộ đếm sự kiện: " + e.getMessage() + "\n");
         }
     }
 

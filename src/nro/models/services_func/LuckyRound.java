@@ -182,11 +182,11 @@ public class LuckyRound {
         }
     }
 
-    /** Mùa Giỗ tổ: báo số lần quay trong ngày và tỉ lệ ra đồ vĩnh viễn hiện tại. */
+    /** Mùa Giỗ tổ: báo số lần đã quay (cộng dồn cả mùa) và tỉ lệ ra đồ vĩnh viễn hiện tại. */
     private void gioToInfo(Player player) {
         if (RewardService.gioToWheelActive()) {
-            Service.gI().sendThongBao(player, "Vòng quay Thượng Đế mùa Giỗ tổ: hôm nay đã quay " + RewardService.spinsToday(player)
-                    + " lần, tỉ lệ ra đồ vĩnh viễn " + RewardService.gioToPermRate(player) + "% (quay càng nhiều càng cao)");
+            Service.gI().sendThongBao(player, "Vòng quay Thượng Đế mùa Giỗ tổ: đã quay " + RewardService.eventSpins(player)
+                    + " lần trong sự kiện, tỉ lệ ra đồ vĩnh viễn " + RewardService.gioToPermRate(player) + "% (quay càng nhiều càng cao)");
         }
     }
 
