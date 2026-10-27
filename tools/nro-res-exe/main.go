@@ -331,6 +331,8 @@ type downloader struct {
 	seenTitle map[int]int // riêng danh hiệu (lệnh 24 loại 2)
 	cmdCount  map[int8]int
 	scanRaw   []string // gói -128 thô, để gửi lại khi cần phân tích
+	probing   bool     // đang thử các kiểu hỏi danh hiệu: ghi lại mọi gói nhận được
+	probeLog  []string
 }
 
 // mark ghi nhận đã nhận key; trả về true nếu là lần đầu.
@@ -351,6 +353,18 @@ func (d *downloader) write(rel string, data []byte) {
 func (d *downloader) onMsg(m msg) {
 	if d.scanning {
 		d.cmdCount[m.cmd]++
+	}
+	if d.probing && len(d.probeLog) < 2000 {
+		switch m.cmd {
+		case -7, -9, -10, -3, 54, -90, -94, -12, -30, -60, -68, 92, 93, 44, 43, -20, -6, 56, 38, -17, -19, -16, -8, 24:
+			// gói di chuyển / chiến đấu / chat của người khác: bỏ qua cho đỡ rối
+		default:
+			head := m.data
+			if len(head) > 48 {
+				head = head[:48]
+			}
+			d.probeLog = append(d.probeLog, fmt.Sprintf("<< lệnh %d, %d byte: % x", m.cmd, len(m.data), head))
+		}
 	}
 	if d.o.Debug {
 		head := m.data
@@ -419,6 +433,7 @@ func (d *downloader) onMsg(m msg) {
 		id, err := r.i16()
 		eff, err2 := r.blob()
 		if err != nil || err2 != nil {
+			d.write("effect_loi/goi_"+strconv.Itoa(int(id))+".bin", m.data)
 			return
 		}
 		if left := len(r.d) - r.p; left >= 4 {
@@ -427,6 +442,16 @@ func (d *downloader) onMsg(m msg) {
 			}
 		}
 		img, err := r.blob()
+		if err != nil || !bytes.HasPrefix(img, pngMagic) {
+			// định dạng khác (vd danh hiệu có thêm dữ liệu): lấy ảnh PNG nằm sau cùng của gói
+			if i := bytes.LastIndex(m.data, pngMagic); i >= 0 {
+				img, err = m.data[i:], nil
+			} else {
+				d.write("effect_loi/goi_"+strconv.Itoa(int(id))+".bin", m.data)
+				d.j.log("  effect %d: gói lạ, đã lưu effect_loi/goi_%d.bin", id, id)
+				return
+			}
+		}
 		if err == nil {
 			d.write("effdata/DataEffect_"+strconv.Itoa(int(id)), eff)
 			d.write("effect/x"+z+"/ImgEffect_"+strconv.Itoa(int(id))+".png", img)
@@ -1157,6 +1182,67 @@ func (d *downloader) scan(zones []int) {
 		rels = append(rels, "effect/x"+z+"/ImgEffect_"+strconv.Itoa(id)+".png")
 	}
 	d.fetch("effect", reqs, keys, rels, -66)
+	var miss []int
+	for _, id := range ids {
+		if !d.got["eff:"+strconv.Itoa(id)] && !d.have("effect/x"+z+"/ImgEffect_"+strconv.Itoa(id)+".png") {
+			miss = append(miss, id)
+		}
+	}
+	if len(miss) > 0 && !d.j.isStopped() {
+		d.probeTitles(miss)
+	}
+}
+
+// probeTitles: server không trả danh hiệu khi hỏi effect kiểu thường. Thử các kiểu hỏi khác
+// (thêm byte loại effect, hỏi ảnh theo tên) và ghi lại mọi gói server trả về để phân tích.
+func (d *downloader) probeTitles(ids []int) {
+	d.j.log("Còn %d effect chưa tải được (%s): thử các kiểu hỏi khác...", len(ids), joinInts(ids))
+	d.probing, d.probeLog = true, nil
+	for _, id := range ids {
+		key := "eff:" + strconv.Itoa(id)
+		try := func(desc string, cmd int8, data []byte) bool {
+			if d.got[key] || d.j.isStopped() {
+				return true
+			}
+			d.probeLog = append(d.probeLog, fmt.Sprintf(">> gửi lệnh %d (%s): % x", cmd, desc, data))
+			d.c.send(cmd, data)
+			d.pump(4)
+			if d.got[key] {
+				d.j.log("  effect %d: tải được khi hỏi %s", id, desc)
+				return true
+			}
+			return false
+		}
+		ok := false
+		for _, tp := range []int8{1, 2, 3, 0} {
+			if ok = try(fmt.Sprintf("effect %d + byte %d", id, tp), -66, (&pkt{}).s(int16(id)).b(tp).Bytes()); ok {
+				break
+			}
+		}
+		if !ok {
+			ok = try(fmt.Sprintf("effect %d dạng int", id), -66, (&pkt{}).i(int32(id)).Bytes())
+		}
+		if !ok {
+			for _, n := range []string{"danhhieu_%d", "danh_hieu_%d", "title_%d", "Title_%d", "dh_%d", "ImgEffect_%d"} {
+				name := fmt.Sprintf(n, id)
+				before := d.stats["ảnh"]
+				try("ảnh theo tên "+name, 66, (&pkt{}).u(name).Bytes())
+				if d.stats["ảnh"] > before {
+					d.j.log("  effect %d: có ảnh theo tên %s", id, name)
+					ok = true
+					break
+				}
+			}
+		}
+		if !ok {
+			d.j.log("  effect %d: không kiểu nào được", id)
+		}
+	}
+	d.probing = false
+	f := filepath.Join(d.o.Out, "danh_hieu_do_duoc.txt")
+	old, _ := os.ReadFile(f)
+	d.write("danh_hieu_do_duoc.txt", append(old, []byte("\n# thử các kiểu hỏi danh hiệu (>> là tool gửi, còn lại là server trả)\n"+strings.Join(d.probeLog, "\n")+"\n")...))
+	d.j.log("  Đã ghi kết quả thử vào danh_hieu_do_duoc.txt, gửi file này để phân tích nếu vẫn chưa tải được")
 }
 
 func joinInts(a []int) string {
@@ -1352,7 +1438,7 @@ func openBrowser(url string) {
 }
 
 // version: ghi vào nhật ký và giao diện để biết đang chạy bản nào
-const version = "v8 (27/10 dò danh hiệu)"
+const version = "v9 (27/10 dò danh hiệu, thử các kiểu hỏi)"
 
 func main() {
 	port := flag.Int("port", 8765, "cổng giao diện web")
@@ -1462,3 +1548,5 @@ func main() {
 	}
 	http.Serve(ln, mux)
 }
+
+var pngMagic = []byte{0x89, 0x50, 0x4e, 0x47}

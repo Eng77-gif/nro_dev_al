@@ -748,3 +748,12 @@ Cách test:
   - Ghi lại số effect người khác đang đeo: danh hiệu (lệnh 24) và hiệu ứng set / cải trang (lệnh -128). Sau đó tự tải đúng các effect đó.
   - Danh sách tìm được lưu ở `danh_hieu_do_duoc.txt`.
   - Test trên server thử: nhân vật khác đeo danh hiệu 222 ở khu 3, tool tìm thấy và tải đúng ảnh và effdata.
+
+## Đợt 29: NroResTool v9 thử các kiểu hỏi danh hiệu
+- Bản v8 dò được danh hiệu server chính thức đang dùng (224, 228), nhưng server không trả ảnh khi hỏi effect kiểu thường.
+- **Tải không được thì tool tự thử thêm các kiểu hỏi:**
+  - effect + 1 byte loại (1, 2, 3, 0);
+  - id dạng int;
+  - ảnh theo tên (`danhhieu_`, `danh_hieu_`, `title_`, `Title_`, `dh_`, `ImgEffect_` + id).
+- Tool ghi mọi gói server trả về trong lúc thử vào cuối `danh_hieu_do_duoc.txt` (bỏ gói di chuyển / chiến đấu) để phân tích.
+- **Gói effect định dạng lạ:** tool lấy ảnh PNG nằm cuối gói. Không đọc được thì lưu nguyên gói vào `effect_loi/goi_<id>.bin`.
