@@ -484,3 +484,36 @@ Sự kiện tự bật và tắt theo lịch mỗi năm: Tết, Giỗ tổ, Trun
 - **Hình pet**: thêm part cho Pet Ngựa Đỏ, Ngựa Be, Ngựa Trắng, Ngựa Thần Tài, Kirby, Rồng xương. Trước đây các pet này mặc vào không hiện hình. `vsData` lên 16 để client tải lại part. Quà top Hộp bánh Trung Thu Chay đổi từ Pet ngựa chiến (chưa có hình) sang Pet Ngựa Be.
 - **Sửa lỗi**: hiệu ứng hóa ma Halloween (Bí ma, Ma trơi, Dơi, Zombie) trước đây không bao giờ hết; giờ hết đúng thời gian.
 - **SQL**: tất cả nằm trong một file `sql/team2026.sql`.
+
+
+## Đợt 15: Halloween theo video hướng dẫn chính thức
+- **Rồng Xương**:
+  - Đủ 7 viên Bí ngô 1–7 sao thì dùng một viên để gọi rồng (chỉ trong sự kiện Halloween, không gọi ở làng hay nhà).
+  - Rồng chờ 5 phút. Ước xong hoặc hết giờ thì rồng đi; phải chờ 1 phút mới gọi lại được.
+  - 9 điều ước, chia hai trang như trong game:
+    1. Đổi 3 kỹ năng đầu của đệ tử (cấp 1, có thể trùng).
+    2. X3 tiềm năng sức mạnh đệ tử 30 phút.
+    3. +15% HP khi hợp thể bông tai Porata 30 phút.
+    4. +15% KI khi hợp thể bông tai Porata 30 phút.
+    5. +15% sức đánh khi hợp thể bông tai Porata 30 phút.
+    6. X3 tiềm năng sức mạnh bản thân 30 phút.
+    7. Giảm 100 triệu sức mạnh (cần trên 40 tỷ).
+    8. Pet Cerberus (chó địa ngục) hạn 15–90 ngày.
+    9. 2% Quả trứng Mabư, hụt thì ra Rương sao pha lê VIP.
+  - Thời gian các điều ước 2–6 lưu vào `player_extra.hlw_buffs`, hiện lại khi vào game.
+  - Loại rồng gửi cho client mặc định là 1. Nếu client hiện sai hình, admin đổi bằng `sukien rongtype <số>`.
+- **Bí ngô 1–7 sao** (tối đa 50/ngày):
+  - Hạ Dơi, Ma trơi: phải mang **Giỏ đựng ngọc bí**, mất 1 giỏ mỗi lần nhặt.
+  - Hạ Xên, Black Goku, Cumber: 30% ra 1 viên ngẫu nhiên, không cần giỏ.
+- **Bà Hạt Mít / Santa**: Ước bằng 50 ngọc, Ước miễn phí (Vé ước miễn phí, có trong Kẹo mù).
+- **Cửa hàng** theo giá trong video:
+  - Giấy trang trí: 3 ngọc.
+  - Giỏ đựng ngọc bí: 10 ngọc.
+  - Máy dò ngọc rồng sự kiện: 30 ngọc.
+  - Hòm Halloween: 99 ngọc.
+  - Túi mù: 99 ngọc.
+  - Capsule Halloween: 349 ngọc (Ván bay cung trăng, CT Android 21 Evil, Cánh thiên thần – Ác quỷ, Gohan Beast, Pet Ma tốc độ).
+- **Túi mù Halloween** ra quà như video: Cờ hồn Xên bọ hung, Đá may mắn cấp 1, Cờ Ma đèn nhảy múa, Pet Cerberus, CT Cađíc SSJ4, Cánh thiên thần sa ngã, Cuốn sách cũ.
+- **Zombie**: 10 triệu HP như trong game.
+- **Hình pet**: thêm part cho Pet Cerberus.
+- `season_event_drop` thêm cột `item_to` (rơi ngẫu nhiên trong khoảng id) và `need_item` (vật phẩm phải mang theo, mất 1 cái mỗi lần rơi).

@@ -29,6 +29,14 @@ public class PlayerExtraDAO {
                 player.qlRewardRank = rs.getInt("ql_reward_rank");
                 player.hdbaCount = rs.getInt("hdba_count");
                 player.hdbaRewardRank = rs.getInt("hdba_reward_rank");
+                String[] hlw = String.valueOf(rs.getString("hlw_buffs")).split(",");
+                if (hlw.length == 5) {
+                    player.hlwPetX3Until = Long.parseLong(hlw[0]);
+                    player.hlwSelfX3Until = Long.parseLong(hlw[1]);
+                    player.hlwHpUntil = Long.parseLong(hlw[2]);
+                    player.hlwKiUntil = Long.parseLong(hlw[3]);
+                    player.hlwDameUntil = Long.parseLong(hlw[4]);
+                }
             }
         } catch (Exception e) {
             Logger.logException(PlayerExtraDAO.class, e, "Lỗi tải player_extra " + player.name);
@@ -41,9 +49,10 @@ public class PlayerExtraDAO {
 
     public static void save(Player player) {
         try {
-            LocalManager.executeUpdate("replace into player_extra (player_id, item_foot, ql_points, aura_reward, aura_until, ql_reward_rank, hdba_count, hdba_reward_rank) values (?, ?, ?, ?, ?, ?, ?, ?)",
+            String hlw = player.hlwPetX3Until + "," + player.hlwSelfX3Until + "," + player.hlwHpUntil + "," + player.hlwKiUntil + "," + player.hlwDameUntil;
+            LocalManager.executeUpdate("replace into player_extra (player_id, item_foot, ql_points, aura_reward, aura_until, ql_reward_rank, hdba_count, hdba_reward_rank, hlw_buffs) values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     player.id, toJson(player.itemFoot), player.qlPoints, player.auraReward, player.auraRewardUntil, player.qlRewardRank,
-                    player.hdbaCount, player.hdbaRewardRank);
+                    player.hdbaCount, player.hdbaRewardRank, hlw);
         } catch (Exception e) {
             Logger.logException(PlayerExtraDAO.class, e, "Lỗi lưu player_extra " + player.name);
         }

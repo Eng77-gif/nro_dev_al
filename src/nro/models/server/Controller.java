@@ -810,6 +810,7 @@ public class Controller implements IMessageHandler {
                             nro.models.services.Event2026Service.gI().deliverRaceReward(player);
                             nro.models.services.Event2026Service.gI().deliverHopDenReward(player);
                             nro.models.services.SeasonEventService.gI().deliverTopRewards(player);
+                            nro.models.services.shenron.RongXuong.sendBuffTimes(player);
                             if (player.getSession() != null && player.getSession().tongnap > 0) {
                                 AchievementService.gI().checkDoneTask(player, ConstAchievement.LAN_DAU_NAP_NGOC);
                             }

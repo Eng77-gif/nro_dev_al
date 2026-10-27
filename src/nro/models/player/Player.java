@@ -260,6 +260,8 @@ public class Player implements Runnable {
     public int qlRewardRank; // hạng đua top đang chờ nhận thưởng (0 = không có)
     public int hdbaCount; // số Hộp đen bí ẩn đã mua (đua top)
     public int hdbaRewardRank; // hạng top mua Hộp đen bí ẩn đang chờ nhận quà
+    // điều ước Rồng Xương (Halloween): hết hạn lúc (ms)
+    public long hlwPetX3Until, hlwSelfX3Until, hlwHpUntil, hlwKiUntil, hlwDameUntil;
     public long timePKVDST;
 
     public int binhChonHatMit;

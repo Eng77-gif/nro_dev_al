@@ -1015,6 +1015,10 @@ public class NPoint {
         if (this.player.fusion.typeFusion != ConstPlayer.NON_FUSION) {
             hpMax += this.player.pet.nPoint.hpMax;
         }
+        // điều ước Rồng Xương: +15% HP khi hợp thể bông tai Porata
+        if (this.player.hlwHpUntil > System.currentTimeMillis() && nro.models.services.shenron.RongXuong.isPorata(this.player)) {
+            hpMax += hpMax * 15 / 100;
+        }
 
         // Xử lý bổ huyết
         if (this.player.itemTime != null && this.player.itemTime.isUseBoHuyet && !this.player.itemTime.isUseBoHuyet2) {
@@ -1148,6 +1152,10 @@ public class NPoint {
         if (this.player.fusion.typeFusion
                 != 0) {
             mpMax += this.player.pet.nPoint.mpMax;
+        }
+        // điều ước Rồng Xương: +15% KI khi hợp thể bông tai Porata
+        if (this.player.hlwKiUntil > System.currentTimeMillis() && nro.models.services.shenron.RongXuong.isPorata(this.player)) {
+            mpMax += mpMax * 15 / 100;
         }
 
         // Xử lý bổ khí
@@ -1311,6 +1319,10 @@ public class NPoint {
         // Xử lý hợp thể
         if (this.player.fusion.typeFusion != 0) {
             dame += this.player.pet.nPoint.dame;
+        }
+        // điều ước Rồng Xương: +15% sức đánh khi hợp thể bông tai Porata
+        if (this.player.hlwDameUntil > System.currentTimeMillis() && nro.models.services.shenron.RongXuong.isPorata(this.player)) {
+            dame += dame * 15 / 100;
         }
 
         // Lấy tất cả option danh hiệu
@@ -1782,6 +1794,12 @@ public class NPoint {
                 tiemNang += tn * 3;
             }
             if (this.player.itemTime != null && this.player.itemTime.isUseDK) {
+                tiemNang += tn * 2;
+            }
+            // điều ước Rồng Xương: x3 tiềm năng sức mạnh 30 phút (bản thân / đệ tử)
+            long now = System.currentTimeMillis();
+            if (!this.player.isPet && this.player.hlwSelfX3Until > now
+                    || this.player.isPet && ((Pet) this.player).master != null && ((Pet) this.player).master.hlwPetX3Until > now) {
                 tiemNang += tn * 2;
             }
             if (player.zone.map.mapId >= 135 && player.zone.map.mapId <= 138) {

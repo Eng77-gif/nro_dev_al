@@ -79,7 +79,7 @@ public class SeasonEventService implements Runnable {
 
     public static class Drop {
 
-        int itemId, rate, qtyMin, qtyMax, dailyMax;
+        int itemId, itemTo, rate, qtyMin, qtyMax, dailyMax, needItem;
         boolean fromBoss;
         Set<Integer> mobs = new HashSet<>(), maps = new HashSet<>();
     }
@@ -146,6 +146,8 @@ public class SeasonEventService implements Runnable {
                     d.qtyMax = Math.max(d.qtyMin, rs.getInt("qty_max"));
                     d.fromBoss = "boss".equals(rs.getString("source"));
                     d.dailyMax = rs.getInt("daily_max");
+                    d.itemTo = rs.getInt("item_to");
+                    d.needItem = rs.getInt("need_item");
                     d.mobs = parseSet(rs.getString("mobs"));
                     d.maps = parseSet(rs.getString("maps"));
                     if (s != null && validItem(d.itemId)) {
@@ -352,6 +354,7 @@ public class SeasonEventService implements Runnable {
         while (ServerManager.isRunning) {
             try {
                 update();
+                nro.models.services.shenron.RongXuong.tick();
             } catch (Exception e) {
                 Logger.error("Lỗi cập nhật sự kiện theo mùa: " + e.getMessage() + "\n");
             }
@@ -450,6 +453,27 @@ public class SeasonEventService implements Runnable {
         return d.maps.isEmpty() || (pl.zone != null && d.maps.contains(pl.zone.map.mapId));
     }
 
+    /** item_id..item_to: rơi ngẫu nhiên 1 món trong khoảng (vd Bí ngô 1-7 sao). */
+    private static int pickItem(Drop d) {
+        return d.itemTo > d.itemId ? Util.nextInt(d.itemId, d.itemTo) : d.itemId;
+    }
+
+    /** Vật phẩm cần mang theo để được rơi (vd Giỏ đựng ngọc bí), mất 1 cái mỗi lần rơi. */
+    private boolean useNeed(Player pl, Drop d, int qty) {
+        if (d.needItem <= 0) {
+            return true;
+        }
+        Item need = InventoryService.gI().findItemBag(pl, d.needItem);
+        if (need == null) {
+            daily.computeIfPresent(pl.id + ":" + d.itemId, (k, v) -> Math.max(0, v - qty)); // không rơi thì không tính vào giới hạn ngày
+            Service.gI().sendThongBao(pl, "Cần có " + ItemService.gI().getTemplate(d.needItem).name + " để nhặt " + ItemService.gI().getTemplate(d.itemId).name);
+            return false;
+        }
+        InventoryService.gI().subQuantityItemsBag(pl, need, 1);
+        InventoryService.gI().sendItemBags(pl);
+        return true;
+    }
+
     /** Vật phẩm sự kiện rơi khi đánh quái. */
     public void addMobDrops(List<ItemMap> list, Player pl, Zone zone, int x, int y, int mobTemp) {
         if (pl == null || !pl.isPl()) {
@@ -462,8 +486,8 @@ public class SeasonEventService implements Runnable {
             for (Drop d : s.drops) {
                 if (!d.fromBoss && matches(d, pl, mobTemp) && Util.isTrue(d.rate, 10000)) {
                     int qty = takeDaily(pl, d, Util.nextInt(d.qtyMin, d.qtyMax));
-                    if (qty > 0) {
-                        list.add(new ItemMap(zone, d.itemId, qty, x, y, pl.id));
+                    if (qty > 0 && useNeed(pl, d, qty)) {
+                        list.add(new ItemMap(zone, pickItem(d), qty, x, y, pl.id));
                     }
                 }
             }
@@ -482,11 +506,11 @@ public class SeasonEventService implements Runnable {
             for (Drop d : s.drops) {
                 if (d.fromBoss && matches(d, pl, (int) boss.id) && Util.isTrue(d.rate, 10000)) {
                     int qty = takeDaily(pl, d, Util.nextInt(d.qtyMin, d.qtyMax));
-                    if (qty <= 0) {
+                    if (qty <= 0 || !useNeed(pl, d, qty)) {
                         continue;
                     }
                     int x = boss.location.x + Util.nextInt(-20, 20);
-                    ItemMap it = new ItemMap(boss.zone, d.itemId, qty, x,
+                    ItemMap it = new ItemMap(boss.zone, pickItem(d), qty, x,
                             boss.zone.map.yPhysicInTop(x, boss.location.y - 24), pl.id);
                     Service.gI().dropItemMap(boss.zone, it);
                 }
@@ -1031,6 +1055,10 @@ public class SeasonEventService implements Runnable {
                     update();
                     return "Ngày sự kiện: " + today() + (testDate != null ? " (giả lập)" : "");
                 }
+                case "rongtype" -> {
+                    nro.models.services.shenron.RongXuong.dragonType = Integer.parseInt(a[1]);
+                    return "Loại rồng gửi cho client khi gọi Rồng Xương: " + a[1];
+                }
                 case "zombie" -> {
                     int m = a.length > 1 ? Integer.parseInt(a[1]) : 15;
                     nro.models.boss.event.Halloween.Zombie.force(m);
@@ -1085,7 +1113,7 @@ public class SeasonEventService implements Runnable {
             }
             sb.append("\n");
         }
-        sb.append("Lệnh: sukien bat|tat|tudong <id>, sukien reload, sukien ngay yyyy-mm-dd, sukien top, sukien chottop <id>, sukien zombie [phút]");
+        sb.append("Lệnh: sukien bat|tat|tudong <id>, sukien reload, sukien ngay yyyy-mm-dd, sukien top, sukien chottop <id>, sukien zombie [phút], sukien rongtype <số>");
         return sb.toString();
     }
 

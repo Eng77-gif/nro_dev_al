@@ -1776,6 +1776,10 @@ public class UseItem {
 
     private void controllerCallRongThan(Player pl, Item item) {
         int tempId = item.template.id;
+        if (nro.models.services.shenron.RongXuong.isBiNgo(tempId)) {
+            nro.models.services.shenron.RongXuong.openSummon(pl);
+            return;
+        }
         if (tempId >= SummonDragon.NGOC_RONG_1_SAO && tempId <= SummonDragon.NGOC_RONG_7_SAO) {
             switch (tempId) {
                 case SummonDragon.NGOC_RONG_1_SAO:
