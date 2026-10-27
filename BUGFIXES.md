@@ -625,3 +625,21 @@ Sự kiện tự bật và tắt theo lịch mỗi năm: Tết, Giỗ tổ, Trun
     - Các món đeo: 8–12%
     - Pet Minion: 6–10%
 - **Sửa lỗi**: nút "Vòng quay đặc biệt" trước đây đi vào nhánh quay thường, nên vật phẩm đặc biệt (cả danh sách Trung Thu / World Cup) không bao giờ ra.
+
+## Đợt 23: Hình đi theo cho 54 pet (lấy từ dữ liệu chính thức)
+- Đối chiếu ảnh icon pet của server với 133 pet trong `Nr_Part.sql` tải từ server chính thức (NroResTool).
+- Mỗi pet có 3 part mới (id 2193–2348): đầu trống, thân và chân chép từ part chính thức. Gắn vào `head/body/leg` của vật phẩm. Pet trùng hình dùng chung part.
+- **Icon**: 36 icon trùng số nhưng khác hình được chép sang số mới (sau 32237) để không đè icon đang dùng, đủ x1–x4.
+- **Đã có hình**:
+  - Pokemon: Pikachu, Squirtle, Bulbasaur, MewTwo, Meowth
+  - Thú: Rắn cute, Đại bàng, Hổ, Hươu, Mèo thần tài, Cậu vàng
+  - Godzilla, Kong, Po, Shimo, Shiba (2 bản), Ông già Noel, Albart (2 bản), Minion, Minion Otto, Baby Shark (3 bản)
+  - Capybara (3 bản), Zịt vàng, Mini Desutoron Gas, Hải Ly (2 bản), Giru, Rồng Xanh, Tuần Lộc Cute, Cá mập Koi
+  - Secret, Rabbit, Dino, Panda, Mắt Long Lanh, Mắt Rưng, Thỏ Vui Vẻ, Cá Dory, Cá Nemo, Gấu Dâu
+  - Ngựa KPI, Bư Noel, Tuần lộc ngố, Ngựa chiến, Ma vàng phù thủy, Bọ cánh cứng, Ngài đêm, Heo bướm
+- **Chưa tìm thấy hình chính thức**:
+  - Khỉ bong bóng, các Pet mèo đuôi vàng, Pet Voi / Gà / Ngựa chín
+  - Mông Quỷ, Mèo Phù Thủy, Chim cánh cụt, Rồng Pikachu thanh long, Rồng con thần tài
+  - Thỏ Ú, Ma cầu mưa, Khủng Long ngok
+- `vsData` lên 18 để client tải lại part.
+- Script: `pets_import.py` (bảng ghép vật phẩm → part chính thức nằm trong script).
