@@ -209,6 +209,11 @@ public class NPoint {
     public long aoThuatUntil, lastTimeAoThuat; // hiệu ứng Ảo Thuật
     private int setHpWithPet, setSTCuoiWithFlag, setCritWithFlag; // option 172, 39, 91
     private int setCritWithSkhBeerus, setSDCMWithXenHT, setGiapWithXenMax; // option 92, 169, 42
+    private int setSDCMWithLuoiHaiHong; // option 255
+    public int tlNeCrit; // option 191: né chí mạng
+    public int tlGiamHoiKhien; // option 183: giảm % thời gian hồi Khiên năng lượng
+    public int tlGiamKhongChe; // option 227: giảm % thời gian bị khống chế khi đang dùng khiên
+    private int nearHauGaiDame; // option 256: +#% SĐ mỗi người ở gần mặc CT Lý Tiểu Nương hầu gái / bikini khác loại
     public int skhBeerus; // số món SKH Thần hủy diệt Beerus đang mặc (option 115)
 
     public boolean isGogeta;
@@ -552,6 +557,50 @@ public class NPoint {
         if (setGiapWithXenMax > 0 && isWearing(PET_XEN_MAX)) {
             this.tlGiap += setGiapWithXenMax;
         }
+        if (setSDCMWithLuoiHaiHong > 0 && isWearing(LUOI_HAI_HONG)) {
+            this.tlDameCrit.add(setSDCMWithLuoiHaiHong);
+            this.tlSDCM += setSDCMWithLuoiHaiHong;
+        }
+    }
+
+    public static final int LUOI_HAI_HONG = 1702;
+
+    /** Thời gian bị khống chế sau khi trừ option 227 (chỉ khi đang bật khiên năng lượng). */
+    public int controlTime(int ms) {
+        if (tlGiamKhongChe > 0 && player.effectSkill != null && player.effectSkill.isShielding) {
+            return ms * (100 - Math.min(90, tlGiamKhongChe)) / 100;
+        }
+        return ms;
+    }
+    /** Bộ Lý Tiểu Nương: hầu gái xanh, hầu gái hồng, bikini */
+    public static final int[] LTN_HAU_GAI = {1503, 1504, 1512};
+
+    private static int costumeId(Player p) {
+        Item ct = p.inventory != null && p.inventory.itemsBody.size() > 5 ? p.inventory.itemsBody.get(5) : null;
+        return ct != null && ct.isNotNullItem() ? ct.template.id : -1;
+    }
+
+    /** % sức đánh cộng thêm khi đứng gần người mặc CT Lý Tiểu Nương khác loại (option 256, tối đa 12%). */
+    private int nearHauGaiBonus() {
+        if (nearHauGaiDame <= 0 || player.zone == null) {
+            return 0;
+        }
+        int mine = costumeId(player);
+        java.util.Set<Integer> kinds = new java.util.HashSet<>();
+        for (Player o : player.zone.getNotBosses()) {
+            if (o == player || o.isPet || Util.getDistance(player, o) > 200) {
+                continue;
+            }
+            int c = costumeId(o);
+            if (c != mine) {
+                for (int id : LTN_HAU_GAI) {
+                    if (c == id) {
+                        kinds.add(c);
+                    }
+                }
+            }
+        }
+        return Math.min(12, nearHauGaiDame * kinds.size());
     }
 
     public static final int PET_XEN_HOAN_THIEN = 2036;
@@ -621,6 +670,21 @@ public class NPoint {
                 break;
             case 169: //Đi cùng Pet Xên hoàn thiện tăng #% sát thương chí mạng
                 this.setSDCMWithXenHT += io.param;
+                break;
+            case 191: //Né chí mạng+#%
+                this.tlNeCrit += io.param;
+                break;
+            case 183: //Giảm #% thời gian hồi Khiên
+                this.tlGiamHoiKhien += io.param;
+                break;
+            case 227: //Giảm #% tác dụng của các đòn khống chế khi dùng khiên năng lượng
+                this.tlGiamKhongChe += io.param;
+                break;
+            case 255: //Đi cùng Lưỡi hái hồng tăng #% sát thương chí mạng
+                this.setSDCMWithLuoiHaiHong += io.param;
+                break;
+            case 256: //+#% sức đánh, tối đa 12% khi ở gần Lý Tiểu Nương : Hầu Gái xanh, hồng, bikini
+                this.nearHauGaiDame = Math.max(this.nearHauGaiDame, io.param);
                 break;
             case 42: //Đi cùng Pet Xên Max tăng #% giảm sát thương
                 this.setGiapWithXenMax += io.param;
@@ -1320,6 +1384,11 @@ public class NPoint {
         if (this.player.fusion.typeFusion != 0) {
             dame += this.player.pet.nPoint.dame;
         }
+        // CT Lý Tiểu Nương hầu gái / bikini: ở gần loại khác thì +% sức đánh
+        int hauGai = nearHauGaiBonus();
+        if (hauGai > 0) {
+            dame += dame * hauGai / 100L;
+        }
         // điều ước Rồng Xương: +15% sức đánh khi hợp thể bông tai Porata
         if (this.player.hlwDameUntil > System.currentTimeMillis() && nro.models.services.shenron.RongXuong.isPorata(this.player)) {
             dame += dame * 15 / 100;
@@ -1459,6 +1528,11 @@ public class NPoint {
         this.setCritWithFlag = 0;
         this.setCritWithSkhBeerus = 0;
         this.setSDCMWithXenHT = 0;
+        this.setSDCMWithLuoiHaiHong = 0;
+        this.tlNeCrit = 0;
+        this.tlGiamHoiKhien = 0;
+        this.tlGiamKhongChe = 0;
+        this.nearHauGaiDame = 0;
         this.setGiapWithXenMax = 0;
         this.skhBeerus = 0;
         this.tlSpeed = 0;

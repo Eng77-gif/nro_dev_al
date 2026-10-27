@@ -129,7 +129,7 @@ public class EffectSkillService {
     public void setThoiMien(Player player, long lastTimeThoiMien, int timeThoiMien) {
         player.effectSkill.isThoiMien = true;
         player.effectSkill.lastTimeThoiMien = lastTimeThoiMien;
-        player.effectSkill.timeThoiMien = timeThoiMien;
+        player.effectSkill.timeThoiMien = player.nPoint != null ? player.nPoint.controlTime(timeThoiMien) : timeThoiMien;
     }
 
     public void removeThoiMien(Player player) {
@@ -139,7 +139,7 @@ public class EffectSkillService {
 
     public void startStun(Player player, long lastTimeStartBlind, int timeBlind) {
         player.effectSkill.lastTimeStartStun = lastTimeStartBlind;
-        player.effectSkill.timeStun = timeBlind;
+        player.effectSkill.timeStun = player.nPoint != null ? player.nPoint.controlTime(timeBlind) : timeBlind;
         player.effectSkill.isStun = true;
         sendEffectPlayer(player, player, TURN_ON_EFFECT, BLIND_EFFECT);
     }
@@ -151,7 +151,7 @@ public class EffectSkillService {
 
     public void setSocola(Player player, long lastTimeSocola, int timeSocola) {
         player.effectSkill.lastTimeSocola = lastTimeSocola;
-        player.effectSkill.timeSocola = timeSocola;
+        player.effectSkill.timeSocola = player.nPoint != null ? player.nPoint.controlTime(timeSocola) : timeSocola;
         player.effectSkill.isSocola = true;
         player.effectSkill.countPem1hp = 0;
     }
@@ -179,7 +179,7 @@ public class EffectSkillService {
     public void setBlindDCTT(Player player, long lastTimeDCTT, int timeBlindDCTT) {
         player.effectSkill.isBlindDCTT = true;
         player.effectSkill.lastTimeBlindDCTT = lastTimeDCTT;
-        player.effectSkill.timeBlindDCTT = timeBlindDCTT;
+        player.effectSkill.timeBlindDCTT = player.nPoint != null ? player.nPoint.controlTime(timeBlindDCTT) : timeBlindDCTT;
     }
 
     public void removeBlindDCTT(Player player) {

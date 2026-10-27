@@ -1153,6 +1153,7 @@ public class SkillService {
                 if (intrinsic.id == 5 || intrinsic.id == 15 || intrinsic.id == 20) {
                     subTimeParam = intrinsic.param1;
                 }
+                subTimeParam += player.nPoint.tlGiamHoiKhien; // option 183
             }
             case Skill.MAKANKOSAPPO -> {
                 if (intrinsic.id == 11) {

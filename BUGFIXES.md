@@ -657,3 +657,25 @@ Sự kiện tự bật và tắt theo lịch mỗi năm: Tết, Giỗ tổ, Trun
 - **Chưa làm**:
   - Bóng mờ Trung Thu chưa tìm thấy khung đeo lưng.
   - Ván bay WC / Trung Thu là thú cưỡi, cần ảnh `mount_...` (mục Mount của NroResTool), vẫn đang mượn hình cũ.
+
+## Đợt 25: Chỉ số theo ảnh vật phẩm bản chính thức
+| id | Món | Chỉ số |
+|---|---|---|
+| 2086 | Cải Trang Póc đường phố | HP 27%, giảm 20% sát thương, 20% né, giảm 20% tác dụng khống chế khi dùng khiên |
+| 1503 / 1504 / 1512 | CT Lý Tiểu Nương hầu gái xanh / hồng / Bikini | SĐ 22%, HP 21%, KI 21%, chí mạng 10%, né chí mạng 10%, +5% SĐ (tối đa 12%) khi ở gần Lý Tiểu Nương hầu gái / bikini khác loại |
+| 1922 | Chổi bay phù thủy | SĐ 13%, HP 10%, KI 10%, +5% tấn công lên Boss, +10% sát thương chí mạng, bay không tốn KI |
+| 2006 | Giáp tập luyện cấp 5 | HP 15%, KI 15%, giảm 5% sát thương, Giáp +50.000 |
+| 1731 | CT Black Goku Rose | SĐ 33%, KI 29%, +18% sát thương chí mạng, chí mạng 15%, chống lạnh, đi cùng Lưỡi hái hồng +5% sát thương chí mạng |
+| 1832 | Cải trang Gohan Beast | SĐ 29%, KI 29%, sát thương chuẩn 7%, chí mạng 10%, giảm 5% thời gian hồi Khiên |
+| 2085 | Cải Trang Bunma bụi | SĐ 25%, tấn công +25.000, +11% sát thương chí mạng, chí mạng 7%, sát thương chuẩn 5% |
+
+**Option mới / mới có tác dụng:**
+- **255** "Đi cùng Lưỡi hái hồng tăng #% sức đánh chí mạng": kiểm tra trên server test, Black Goku Rose + Lưỡi hái hồng cho chí mạng 16%, sát thương chí mạng 23%.
+- **256** "+#% sức đánh, tối đa 12% khi ở gần Lý Tiểu Nương: Hầu Gái xanh, hồng, bikini": tính lúc ra đòn, mỗi loại CT khác loại đứng trong 200px cộng thêm.
+- **191** Né chí mạng: có tỉ lệ biến đòn chí mạng của người đánh thành đòn thường.
+- **183** Giảm % thời gian hồi Khiên năng lượng.
+- **227** Giảm % thời gian bị choáng / thôi miên / socola / mù khi đang bật khiên.
+
+`vsData` lên 19 để client tải lại tên option.
+
+**Chưa làm:** "Triệu hồi quái 120% sức đánh, CD 360s" của Chổi bay phù thủy cần cơ chế triệu hồi mới, chưa có.

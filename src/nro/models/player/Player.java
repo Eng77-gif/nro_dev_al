@@ -1061,6 +1061,11 @@ public class Player implements Runnable {
 
     public synchronized int injured(Player plAtt, long damage, boolean piercing, boolean isMobAttack) {
         if (!this.isDie()) {
+            // option 191 Né chí mạng: có tỉ lệ biến đòn chí mạng của người đánh thành đòn thường
+            if (plAtt != null && plAtt.nPoint != null && plAtt.nPoint.isCrit && this.nPoint != null && this.nPoint.tlNeCrit > 0
+                    && Util.isTrue(this.nPoint.tlNeCrit, 100)) {
+                damage = damage * 100 / (100 + Math.max(0, plAtt.nPoint.tlSDCM)) / 2;
+            }
             if (plAtt != null && !plAtt.equals(this)) {
                 setTemporaryEnemies(plAtt);
             }
