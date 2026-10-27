@@ -773,3 +773,10 @@ Cách test:
   - File `lastZoomlevel` = 2: client chính thức chạy zoom x2, còn tool hỏi x4.
 - Hỏi x4 không được thì tool tự kết nối lại với zoom x2, x1, x3 rồi hỏi lại. Ảnh lưu ở `effect/x<zoom>`.
 - Test trên server thử: danh hiệu chỉ có ảnh x2 → tool không tải được ở x4, tự chuyển sang x2 và tải được.
+
+## Đợt 32: NroResTool v12 sửa lỗi không vào game
+- **Lỗi của v10–v11:** khi tool báo phiên bản `pc|2.5.2`, server chính thức không cho vào game (bản 2.5.2 thật đăng nhập bằng gói khác). Vì vậy dò 50 khu đều không thấy gì.
+- **Sửa:**
+  - Trả mặc định về `pc|2.3.3`.
+  - Nếu với phiên bản đã chọn mà không vào được game, tool tự kết nối lại bằng 2.3.3.
+  - Phần thử zoom x2 / x1 / x3 cho danh hiệu (v11) vẫn giữ.
