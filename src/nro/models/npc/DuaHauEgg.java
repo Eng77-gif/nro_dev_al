@@ -28,6 +28,11 @@ public class DuaHauEgg {
         player.DuaHauEgg = new DuaHauEgg(player, System.currentTimeMillis(), TIME_DONE);
     }
 
+    /** Trồng dưa sự kiện Giỗ tổ: chín sau timeDoneMs (đến phút 00 / 30 kế tiếp). */
+    public static void createDuaHauEgg(Player player, long timeDoneMs) {
+        player.DuaHauEgg = new DuaHauEgg(player, System.currentTimeMillis(), timeDoneMs);
+    }
+
     public void sendDuaHauEgg() {
         Message msg;
         try {
@@ -69,10 +74,10 @@ public class DuaHauEgg {
                 Item dua = ItemService.gI().createNewItem((short) 569);
                 InventoryService.gI().addItemBag(player, dua);
                 InventoryService.gI().sendItemBags(player);
-                Service.gI().sendThongBao(player, "Bạn đã thu hoạch dưa hấu thành công!");
-                this.lastTimeCreate = System.currentTimeMillis();
-                this.timeDone = TIME_DONE;
-                this.sendDuaHauEgg();
+                Service.gI().sendThongBao(player, "Bạn đã thu hoạch dưa hấu thành công! Đến phút 25 hoặc 55 gặp Hùng Vương trồng tiếp.");
+                Player p = player;
+                p.DuaHauEgg = null; // thu hoạch xong thì gốc dưa biến mất, lượt sau trồng lại ở Hùng Vương
+                dispose();
             } else {
                 Service.gI().sendThongBao(player, "Dưa hấu chưa chín, vui lòng đợi thêm.");
             }

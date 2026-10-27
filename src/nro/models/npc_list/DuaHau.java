@@ -27,6 +27,10 @@ public class DuaHau extends Npc {
 
     @Override
     public void openBaseMenu(Player player) {
+        if (player.DuaHauEgg == null) {
+            nro.models.services.Service.gI().sendThongBao(player, "Không có cây dưa nào, gặp Hùng Vương vào phút 25 hoặc 55 để trồng");
+            return;
+        }
         if (player.DuaHauEgg.getSecondDone() <= 0) {
             this.createOtherMenu(player, ConstNpc.CO_THE_THU_HOACH, "Dưa hấu đã chín, bạn có thể thu hoạch!", "Thu hoạch", "Từ chối");
         } else {
@@ -44,7 +48,7 @@ public class DuaHau extends Npc {
     public void confirmMenu(Player player, int select) {
         switch (player.idMark.getIndexMenu()) {
             case ConstNpc.CO_THE_THU:
-                if (select == 0) {
+                if (select == 0 && player.DuaHauEgg != null) {
                     player.DuaHauEgg.openEgg();
                 }
                 break;

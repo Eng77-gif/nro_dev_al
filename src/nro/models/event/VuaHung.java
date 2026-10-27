@@ -29,10 +29,12 @@ public class VuaHung extends Npc {
     private static final int DUA_HAU = 569;
     private static final int TEM = 1558;
     private static final int THOI_VANG = 457;
-    private static final List<Integer> nguoiDaTrong = new java.util.concurrent.CopyOnWriteArrayList<>();
-    private static final long START_TIME = System.currentTimeMillis();
-    private static final long THOI_GIAN_TRONG_CAY_MS = 6 * 60 * 60 * 1000;
-    private static final int SO_LUONG_TOI_DA = 10;
+    private static final int LENH_BAI_THANH_CO = 2018;
+    public static final int MAP_THANH_CO_1 = 183, MAP_THANH_CO_2 = 184, MAP_DAU_TRUONG = 185;
+    /** người đã trồng dưa trong khung giờ hiện tại: playerId -> mã khung giờ */
+    private static final java.util.Map<Long, Long> daTrong = new java.util.concurrent.ConcurrentHashMap<>();
+    /** các nút đang hiện ở menu của từng người */
+    private static final java.util.Map<Long, List<String>> actions = new java.util.concurrent.ConcurrentHashMap<>();
 
     private final Random random = new Random();
 
@@ -40,56 +42,70 @@ public class VuaHung extends Npc {
         super(mapId, status, cx, cy, tempId, avatar);
     }
 
+    /** Trồng dưa vào phút 25-29 và 55-59 mỗi giờ, dưa chín đúng phút 00 / 30. */
+    private static boolean isPlantTime() {
+        return java.time.LocalTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).getMinute() % 30 >= 25;
+    }
+
+    private static long plantWindow() {
+        return System.currentTimeMillis() / (30 * 60_000L);
+    }
+
+    private static long msToHarvest() {
+        long half = 30 * 60_000L;
+        long now = System.currentTimeMillis();
+        return (now / half + 1) * half - now;
+    }
+
     @Override
     public void openBaseMenu(Player player) {
-        long now = System.currentTimeMillis();
-        long elapsed = now - START_TIME;
-        long phaseStartTime = START_TIME + (elapsed / (60 * 60 * 1000)) * (60 * 60 * 1000);
-        long timeInCurrentPhase = now - phaseStartTime;
-
-        boolean isPhaseActive = timeInCurrentPhase < 15 * 60 * 1000;
-        boolean isSlotAvailable = nguoiDaTrong.size() < SO_LUONG_TOI_DA;
-
-        boolean isDangTrong = player.DuaHauEgg != null && (now - player.DuaHauEgg.timeStart < THOI_GIAN_TRONG_CAY_MS);
-        boolean daTrongTrongPhase = nguoiDaTrong.contains((int) player.id); // list Integer: truyền long sẽ luôn false
+        if (!canOpenNpc(player)) {
+            return;
+        }
+        List<String> act = new ArrayList<>();
+        List<String> label = new ArrayList<>();
+        if (isPlantTime() && player.DuaHauEgg == null && !Long.valueOf(plantWindow()).equals(daTrong.get(player.id))) {
+            act.add("PLANT");
+            label.add("Trồng\ndưa");
+        }
+        act.add("DOI");
+        label.add("Đổi\ndưa hấu");
+        List<String> ex = nro.models.services.SeasonEventService.gI().npcExchangeNames(tempId);
+        if (!ex.isEmpty()) {
+            for (int i = 0; i < ex.size(); i++) {
+                act.add("EX" + i);
+                label.add(ex.get(i));
+            }
+        } else {
+            String[] old = {"Dâng\nsính lễ", "Dâng\nsính lễ\nxịn", "Dâng\nbánh dầy", "Dâng\nbánh chưng"};
+            for (int i = 0; i < old.length; i++) {
+                act.add("OLD" + (i + 1));
+                label.add(old[i]);
+            }
+        }
+        int map = player.zone.map.mapId;
+        if (map == MAP_THANH_CO_1 || map == MAP_THANH_CO_2) {
+            act.add(0, "NEXT");
+            label.add(0, "Đi tiếp");
+            act.add("HOME");
+            label.add("Về làng");
+        } else if (map == MAP_DAU_TRUONG) {
+            act.add(0, "FIGHT");
+            label.add(0, "Lên\nsàn đấu");
+            act.add("HOME");
+            label.add("Về làng");
+        } else {
+            act.add(0, "THANHCO");
+            label.add(0, "Đến\ncổ thành");
+        }
+        actions.put(player.id, act);
+        String say = "Ngươi tìm ta có việc gì ?";
         if (player.DuaHauEgg != null) {
-            boolean hetThoiGian = (now - player.DuaHauEgg.timeStart >= THOI_GIAN_TRONG_CAY_MS);
-            player.idMark.setIndexMenu(0);
-            List<String> options = new ArrayList<>(List.of(
-                    "Đổi\nDưa hấu",
-                    "Dâng\nsính lễ",
-                    "Dâng\nsính lễ\nxịn",
-                    "Dâng\nbánh dầy",
-                    "Dâng\nbánh chưng"
-            ));
-            String info = hetThoiGian
-                    ? "Cây dưa đã sẵn sàng, ngươi muốn đổi quà chăng?"
-                    : "Cây dưa đang lớn, quay lại sau để đổi quà!";
-            createOtherMenu(player, 0, info, options.toArray(new String[0]));
-            return;
+            say += player.DuaHauEgg.getSecondDone() == 0 ? "\nDưa của ngươi đã chín, về nhà thu hoạch rồi mang đến đây!" : "\nDưa đang lớn, chín lúc phút 00 hoặc 30.";
+        } else if (!isPlantTime()) {
+            say += "\nTrồng dưa vào phút 25 và 55 mỗi giờ.";
         }
-
-        if (isPhaseActive && isSlotAvailable && !daTrongTrongPhase) {
-            player.idMark.setIndexMenu(100);
-            createOtherMenu(player, 100, "Hãy trồng dưa hấu và mang quả đến gặp ta đổi quà?", "Trồng\nDưa Hấu");
-            return;
-        }
-
-        if (isPhaseActive && daTrongTrongPhase) {
-            player.idMark.setIndexMenu(101);
-            createOtherMenu(player, 101, "Bạn đã trồng cây trong phiên này rồi!", "OK");
-            return;
-        }
-
-        player.idMark.setIndexMenu(0);
-        List<String> options = new ArrayList<>(List.of(
-                "Đổi\nDưa hấu",
-                "Dâng\nsính lễ",
-                "Dâng\nsính lễ\nxịn",
-                "Dâng\nbánh dầy",
-                "Dâng\nbánh chưng"
-        ));
-        createOtherMenu(player, 0, "Ngươi muốn dâng sính lễ?", options.toArray(new String[0]));
+        createOtherMenu(player, 0, say, label.toArray(new String[0]));
     }
 
     @Override
@@ -97,14 +113,64 @@ public class VuaHung extends Npc {
         if (canOpenNpc(pl)) {
             switch (pl.idMark.getIndexMenu()) {
                 case 0 -> {
-                    switch (select) {
-                        case 0 ->
-                            createOtherMenu(pl, 10, "Muốn đổi ngọc thì mang Dưa Hấu và Tem đến đây?",
-                                    "5 thỏi\n1 Quả\n1 tem",
-                                    "40 thỏi\n10 Quả\n2 tem",
-                                    "120 thỏi\n20 Quả\n3 tem",
-                                    "185 thỏi\n25 Quả\n4 tem",
-                                    "250 thỏi\n30 Quả\n5 tem");
+                    List<String> act = actions.get(pl.id);
+                    if (act == null || select < 0 || select >= act.size()) {
+                        return;
+                    }
+                    String a = act.get(select);
+                    if (a.startsWith("EX")) {
+                        nro.models.services.SeasonEventService.gI().openNpcExchange(this, pl, Integer.parseInt(a.substring(2)));
+                    } else if (a.startsWith("OLD")) {
+                        legacy(pl, Integer.parseInt(a.substring(3)));
+                    } else {
+                        switch (a) {
+                            case "PLANT" -> plant(pl);
+                            case "DOI" -> legacy(pl, 0);
+                            case "THANHCO" -> ThanhCo.enter(pl);
+                            case "NEXT" -> ThanhCo.next(pl);
+                            case "FIGHT" -> ThanhCo.fight(pl);
+                            case "HOME" -> ThanhCo.home(pl);
+                        }
+                    }
+                }
+                case 10 -> {
+                    if (select >= 0 && select <= 4) {
+                        DoiDuaHau(pl, select);
+                    }
+                }
+                case 1 -> {
+                    if (select == 0) {
+                        NhanQuaThuong(pl);
+                    }
+                }
+                case 2 -> {
+                    if (select == 0) {
+                        NhanQuaVip(pl);
+                    }
+                }
+                case 3 -> {
+                    if (select == 0) {
+                        BanhDay(pl);
+                    }
+                }
+                case 4 -> {
+                    if (select == 0) {
+                        BanhChung(pl);
+                    }
+                }
+            }
+        }
+    }
+
+    private void legacy(Player pl, int select) {
+        switch (select) {
+            case 0 ->
+                createOtherMenu(pl, 10, "Mang Dưa Hấu và Tem chứng nhận Mai An Tiêm đến đây đổi hồng ngọc",
+                        "5 hồng ngọc\n1 Quả\n1 tem",
+                        "40 hồng ngọc\n10 Quả\n2 tem",
+                        "120 hồng ngọc\n20 Quả\n3 tem",
+                        "185 hồng ngọc\n25 Quả\n4 tem",
+                        "250 hồng ngọc\n30 Quả\n5 tem");
                         case 1 -> {
                             int q1 = getItemQuantity(pl, NGA_VOI);
                             int q2 = getItemQuantity(pl, CUA_GA);
@@ -167,50 +233,17 @@ public class VuaHung extends Npc {
                                 createOtherMenu(pl, 123, sb.toString(), "Từ chối");
                             }
                         }
-                    }
-                }
-                case 100 -> {
-                    if (select == 0) {
-                        if (pl.DuaHauEgg == null) {
-                            DuaHauEgg.createDuaHauEgg(pl);
-                            if (pl.DuaHauEgg != null) {
-                                pl.DuaHauEgg.sendDuaHauEgg();
-                                nguoiDaTrong.add((int) (pl.id));
-                                openBaseMenu(pl);
-                                Service.gI().sendThongBao(pl, "Bạn đã trồng 1 cây Dưa Hấu!");
-                            }
-                        } else {
-                            Service.gI().sendThongBao(pl, "Bạn đã có cây dưa hấu nên không thể trồng thêm.");
-                        }
-                    }
-                }
-                case 10 -> {
-                    if (select >= 0 && select <= 4) {
-                        DoiDuaHau(pl, select);
-                    }
-                }
-                case 1 -> {
-                    if (select == 0) {
-                        NhanQuaThuong(pl);
-                    }
-                }
-                case 2 -> {
-                    if (select == 0) {
-                        NhanQuaVip(pl);
-                    }
-                }
-                case 3 -> {
-                    if (select == 0) {
-                        BanhDay(pl);
-                    }
-                }
-                case 4 -> {
-                    if (select == 0) {
-                        BanhChung(pl);
-                    }
-                }
-            }
         }
+    }
+
+    private void plant(Player pl) {
+        if (!isPlantTime() || pl.DuaHauEgg != null || Long.valueOf(plantWindow()).equals(daTrong.get(pl.id))) {
+            Service.gI().sendThongBao(pl, "Chưa đến giờ trồng dưa hoặc ngươi đã trồng rồi");
+            return;
+        }
+        DuaHauEgg.createDuaHauEgg(pl, msToHarvest());
+        daTrong.put(pl.id, plantWindow());
+        Service.gI().sendThongBao(pl, "Đã trồng 1 cây dưa hấu ở nhà, dưa chín lúc phút 00 hoặc 30");
     }
 
     private void NhanQuaThuong(Player player) {
@@ -327,10 +360,10 @@ public class VuaHung extends Npc {
             InventoryService.gI().subQuantityItemsBag(player, tem, temNeeded[select]);
             InventoryService.gI().sendItemBags(player);
 
-            player.inventory.gem += gems[select];
+            player.inventory.ruby += gems[select];
             Service.gI().sendMoney(player);
 
-            Service.gI().sendThongBao(player, "Bạn đã nhận được " + gems[select] + " Ngọc!");
+            Service.gI().sendThongBao(player, "Bạn đã nhận được " + gems[select] + " hồng ngọc!");
         } else {
             Service.gI().sendThongBao(player, "Bạn không đủ nguyên liệu để đổi Ngọc!");
         }

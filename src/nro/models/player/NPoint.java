@@ -419,7 +419,7 @@ public class NPoint {
                         case 147: //+#% sức đánh
                             this.tlDame.add(io.param);
                             break;
-                        case 156: //Giảm 50% sức đánh, HP, KI và +#% SM, TN, vàng từ quái
+                        case 155: //Giảm 50% sức đánh, HP, KI và +#% SM, TN, vàng từ quái (id theo item_option_template)
                             this.tlSubSD += 50;
                             this.tlTNSM.add(io.param);
                             this.tlGold += io.param;
@@ -773,7 +773,7 @@ public class NPoint {
             case 147: //+#% sức đánh
                 this.tlDame.add(io.param);
                 break;
-            case 156: //Giảm 50% sức đánh, HP, KI và +#% SM, TN, vàng từ quái
+            case 155: //Giảm 50% sức đánh, HP, KI và +#% SM, TN, vàng từ quái (id theo item_option_template)
                 this.tlSubSD += 50;
                 this.tlTNSM.add(io.param);
                 this.tlGold += io.param;

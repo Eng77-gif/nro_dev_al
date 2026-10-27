@@ -559,3 +559,44 @@ Sự kiện tự bật và tắt theo lịch mỗi năm: Tết, Giỗ tổ, Trun
 - Xoá 11 dòng `head_avatar` của các part đầu đó.
 - 3 vật phẩm 2093 (Cải Trang Goku Ninja), 2094 (Pet ma dơi), 2099 (Cải Trang công chúa quỷ) không có icon và không có cách nhận: đổi tên thành "Vật phẩm đã xoá", icon 0. Giữ dòng để id các vật phẩm sau không lệch.
 - Sau khi dọn, không còn part, vật phẩm hay avatar nào trỏ tới icon bị thiếu. `vsData` lên 17 để client tải lại part.
+
+## Đợt 20: Giỗ tổ Hùng Vương theo video hướng dẫn 2026
+- **Hùng Vương**: xuất hiện ở 3 làng khi có sự kiện, menu giống bản chính thức: Đến cổ thành, (Trồng dưa), Đổi dưa hấu, Dâng sính lễ, Dâng sính lễ xịn, Dâng bánh dầy, Dâng bánh chưng Lang Liêu. Các mục dâng tính điểm sự kiện và đua top.
+- **Trồng dưa**:
+  - Trồng vào phút 25–29 và 55–59 mỗi giờ (mỗi khung một lần), dưa chín đúng phút 00 / 30.
+  - Thu hoạch ở nhà xong thì trồng được lượt mới.
+  - Đổi dưa + Tem chứng nhận Mai An Tiêm nhận **hồng ngọc** 5 / 40 / 120 / 185 / 250 (trước là ngọc xanh).
+- **Tìm sính lễ**:
+  - Voi Chín Ngà (20 triệu máu, rơi Ngà voi) và Gà Chín Cựa (12 triệu máu, rơi Cựa gà) có ở mọi khu Rừng nấm khi bật sự kiện, chết thì 5 phút sau hồi sinh.
+  - Hồng mao rơi từ boss.
+  - Bảng mới `season_event_mob` (quái to theo sự kiện).
+- **Sơn Tinh – Thủy Tinh**: hạ Thủy Tinh rơi Cải trang Sơn Tinh 7 ngày, hạ Sơn Tinh rơi Cải trang Thủy Tinh 7 ngày; 10% thêm Yêu quái núi lãng lãng 45 ngày.
+- **Thành cổ**:
+  - Mua Lệnh bài thành cổ (50 ngọc) ở Chi Chi, nhờ Hùng Vương đưa đến Thành cổ 1.
+  - Hùng Vương ở mỗi map: Đi tiếp → Thành cổ 2 → Đấu trường thành cổ.
+  - Lên sàn đấu với Gohan chiến binh (máu bằng máu người chơi, chỉ người lên sàn đánh được); thắng nhận Hộp quà thường Giỗ tổ.
+- **Shop Chi Chi**:
+
+  | Món | Giá |
+  |---|---|
+  | Cải trang Sơn Tinh, Cải trang Thủy Tinh (30 ngày) | 99 ngọc |
+  | Tem chứng nhận | 2 ngọc |
+  | Chả lụa (35 ngày) | 10 ngọc |
+  | Bản đồ truyền thuyết (2 ngày) | 2 ngọc |
+  | Pháo bông (30 ngày) | 10 triệu vàng |
+  | Lệnh bài thành cổ (30 ngày) | 50 ngọc |
+
+- **Hộp hào khí** (Quy Lão): thêm Cải trang Goku / Chi Chi giỗ tổ, CT Hắc Mị Nương, Mảnh hồn bông tai, Rương sao pha lê VIP, Đá Linh Hồn / Hiện Thực / Sức Mạnh / Thời Gian.
+- **Top Hộp quà Cao Cấp, Dâng Bánh Dầy**: thêm Rađa ngọc rồng VIP (100 / 50 / 30 / 20 / 10 / 5).
+- **Chỉ số đúng bản chính thức**:
+
+  | Món | Chỉ số |
+  |---|---|
+  | Cải trang Sơn Tinh | SĐ 22%, giảm 15% sát thương, HP 27%, KI 22%, +20% TN SM, 12% né |
+  | Cải trang Thủy Tinh | SĐ 27% (các chỉ số còn lại đặt giống Sơn Tinh) |
+  | Yêu quái núi lãng lãng | SĐ 19%, HP 25%, KI 21%, +72% TN SM |
+  | Cải trang Goku giỗ tổ | KI 35%, KI +17.000, 21% né |
+  | Cải trang Chi Chi giỗ tổ | biến 15% tấn công thành HP, +30% vàng, giảm 50% SĐ / HP / KI và +150% SM TN vàng |
+  | Cánh hào khí | KI 40%, KI +40.000, +10% vàng |
+
+- **Sửa lỗi**: option "Giảm 50% sức đánh, HP, KI và +#% SM, TN, vàng" trong code dùng nhầm id 156 (trong DB là 155).

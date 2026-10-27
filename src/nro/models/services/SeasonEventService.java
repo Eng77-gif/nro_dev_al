@@ -70,6 +70,7 @@ public class SeasonEventService implements Runnable {
         public int month, day, daysBefore, daysAfter;
         public int[][] bosses = new int[0][];
         public List<int[]> npcSpawns = new ArrayList<>(); // {npcTempId, mapId, x, y}; x = 0 tự chọn chỗ trống
+        public List<int[]> mobSpawns = new ArrayList<>(); // {mobTempId, mapId, hp, respawnMinutes}
         public List<Drop> drops = new ArrayList<>();
         public List<Exchange> exchanges = new ArrayList<>();
         public List<String> groups = new ArrayList<>();
@@ -115,6 +116,9 @@ public class SeasonEventService implements Runnable {
     private final Map<String, Integer> daily = new ConcurrentHashMap<>();
     /** NPC sự kiện đang được đặt thêm vào bản đồ: "mapId:tempId" -> npc */
     private final Map<String, Npc> eventNpcs = new ConcurrentHashMap<>();
+    /** quái to sự kiện đang được thả: "mapId:mobTempId" -> các con (mỗi khu một con) */
+    private final Map<String, List<nro.models.mob.Mob>> eventMobs = new ConcurrentHashMap<>();
+    private final Map<String, int[]> eventMobCfg = new ConcurrentHashMap<>();
     private volatile LocalDate dailyDate;
     private volatile LocalDate testDate;
 
@@ -226,6 +230,16 @@ public class SeasonEventService implements Runnable {
             } catch (Exception e) {
                 Logger.error("Không tải được season_event_npc: " + e.getMessage() + "\n");
             }
+            try (PreparedStatement ps = con.prepareStatement("select * from season_event_mob order by id"); ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Season s = map.get(rs.getInt("event_id"));
+                    if (s != null) {
+                        s.mobSpawns.add(new int[]{rs.getInt("mob_id"), rs.getInt("map_id"), rs.getInt("hp"), rs.getInt("respawn_minutes")});
+                    }
+                }
+            } catch (Exception e) {
+                Logger.error("Không tải được season_event_mob: " + e.getMessage() + "\n");
+            }
         } catch (Exception e) {
             Logger.error("Không tải được sự kiện theo mùa: " + e.getMessage() + "\n");
             return;
@@ -252,6 +266,7 @@ public class SeasonEventService implements Runnable {
         tops.clear();
         tops.putAll(topMap);
         syncNpcs();
+        syncMobs();
         Logger.success("Successfully loaded season event (" + seasons.size() + " sự kiện, " + exMap.size() + " công thức, " + topMap.size() + " đua top)\n");
     }
 
@@ -408,6 +423,85 @@ public class SeasonEventService implements Runnable {
             }
         }
         syncNpcs();
+        syncMobs();
+    }
+
+    // ------------------------------------------------------------------ quái to sự kiện
+    /** Thả / thu quái to (Voi Chín Ngà, Gà Chín Cựa...) theo sự kiện đang chạy; hồi sinh con đã chết sau vài phút. */
+    private synchronized void syncMobs() {
+        Map<String, int[]> want = new LinkedHashMap<>();
+        for (Season s : seasons.values()) {
+            if (s.active) {
+                for (int[] m : s.mobSpawns) {
+                    want.putIfAbsent(m[1] + ":" + m[0], m);
+                }
+            }
+        }
+        for (Map.Entry<String, List<nro.models.mob.Mob>> en : eventMobs.entrySet()) {
+            if (!want.containsKey(en.getKey())) {
+                for (nro.models.mob.Mob m : en.getValue()) {
+                    synchronized (m.zone) {
+                        m.zone.mobs.remove(m);
+                    }
+                }
+                eventMobs.remove(en.getKey());
+                eventMobCfg.remove(en.getKey());
+            }
+        }
+        for (Map.Entry<String, int[]> en : want.entrySet()) {
+            int[] cfg = en.getValue();
+            eventMobCfg.put(en.getKey(), cfg);
+            List<nro.models.mob.Mob> list = eventMobs.get(en.getKey());
+            if (list != null) {
+                long respawn = Math.max(1, cfg[3]) * 60_000L;
+                for (nro.models.mob.Mob m : list) {
+                    if (m.isDie() && Util.canDoWithTime(m.lastTimeDie, respawn)) {
+                        m.hoiSinh();
+                        m.sendMobHoiSinh();
+                    }
+                }
+                continue;
+            }
+            nro.models.map.Map map = nro.models.map.service.MapService.gI().getMapById(cfg[1]);
+            nro.models.player_system.Template.MobTemplate temp = nro.models.server.Manager.getMobTemplateByTemp(cfg[0]);
+            if (map == null || temp == null) {
+                continue;
+            }
+            list = new ArrayList<>();
+            for (Zone z : map.zones) {
+                try {
+                    nro.models.mob.Mob base = new nro.models.mob.Mob();
+                    base.id = z.mobs.size();
+                    base.tempId = cfg[0];
+                    base.level = 1;
+                    base.point.setHpFull(cfg[2]);
+                    base.point.sethp(cfg[2]);
+                    base.location.x = freeMobX(map, list.size());
+                    base.location.y = groundY(map, base.location.x);
+                    base.pDame = temp.percentDame;
+                    base.pTiemNang = temp.percentTiemNang;
+                    base.type = temp.type;
+                    base.setTiemNang();
+                    nro.models.mob.Mob m = switch (cfg[0]) {
+                        case nro.models.consts.ConstMob.VOI_CHIN_NGA -> new nro.models.mob_bigboss.VoiChinNga(base);
+                        case nro.models.consts.ConstMob.GA_CHIN_CUA -> new nro.models.mob_bigboss.GaChinCua(base);
+                        default -> new nro.models.mob.Mob(base);
+                    };
+                    m.zone = z;
+                    synchronized (z) {
+                        z.mobs.add(m);
+                    }
+                    list.add(m);
+                } catch (Exception e) {
+                    Logger.error("Không thả được quái sự kiện " + cfg[0] + " ở map " + cfg[1] + ": " + e.getMessage() + "\n");
+                }
+            }
+            eventMobs.put(en.getKey(), list);
+        }
+    }
+
+    private static int freeMobX(nro.models.map.Map m, int i) {
+        return Math.max(150, Math.min(m.mapWidth - 150, m.mapWidth / 3 + (i % 2) * m.mapWidth / 3));
     }
 
     // ------------------------------------------------------------------ npc
@@ -443,7 +537,7 @@ public class SeasonEventService implements Runnable {
             try {
                 int x = n[2] > 0 ? n[2] : freeX(m);
                 int y = n[3] > 0 ? n[3] : groundY(m, x);
-                Npc npc = n[0] == nro.models.consts.ConstNpc.SANTA
+                Npc npc = n[0] == nro.models.consts.ConstNpc.SANTA || n[0] == nro.models.consts.ConstNpc.HUNG_VUONG
                         ? nro.models.npc.NpcFactory.createNPC(m.mapId, 1, x, y, n[0])
                         : new EventNpc(m.mapId, x, y, n[0]);
                 if (npc != null) {
@@ -815,6 +909,23 @@ public class SeasonEventService implements Runnable {
             return true;
         }
         return confirmMenu(npc, pl, menu, select);
+    }
+
+    /** Tên các mục sự kiện của NPC này (đang diễn ra), để NPC tự xếp vào menu của mình. */
+    public List<String> npcExchangeNames(int npcTemp) {
+        List<String> out = new ArrayList<>();
+        for (Exchange e : npcExchanges(npcTemp)) {
+            out.add(e.name);
+        }
+        return out;
+    }
+
+    /** Mở mục sự kiện thứ idx của NPC (theo thứ tự của npcExchangeNames). */
+    public void openNpcExchange(Npc npc, Player pl, int idx) {
+        List<Exchange> list = npcExchanges(npc.tempId);
+        if (idx >= 0 && idx < list.size()) {
+            openExchange(npc, pl, list.get(idx));
+        }
     }
 
     private void openNpcEvent(Npc npc, Player pl) {
