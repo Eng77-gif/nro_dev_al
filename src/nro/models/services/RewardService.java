@@ -59,9 +59,63 @@ public class RewardService {
         return it;
     }
 
+    /**
+     * Vòng quay Thượng Đế mùa Giỗ tổ Hùng Vương: khi sự kiện đang diễn ra, mỗi ô quay ngọc có cơ hội ra
+     * 1 trong các món dưới đây. Quay càng nhiều trong ngày, tỉ lệ ra đồ vĩnh viễn càng cao.
+     */
+    public static final int[] GIO_TO_WHEEL_ITEMS = {
+        860, 1022, 1013, 1207, 1213, 1112, 1205, 1230, 1557 // Mị Nương, Búa Stormbreaker, Kiếm ánh sáng, Pet Minion, Mèo Hoàng Thượng, Cây nắp ấm, Drabura hóa băng, Hào quang rực rỡ, Hắc Mị Nương
+    };
+    public static final int GIO_TO_SEASON = 4;
+    public static final int GIO_TO_WHEEL_RATE = 5; // % mỗi ô quay
+    private static final java.util.Map<Long, int[]> spinsToday = new java.util.concurrent.ConcurrentHashMap<>(); // playerId -> {ngày, số lần}
+
+    private static int today() {
+        return (int) java.time.LocalDate.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).toEpochDay();
+    }
+
+    /** Số lần quay ngọc hôm nay của người chơi. */
+    public static int spinsToday(Player pl) {
+        int[] v = spinsToday.get(pl.id);
+        return v != null && v[0] == today() ? v[1] : 0;
+    }
+
+    private static void addSpins(Player pl, int n) {
+        spinsToday.compute(pl.id, (k, v) -> v == null || v[0] != today() ? new int[]{today(), n} : new int[]{v[0], v[1] + n});
+    }
+
+    /** Tỉ lệ (%) ra đồ vĩnh viễn: 1% + 1% mỗi 20 lần quay trong ngày, tối đa 10%. */
+    public static int gioToPermRate(Player pl) {
+        return Math.min(10, 1 + spinsToday(pl) / 20);
+    }
+
+    public static boolean gioToWheelActive() {
+        return SeasonEventService.gI().isActive(GIO_TO_SEASON);
+    }
+
+    public Item createGioToWheelItem(Player pl) {
+        int id = GIO_TO_WHEEL_ITEMS[Util.nextInt(0, GIO_TO_WHEEL_ITEMS.length - 1)];
+        Item it = ItemService.gI().createNewItem((short) id);
+        it.itemOptions.clear();
+        it.itemOptions.addAll(ItemService.gI().getListOptionItemShop((short) id));
+        if (!Util.isTrue(gioToPermRate(pl), 100)) {
+            it.itemOptions.add(new Item.ItemOption(93, Util.nextInt(3, 15))); // HSD
+        }
+        it.quantity = 1;
+        return it;
+    }
+
     public List<Item> getListItemLuckyRound(Player player, int num, boolean vip) {
         List<Item> list = new ArrayList<>();
+        boolean gioTo = vip && gioToWheelActive();
         for (int i = 0; i < num; i++) {
+            if (gioTo) {
+                addSpins(player, 1);
+                if (Util.isTrue(GIO_TO_WHEEL_RATE, 100)) {
+                    list.add(createGioToWheelItem(player));
+                    continue;
+                }
+            }
             if (vip && Util.isTrue(SPECIAL_WHEEL_RATE, 100)) {
                 list.add(createSpecialWheelItem());
                 continue;

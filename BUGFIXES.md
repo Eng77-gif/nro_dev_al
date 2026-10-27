@@ -610,3 +610,15 @@ Sự kiện tự bật và tắt theo lịch mỗi năm: Tết, Giỗ tổ, Trun
   - Thời gian 10 phút. Hạ xong quái thì 30 giây sau, hoặc hết giờ, tự đưa về nhà.
 - **Rơi đồ trong map này**: Ngà voi / Cựa gà / Hồng mao 3–5 cái (100%). Ngựa Chín Hồng Mao ở mọi nơi đều rơi Hồng mao.
 - Quái 84 đổi tên "Ngựa Chín Lmao" thành "Ngựa Chín Hồng Mao".
+
+## Đợt 22: Vòng quay Thượng Đế mùa Giỗ tổ
+- Khi sự kiện Giỗ tổ Hùng Vương đang diễn ra, "Vòng quay đặc biệt" ở Thượng Đế (và quay bằng ngọc / vé) có 5% mỗi ô ra 1 trong 9 món:
+  - Cải trang Mị Nương, Búa Stormbreaker, Kiếm ánh sáng, Pet Minion, Cờ mèo Hoàng Thượng
+  - Cây nắp ấm, Cải trang Drabura hóa băng, Hào quang rực rỡ, CT Hắc Mị Nương
+- **Quay càng nhiều tỉ lệ vĩnh viễn càng cao (tính trong ngày)**: 1% + 1% mỗi 20 lần quay, tối đa 10%; còn lại có hạn 3–15 ngày. Sau mỗi lượt quay có thông báo số lần đã quay và tỉ lệ hiện tại. Số lần quay giữ trong bộ nhớ, khởi động lại server thì đếm lại.
+- 8 món chưa có chỉ số được đặt chỉ số mặc định:
+  - Mị Nương: SĐ / HP 18–24%, Đẹp 15%
+  - Drabura: 20–25%
+  - Các món đeo: 8–12%
+  - Pet Minion: 6–10%
+- **Sửa lỗi**: nút "Vòng quay đặc biệt" trước đây đi vào nhánh quay thường, nên vật phẩm đặc biệt (cả danh sách Trung Thu / World Cup) không bao giờ ra.
