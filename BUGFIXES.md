@@ -821,3 +821,37 @@ Theo ảnh bản chính thức:
   - Canh lưới 1 px game để các mảnh ghép khít.
 - **Giới hạn:** tấm effect x1 tối đa 255x255 (toạ độ mảnh là 1 byte), nên dùng 11 khung, mỗi khung giữ 2 nhịp (vòng lặp vẫn dài như video). Tỉ lệ ước tính 2,5 px màn hình = 1 px game; ảnh x3/x4 phóng từ video nên hơi mềm.
 - **File:** `data/effdata/DataEffect_302`, `data/effect/x1..x4/ImgEffect_302.png` (26 mảnh, ảnh 256 màu). Đã test server gửi effect 302 cho client.
+
+## Đợt 36: Danh hiệu tạm, đập sao 10, nâng cấp +13
+**Danh hiệu tạm** (đến khi có effect thật):
+- Vẽ bảng tên đúng tên cho 300 Phá Cổ Trung Thu (cam), 301 Phá Cổ Trung Thu VIP (tím), 303 Đón Xuân (đỏ), cùng kiểu bảng chữ danh hiệu sẵn có.
+- Có đủ x1–x4; muốn thay chỉ cần chép đè file `ImgEffect_<số>` và `DataEffect_<số>`.
+- Perfect (302) dùng bản làm từ video.
+
+**Pha lê hóa tối đa 10 sao** (trước là 9):
+- Sao thứ 10: tỉ lệ 0,05% (hiện 1%), 500 triệu vàng, 280 ngọc (giá ngọc có sẵn trong bảng cũ).
+- **Cường hóa lỗ (Hematite + Dùi đục):** viết lại theo bậc 8 → 9 → 10, không vượt quá số sao đang có.
+  - Tỉ lệ lỗ 8: 100%, lỗ 9: 25%, lỗ 10: 15%.
+  - Thông tin hiện đúng lỗ sắp cường hóa và tỉ lệ thật (trước ghi chung "50%").
+- **Ép sao:** cho ép vào lỗ 10 (đá ở lỗ 8–10 thành dòng riêng như lỗ 8, 9), 10 ngọc.
+
+**Nâng cấp vật phẩm tối đa +13** (trước +8): bảng cho +8 → +13.
+| Cấp | Đá | Vàng | Tỉ lệ |
+|---|---|---|---|
+| +8 → +9 | 90 | 300 Tr | 0,3% |
+| +9 → +10 | 110 | 400 Tr | 0,25% |
+| +10 → +11 | 130 | 500 Tr | 0,2% |
+| +11 → +12 | 160 | 700 Tr | 0,15% |
+| +12 → +13 | 200 | 900 Tr | 0,1% |
+
+- Bảng cũ có sẵn tỉ lệ vô lý cho +8 trở lên (5%, 1%), đã đặt lại cho giảm dần.
+- Thất bại ở cấp chẵn (+2, +4, … +12) rớt 1 cấp như +2/+4/+6 cũ, trừ khi có đá bảo vệ.
+- Mỗi cấp vẫn +10% chỉ số.
+- Hào quang trọn bộ vẫn tính tới +8 (client chỉ có hiệu ứng tới +8).
+
+**Test qua NPC Bà Hạt Mít:**
+- Áo +12 hiện "Sau khi nâng cấp (+13)", thất bại rớt +11.
+- Pha lê hóa từ 9 sao hiện đúng giá và tỉ lệ.
+- Cường hóa lỗ 10 thành công sau 2 lần.
+- Ép sao lỗ 10 → 10/10 sao (+2% né đòn).
+- Không có lỗi server.

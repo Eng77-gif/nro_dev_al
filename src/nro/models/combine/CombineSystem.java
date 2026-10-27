@@ -50,7 +50,7 @@ public class CombineSystem {
                 return 10;
 
             }
-            case 8 -> {
+            case 8, 9 -> { // ép vào lỗ thứ 9, 10
                 return 10;
 
             }
@@ -154,7 +154,8 @@ public class CombineSystem {
                 return 200000000;
             case 8:
                 return 300000000;
-
+            case 9:
+                return 500000000;
         }
         return 0;
     }
@@ -260,6 +261,16 @@ public class CombineSystem {
                 return 50;
             case 7:
                 return 70;
+            case 8:
+                return 90;
+            case 9:
+                return 110;
+            case 10:
+                return 130;
+            case 11:
+                return 160;
+            case 12:
+                return 200;
         }
         return 0;
     }
@@ -286,6 +297,16 @@ public class CombineSystem {
                 return 100000000;
             case 7:
                 return 250000000;
+            case 8:
+                return 300000000;
+            case 9:
+                return 400000000;
+            case 10:
+                return 500000000;
+            case 11:
+                return 700000000;
+            case 12:
+                return 900000000;
         }
         return 0;
     }
@@ -309,15 +330,15 @@ public class CombineSystem {
             case 7: // 7 sao
                 return 0.3;
             case 8:
-                return 5;
+                return 0.3;
             case 9:
-                return 1;
-            case 10: // 7 sao
-                return 0.3;
-            case 11: // 7 sao
-                return 0.3;
-            case 12: // 7 sao
-                return 0.3;
+                return 0.25;
+            case 10:
+                return 0.2;
+            case 11:
+                return 0.15;
+            case 12:
+                return 0.1;
         }
         return 0;
     }

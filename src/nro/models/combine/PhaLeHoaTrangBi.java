@@ -82,6 +82,8 @@ public class PhaLeHoaTrangBi {
                 return 0.1f;
             case 8:
                 return 0.1f;
+            case 9:
+                return 0.05f;
         }
 
         return 0;
@@ -105,7 +107,7 @@ public class PhaLeHoaTrangBi {
                 3;
             case 7 ->
                 2;
-            case 8 ->
+            case 8, 9 ->
                 1;
             default ->
                 0;

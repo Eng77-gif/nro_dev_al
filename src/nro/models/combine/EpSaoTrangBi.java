@@ -37,7 +37,7 @@ public class EpSaoTrangBi {
                     }
                 }
 
-                if (starEmpty <= 9) {
+                if (starEmpty <= CombineService.MAX_STAR_ITEM) {
                     if (star >= 7 && starEmpty >= 8 && !CombineService.gI().CheckSlot(trangBi, starEmpty)) {
                         CombineService.gI().baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU,
                                 "Cần cường hóa lỗ sao pha lê này trước", "Đóng");
@@ -65,7 +65,7 @@ public class EpSaoTrangBi {
                             "Nâng cấp\ncần " + player.combineNew.gemCombine + " ngọc");
                 } else {
                     CombineService.gI().baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU,
-                            "Cần 1 trang bị có lỗ sao pha lê và 1 loại đá pha lê để ép vào, và lỗ sao tối đa là 9", "Đóng");
+                            "Cần 1 trang bị có lỗ sao pha lê và 1 loại đá pha lê để ép vào, và lỗ sao tối đa là " + CombineService.MAX_STAR_ITEM, "Đóng");
                 }
             } else {
                 CombineService.gI().baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU,
@@ -130,7 +130,7 @@ public class EpSaoTrangBi {
             int currentSlot = star + 1;
             boolean shouldSplitOption;
 
-            if (currentSlot == 8 || currentSlot == 9) {
+            if (currentSlot >= 8) { // lỗ 8, 9, 10 cộng thành dòng riêng
                 shouldSplitOption = true;
             } else {
                 shouldSplitOption = false;

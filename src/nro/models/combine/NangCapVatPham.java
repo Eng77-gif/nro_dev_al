@@ -92,7 +92,7 @@ public class NangCapVatPham {
                             + "Cần " + Util.numberToMoney(player.combineNew.goldCombine) + " vàng";
 
                     String daNPC = player.combineNew.itemsCombine.size() == 3 && itemDBV != null ? String.format("\nCần tốn %s đá bảo vệ", player.combineNew.countDaBaoVe) : "";
-                    if ((level == 2 || level == 4 || level == 6) && !(player.combineNew.itemsCombine.size() == 3 && itemDBV != null)) {
+                    if (level >= 2 && level % 2 == 0 && !(player.combineNew.itemsCombine.size() == 3 && itemDBV != null)) { // +2, +4, ... +12 thất bại rớt cấp
                         npcSay += "\nNếu thất bại sẽ rớt xuống (+" + (level - 1) + ")";
                     }
                     if (player.combineNew.countDaNangCap > itemDNC.quantity) {
@@ -217,7 +217,7 @@ public class NangCapVatPham {
                             BadgesTaskService.updateCountBagesTask(player, ConstTaskBadges.THANH_DAP_DO_7, 1);
                         }
                     } else {
-                        if ((level == 2 || level == 4 || level == 6) && (player.combineNew.itemsCombine.size() != 3)) {
+                        if (level >= 2 && level % 2 == 0 && (player.combineNew.itemsCombine.size() != 3)) {
                             option.param -= (option.param * 11 / 100) < 1 ? 1 : (option.param * 11 / 100);
                             if (option2 != null) {
                                 option2.param -= (option2.param * 11 / 100) < 1 ? 1 : (option2.param * 11 / 100);

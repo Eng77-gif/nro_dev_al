@@ -19,8 +19,8 @@ import nro.models.services.InventoryService;
 
 public class CombineService {
     
-    public static final byte MAX_STAR_ITEM = 9;
-    public static final byte MAX_LEVEL_ITEM = 8;
+    public static final byte MAX_STAR_ITEM = 10;
+    public static final byte MAX_LEVEL_ITEM = 13;
     public static final int DANG_SINH_LE = 8999;
     
     private static final byte OPEN_TAB_COMBINE = 0;
@@ -524,11 +524,10 @@ public class CombineService {
         if (starEmpty < 8) {
             return true;
         }
+        // lỗ thứ 8, 9, 10 phải được cường hóa (option 228) tới đúng lỗ đó
         for (ItemOption io : trangBi.itemOptions) {
-            if (starEmpty == 8 && io.optionTemplate.id == 228) {
-                return io.param >= 8;
-            } else if (starEmpty == 9 && io.optionTemplate.id == 228) {
-                return io.param >= 9;
+            if (io.optionTemplate.id == 228) {
+                return io.param >= starEmpty;
             }
         }
         
