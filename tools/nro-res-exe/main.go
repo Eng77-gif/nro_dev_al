@@ -319,11 +319,12 @@ type downloader struct {
 	resEnd    bool
 	got       map[string]bool // các yêu cầu đã nhận được (để không gửi lại / đếm trùng)
 	hinted    bool
-	waitLogin int    // server bảo chờ bao nhiêu giây mới cho đăng nhập (lệnh 122)
-	inGame    bool   // đã vào bản đồ sau khi đăng nhập
-	sessBytes int    // dung lượng ảnh nhận được trong phiên hiện tại
-	recvCount int    // số gói ảnh/icon/effect nhận được (kể cả trùng)
-	canary    []byte // yêu cầu một ảnh chắc chắn có, dùng để thử server còn trả lời không
+	waitLogin int      // server bảo chờ bao nhiêu giây mới cho đăng nhập (lệnh 122)
+	inGame    bool     // đã vào bản đồ sau khi đăng nhập
+	sessBytes int      // dung lượng ảnh nhận được trong phiên hiện tại
+	recvCount int      // số gói ảnh/icon/effect nhận được (kể cả trùng)
+	canary    []byte   // yêu cầu một ảnh chắc chắn có, dùng để thử server còn trả lời không
+	probes    [][]byte // các ảnh đã có trên máy, chưa hỏi lại trong phiên này: dùng lần lượt làm ảnh kiểm tra
 }
 
 // mark ghi nhận đã nhận key; trả về true nếu là lần đầu.
@@ -458,14 +459,27 @@ func (d *downloader) fetch(label string, reqs [][]byte, keys, rels []string, cmd
 	var r2 [][]byte
 	var k2 []string
 	d.canary = nil
-	best := int64(-1)
+	type ex struct {
+		size int64
+		req  []byte
+	}
+	var have []ex
 	for i := range reqs {
 		if !d.have(rels[i]) {
 			r2 = append(r2, reqs[i])
 			k2 = append(k2, keys[i])
-		} else if st, err := os.Stat(filepath.Join(d.o.Out, filepath.FromSlash(rels[i]))); err == nil && (best < 0 || st.Size() < best) {
-			best, d.canary = st.Size(), reqs[i]
+		} else if st, err := os.Stat(filepath.Join(d.o.Out, filepath.FromSlash(rels[i]))); err == nil {
+			have = append(have, ex{st.Size(), reqs[i]})
 		}
+	}
+	// ảnh kiểm tra: ưu tiên ảnh nhỏ; mỗi lần kiểm tra dùng một ảnh khác (server có thể không gửi lại ảnh đã gửi)
+	sort.Slice(have, func(a, b int) bool { return have[a].size < have[b].size })
+	d.probes = nil
+	for i := 0; i < len(have) && i < 40; i++ {
+		d.probes = append(d.probes, have[i].req)
+	}
+	if len(have) > 0 {
+		d.canary = have[0].req
 	}
 	if n := len(reqs) - len(r2); n > 0 {
 		d.j.log("Bỏ qua %d %s đã có", n, label)
@@ -819,7 +833,11 @@ func (d *downloader) retryDeferred(label string, reqs [][]byte, keys []string, c
 // alive gửi lại ảnh kiểm tra (chắc chắn có) xem server còn trả lời không.
 func (d *downloader) alive(cmd int8, wait float64) bool {
 	before := d.recvCount
-	if d.c.send(cmd, d.canary) != nil {
+	probe := d.canary
+	if len(d.probes) > 0 {
+		probe, d.probes = d.probes[0], d.probes[1:]
+	}
+	if d.c.send(cmd, probe) != nil {
 		return false
 	}
 	deadline := time.Now().Add(time.Duration(wait * float64(time.Second)))
@@ -1221,7 +1239,7 @@ func openBrowser(url string) {
 }
 
 // version: ghi vào nhật ký và giao diện để biết đang chạy bản nào
-const version = "v6 (27/10 kiểm tra bằng ảnh có sẵn)"
+const version = "v7 (27/10 aura, mỗi lần kiểm tra một ảnh khác)"
 
 func main() {
 	port := flag.Int("port", 8765, "cổng giao diện web")
