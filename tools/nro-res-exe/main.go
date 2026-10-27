@@ -1235,8 +1235,44 @@ func (d *downloader) probeTitles(ids []int) {
 			}
 		}
 		if !ok {
-			d.j.log("  effect %d: không kiểu nào được", id)
+			d.j.log("  effect %d: không kiểu nào được ở zoom x%d", id, d.o.Zoom)
 		}
+	}
+	// client chính thức chạy zoom x2: server có thể không có ảnh danh hiệu x4. Kết nối lại với zoom khác rồi hỏi lại.
+	var left []int
+	for _, id := range ids {
+		if !d.got["eff:"+strconv.Itoa(id)] {
+			left = append(left, id)
+		}
+	}
+	orig := d.o.Zoom
+	for _, zm := range []int{2, 1, 3, 4} {
+		if len(left) == 0 || zm == orig || d.j.isStopped() {
+			continue
+		}
+		d.o.Zoom = zm
+		if !d.reconnect(fmt.Sprintf("Thử lại với zoom x%d", zm)) {
+			break
+		}
+		var still []int
+		for _, id := range left {
+			d.probeLog = append(d.probeLog, fmt.Sprintf(">> gửi lệnh -66 (effect %d, zoom x%d)", id, zm))
+			d.c.send(-66, (&pkt{}).s(int16(id)).Bytes())
+			d.pump(4)
+			if d.got["eff:"+strconv.Itoa(id)] {
+				d.j.log("  effect %d: tải được ở zoom x%d (lưu ở effect/x%d)", id, zm, zm)
+			} else {
+				still = append(still, id)
+			}
+		}
+		left = still
+	}
+	if d.o.Zoom != orig {
+		d.o.Zoom = orig
+		d.reconnect("Trả lại zoom ban đầu")
+	}
+	if len(left) > 0 {
+		d.j.log("  Không zoom nào tải được: %s", joinInts(left))
 	}
 	d.probing = false
 	f := filepath.Join(d.o.Out, "danh_hieu_do_duoc.txt")
@@ -1438,7 +1474,7 @@ func openBrowser(url string) {
 }
 
 // version: ghi vào nhật ký và giao diện để biết đang chạy bản nào
-const version = "v10 (27/10 giả client 2.5.2)"
+const version = "v11 (27/10 thử zoom x2 cho danh hiệu)"
 
 func main() {
 	port := flag.Int("port", 8765, "cổng giao diện web")

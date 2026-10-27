@@ -766,3 +766,10 @@ Cách test:
 - **Server đọc phiên bản client từ chuỗi platform** lúc đăng nhập (`pc|2.3.3` → 233). Tool trước báo là 2.3.3, nên server chính thức có thể không gửi effect / danh hiệu mới.
   - Nay mặc định `pc|2.5.2` / `2.5.2` cho khớp client chính thức (sửa được ở mục Nâng cao).
 - **Dự phòng:** client chính thức lưu dữ liệu đã tải ở `%USERPROFILE%\AppData\LocalLow\Team\Dragonboy252`. Nén thư mục này gửi lên để lấy ảnh danh hiệu client đã tải.
+
+## Đợt 31: NroResTool v11 thử zoom x2 cho danh hiệu
+- **Dữ liệu AppData của client chính thức:**
+  - Client không lưu effect / danh hiệu xuống ổ đĩa, chỉ giữ trong RAM.
+  - File `lastZoomlevel` = 2: client chính thức chạy zoom x2, còn tool hỏi x4.
+- Hỏi x4 không được thì tool tự kết nối lại với zoom x2, x1, x3 rồi hỏi lại. Ảnh lưu ở `effect/x<zoom>`.
+- Test trên server thử: danh hiệu chỉ có ảnh x2 → tool không tải được ở x4, tự chuyển sang x2 và tải được.
