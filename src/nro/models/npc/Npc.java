@@ -105,14 +105,7 @@ public abstract class Npc implements IAtionNpc {
                 if (baseMenu != null) {
                     baseMenu.openMenu(player);
                 } else {
-                    Message msg;
-                    msg = new Message(32);
-                    msg.writer().writeShort(tempId);
-                    msg.writer().writeUTF("Ta có thể giúp gì cho ngươi ?");
-                    msg.writer().writeByte(1);
-                    msg.writer().writeUTF("Từ chối");
-                    player.sendMessage(msg);
-                    msg.cleanup();
+                    createOtherMenu(player, ConstNpc.BASE_MENU, "Ta có thể giúp gì cho ngươi ?", "Từ chối");
                 }
             } catch (Exception e) {
                 Logger.logException(Npc.class, e);

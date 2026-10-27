@@ -538,3 +538,13 @@ Sự kiện tự bật và tắt theo lịch mỗi năm: Tết, Giỗ tổ, Trun
 | Thiếu nhi, 20/11 | Chi Chi | Đổi quà |
 
 - Gán NPC bằng cột `npc` (danh sách id mẫu NPC) trong `season_event_exchange`. Sửa rồi gõ `sukien reload` là áp dụng.
+
+## Đợt 17: NPC sự kiện tự xuất hiện ở nhiều bản đồ
+- Bảng mới `season_event_npc` (event_id, npc_id, map_id, x, y). Khi sự kiện bật, NPC trong bảng được đặt thêm vào bản đồ; khi sự kiện tắt thì tự gỡ. `x = 0` thì tự tìm chỗ trống gần giữa map (cách NPC khác ≥ 70px), `y = 0` thì lấy mặt đất.
+- Dữ liệu mặc định:
+  - Santa ở 3 làng (0, 7, 14).
+  - Các NPC có mục sự kiện của mùa đó (Chi Chi, Bà Hạt Mít, Lý Tiểu Nương, Nồi Bánh, Hùng Vương, Trung Thu) ở 3 làng và Đảo Kamê / Đảo Guru / Vách núi đen.
+  - Bản đồ đã có sẵn NPC đó thì bỏ qua. Quy Lão, Bunma giữ nguyên chỗ cũ.
+- NPC đặt thêm (trừ Santa) chỉ mở các mục sự kiện của nó, nên không dính các chức năng gắn với bản đồ gốc. Santa mở được ở mọi map.
+- `Map.npcs` đổi sang CopyOnWriteArrayList để thêm/gỡ NPC lúc server đang chạy. NPC mặc định (không có menu riêng) mở menu qua `createOtherMenu`, nên cũng có nút sự kiện.
+- Người đang đứng trong map sẽ thấy NPC mới sau khi chuyển map hoặc đăng nhập lại.

@@ -59,7 +59,7 @@ public class Santa extends Npc {
         if (SeasonEventService.gI().confirmMenu(this, player, player.idMark.getIndexMenu(), select)) {
             return;
         }
-        if (player.idMark.isBaseMenu() && (this.mapId == 5 || this.mapId == 13 || this.mapId == 20)) {
+        if (player.idMark.isBaseMenu()) {
             List<String[]> menu = menu(player);
             if (select < 0 || select >= menu.size()) {
                 return;

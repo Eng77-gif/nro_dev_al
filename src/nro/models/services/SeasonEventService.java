@@ -69,6 +69,7 @@ public class SeasonEventService implements Runnable {
         public boolean lunar, enabled;
         public int month, day, daysBefore, daysAfter;
         public int[][] bosses = new int[0][];
+        public List<int[]> npcSpawns = new ArrayList<>(); // {npcTempId, mapId, x, y}; x = 0 tự chọn chỗ trống
         public List<Drop> drops = new ArrayList<>();
         public List<Exchange> exchanges = new ArrayList<>();
         public List<String> groups = new ArrayList<>();
@@ -112,6 +113,8 @@ public class SeasonEventService implements Runnable {
     private final Map<Integer, Boolean> forced = new ConcurrentHashMap<>();
     /** số vật phẩm đã nhặt trong ngày: "playerId:itemId" */
     private final Map<String, Integer> daily = new ConcurrentHashMap<>();
+    /** NPC sự kiện đang được đặt thêm vào bản đồ: "mapId:tempId" -> npc */
+    private final Map<String, Npc> eventNpcs = new ConcurrentHashMap<>();
     private volatile LocalDate dailyDate;
     private volatile LocalDate testDate;
 
@@ -213,6 +216,16 @@ public class SeasonEventService implements Runnable {
                     }
                 }
             }
+            try (PreparedStatement ps = con.prepareStatement("select * from season_event_npc order by id"); ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Season s = map.get(rs.getInt("event_id"));
+                    if (s != null) {
+                        s.npcSpawns.add(new int[]{rs.getInt("npc_id"), rs.getInt("map_id"), rs.getInt("x"), rs.getInt("y")});
+                    }
+                }
+            } catch (Exception e) {
+                Logger.error("Không tải được season_event_npc: " + e.getMessage() + "\n");
+            }
         } catch (Exception e) {
             Logger.error("Không tải được sự kiện theo mùa: " + e.getMessage() + "\n");
             return;
@@ -238,6 +251,7 @@ public class SeasonEventService implements Runnable {
         exchanges.putAll(exMap);
         tops.clear();
         tops.putAll(topMap);
+        syncNpcs();
         Logger.success("Successfully loaded season event (" + seasons.size() + " sự kiện, " + exMap.size() + " công thức, " + topMap.size() + " đua top)\n");
     }
 
@@ -392,6 +406,96 @@ public class SeasonEventService implements Runnable {
                     }
                 }
             }
+        }
+        syncNpcs();
+    }
+
+    // ------------------------------------------------------------------ npc
+    /** Đặt / gỡ NPC sự kiện trên các bản đồ cho khớp với các sự kiện đang chạy. */
+    private synchronized void syncNpcs() {
+        Map<String, int[]> want = new LinkedHashMap<>();
+        for (Season s : seasons.values()) {
+            if (s.active) {
+                for (int[] n : s.npcSpawns) {
+                    want.putIfAbsent(n[1] + ":" + n[0], n);
+                }
+            }
+        }
+        for (Map.Entry<String, Npc> en : eventNpcs.entrySet()) {
+            if (!want.containsKey(en.getKey())) {
+                Npc npc = en.getValue();
+                if (npc.map != null) {
+                    npc.map.npcs.remove(npc);
+                }
+                nro.models.server.Manager.NPCS.remove(npc);
+                eventNpcs.remove(en.getKey());
+            }
+        }
+        for (Map.Entry<String, int[]> en : want.entrySet()) {
+            if (eventNpcs.containsKey(en.getKey())) {
+                continue;
+            }
+            int[] n = en.getValue();
+            nro.models.map.Map m = nro.models.map.service.MapService.gI().getMapById(n[1]);
+            if (m == null || m.npcs.stream().anyMatch(x -> x.tempId == n[0])) {
+                continue; // bản đồ đã có sẵn NPC này
+            }
+            try {
+                int x = n[2] > 0 ? n[2] : freeX(m);
+                int y = n[3] > 0 ? n[3] : groundY(m, x);
+                Npc npc = n[0] == nro.models.consts.ConstNpc.SANTA
+                        ? nro.models.npc.NpcFactory.createNPC(m.mapId, 1, x, y, n[0])
+                        : new EventNpc(m.mapId, x, y, n[0]);
+                if (npc != null) {
+                    npc.map = m;
+                    m.npcs.add(npc);
+                    eventNpcs.put(en.getKey(), npc);
+                }
+            } catch (Exception e) {
+                Logger.error("Không đặt được NPC sự kiện " + n[0] + " ở map " + n[1] + ": " + e.getMessage() + "\n");
+            }
+        }
+    }
+
+    /** Chỗ trống gần giữa bản đồ, cách các NPC khác ít nhất 70px. */
+    private static int freeX(nro.models.map.Map m) {
+        int mid = m.mapWidth / 2;
+        for (int d = 0; d < m.mapWidth; d += 40) {
+            for (int x : new int[]{mid + d, mid - d}) {
+                if (x >= 100 && x <= m.mapWidth - 100 && m.npcs.stream().allMatch(o -> Math.abs(o.cx - x) >= 70)
+                        && Math.abs(groundY(m, x) - groundY(m, x - 30)) < 24 && Math.abs(groundY(m, x) - groundY(m, x + 30)) < 24) {
+                    return x;
+                }
+            }
+        }
+        return mid;
+    }
+
+    private static int groundY(nro.models.map.Map m, int x) {
+        return m.yPhysicInTop(x, 24);
+    }
+
+    /** NPC đặt thêm khi có sự kiện: chỉ mở các mục sự kiện của NPC đó. */
+    private static class EventNpc extends Npc {
+
+        EventNpc(int mapId, int cx, int cy, int tempId) {
+            super(mapId, 1, cx, cy, tempId, nro.models.server.Manager.NPC_TEMPLATES.get(tempId).avatar);
+        }
+
+        @Override
+        public void openBaseMenu(Player player) {
+            if (canOpenNpc(player)) {
+                if (gI().npcExchanges(tempId).isEmpty()) {
+                    createOtherMenu(player, nro.models.consts.ConstNpc.IGNORE_MENU, "Sự kiện đã kết thúc", "Đóng");
+                } else {
+                    gI().openNpcEvent(this, player);
+                }
+            }
+        }
+
+        @Override
+        public void confirmMenu(Player player, int select) {
+            // các menu sự kiện đã được SeasonEventService.npcSelect xử lý trước
         }
     }
 
