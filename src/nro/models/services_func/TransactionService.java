@@ -45,7 +45,7 @@ public class TransactionService implements Runnable {
     public static TransactionService gI() {
         if (i == null) {
             i = new TransactionService();
-            Executors.newSingleThreadExecutor().submit(i);
+            nro.models.utils.Util.POOL.submit(i);
         }
         return i;
     }

@@ -171,7 +171,7 @@ public class Logger {
     }
 
     public static void fileLog(String playerName, String string) {
-        Executors.newSingleThreadExecutor().submit(() -> {
+        nro.models.utils.Util.POOL.submit(() -> {
             try {
                 SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy + HH:mm:ss");
                 String timeNow = formatter.format(new Date());

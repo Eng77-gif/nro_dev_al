@@ -40,7 +40,7 @@ public class Client implements Runnable {
     private final List<Player> players = new ArrayList<>();
 
     private Client() {
-        Executors.newSingleThreadExecutor().submit(this, "Update Client");
+        nro.models.utils.Util.POOL.submit(this);
     }
 
     public static Client gI() {

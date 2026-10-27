@@ -207,7 +207,7 @@ public class BanDoKhoBau implements Runnable {
                 }
             }
         }
-        Executors.newSingleThreadExecutor().submit(this, "Bản Đồ Kho Báu: " + this.clan.name);
+        nro.models.utils.Util.POOL.submit(this);
     }
 
     public void finish() {

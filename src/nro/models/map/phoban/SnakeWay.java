@@ -196,7 +196,7 @@ public class SnakeWay implements Runnable {
                 }
             }
         }
-        Executors.newSingleThreadExecutor().submit(this, "Con Đường Rắn Độc: " + this.clan.name);
+        nro.models.utils.Util.POOL.submit(this);
     }
 
     public void finish() {

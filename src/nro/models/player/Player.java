@@ -437,7 +437,7 @@ public class Player implements Runnable {
     }
 
     public void start() {
-        Executors.newSingleThreadExecutor().submit(this, "Update player " + this.name);
+        nro.models.utils.Util.POOL.submit(this);
     }
 
     public void update() {

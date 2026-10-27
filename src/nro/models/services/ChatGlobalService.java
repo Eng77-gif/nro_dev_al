@@ -33,7 +33,7 @@ public class ChatGlobalService implements Runnable {
     }
 
     private void start() {
-        Executors.newSingleThreadExecutor().submit(this, "**Chat global");
+        nro.models.utils.Util.POOL.submit(this);
     }
 
     public static ChatGlobalService gI() {

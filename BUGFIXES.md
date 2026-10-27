@@ -723,3 +723,18 @@ Cách test:
 - 256 Hầu gái: +5%; cùng loại thì không cộng.
 
 **Option chỉ để hiện chữ** (hạn dùng, không giao dịch, sách kỹ năng…), không cần code: 1, 9, 30, 93, 210, 231…
+
+## Đợt 27: Tối ưu cho VPS yếu, effect chính thức, tool tải repo
+- **Rò rỉ luồng (lỗi nặng):** mỗi lần đăng nhập, hiện hiệu ứng (LogicEffect), ghi log, hẹn giờ (setTimeout), Mabư ăn người, luyện tập, trả thù, phó bản… server tạo 1 luồng không bao giờ đóng.
+  - Test cũ: 15 lần đăng nhập để lại 13 luồng.
+  - Nay dùng chung `Util.POOL` (luồng rảnh 60 giây tự đóng) và `Util.TIMER`. Test lại: không còn luồng thừa.
+- Khu Ngọc Rồng Sao Đen không có người: cập nhật 1 lần/giây thay vì 7 lần/giây.
+- `run_vps_yeu.bat` / `run_vps_yeu.sh`: dùng SerialGC, giới hạn RAM. Lúc không có người chơi tốn khoảng 160 MB RAM, so với khoảng 420 MB khi chạy mặc định.
+- Hướng dẫn chọn JDK / NetBeans và chỉnh MySQL: xem `HUONG_DAN_VPS_YEU.md`.
+- **Effect chính thức:** thêm effect 500–519; cập nhật 19 effect khác bản chính thức (ảnh x4 gốc, x1–x3 thu nhỏ từ x4).
+  - Danh hiệu 300–303 không có trên server chính thức nên vẫn thiếu ảnh.
+- **`tools/NroRepoDownloader.exe`:** tải toàn bộ file server từ GitHub, mặc định bỏ `tools/` và `client/` (LÂU CỒ MOD).
+  - Lần đầu tải 1 file zip (khoảng 690 MB) rồi giải nén: test được 79.325 file trong 55 giây.
+  - Lần sau so mã hash từng file, chỉ tải file mới / đã sửa.
+  - Không ghi đè `Config.properties` và `maintenanceConfig.txt` nếu trên máy đã có.
+  - Mã nguồn: `tools/repo-downloader`.

@@ -49,7 +49,7 @@ public class BlackBallWar implements Runnable {
     }
 
     private void start() {
-    Executors.newSingleThreadExecutor().submit(this, "Zone " + zone.zoneId);
+        nro.models.utils.Util.POOL.submit(this);
     }
 
     @Override
@@ -58,7 +58,9 @@ public class BlackBallWar implements Runnable {
             try {
                 long startTime = System.currentTimeMillis();
                 update();
-                Functions.sleep(Math.max(150 - (System.currentTimeMillis() - startTime), 10));
+                // khu không có ai thì 1 giây mới kiểm tra 1 lần (đỡ CPU cho VPS yếu)
+                int tick = zone.getPlayers().isEmpty() ? 1000 : 150;
+                Functions.sleep(Math.max(tick - (System.currentTimeMillis() - startTime), 10));
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -45,13 +45,7 @@ public class The23rdMartialArtCongressService {
     }
 
     public static void setTimeout(Runnable runnable, int delay) {
-        new Thread(() -> {
-            try {
-                Thread.sleep(delay);
-                runnable.run();
-            } catch (Exception e) {
-            }
-        }).start();
+        nro.models.utils.Util.setTimeout(runnable, delay);
     }
 
     public void sendTypePK(Player player, Player boss) {

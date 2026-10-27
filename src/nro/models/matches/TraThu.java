@@ -25,7 +25,7 @@ public class TraThu extends PVP {
         }
         Service.gI().sendThongBao(p2, "Có người đang đến tìm bạn để trả thù");
         Service.gI().chat(p1, "Mày tới số rồi con ạ!");
-        Executors.newSingleThreadExecutor().submit(() -> {
+        nro.models.utils.Util.POOL.submit(() -> {
             try {
                 Thread.sleep(3000);
             } catch (InterruptedException e) {

@@ -26,7 +26,7 @@ public final class MajinBuu14H implements Runnable {
     }
 
     public void init() {
-        Executors.newSingleThreadExecutor().submit(this, "MajinBuu 14H - Id : " + id);
+        nro.models.utils.Util.POOL.submit(this);
     }
 
     @Override

@@ -395,15 +395,30 @@ public class Util {
         return str;
     }
 
+    /**
+     * Pool luồng dùng chung cho việc chạy nền (thay cho tạo Executors.newSingleThreadExecutor() mỗi lần: luồng đó
+     * không bao giờ đóng nên mỗi lần đăng nhập / hiệu ứng / log để lại 1 luồng chết, VPS yếu bị đầy RAM).
+     * Luồng rảnh quá 60 giây tự đóng.
+     */
+    public static final ExecutorService POOL = Executors.newCachedThreadPool(named("nro-pool"));
+    /** Bộ hẹn giờ dùng chung (2 luồng) cho các việc "chạy sau X ms". */
+    public static final java.util.concurrent.ScheduledExecutorService TIMER = Executors.newScheduledThreadPool(2, named("nro-timer"));
+
+    private static java.util.concurrent.ThreadFactory named(String prefix) {
+        java.util.concurrent.atomic.AtomicInteger n = new java.util.concurrent.atomic.AtomicInteger();
+        return r -> {
+            Thread th = new Thread(r, prefix + "-" + n.incrementAndGet());
+            th.setDaemon(true);
+            return th;
+        };
+    }
+
     public static void threadPool(Runnable task) {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> {
+        POOL.submit(() -> {
             try {
                 task.run();
             } catch (Exception e) {
                 Logger.error(e + "\n");
-            } finally {
-                executor.shutdown();
             }
         });
     }
@@ -421,13 +436,13 @@ public class Util {
     }
 
     public static void setTimeout(Runnable runnable, int delay) {
-        Executors.newSingleThreadExecutor().submit(() -> {
+        TIMER.schedule(() -> {
             try {
-                Thread.sleep(delay);
                 runnable.run();
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
+                Logger.error(e + "\n");
             }
-        });
+        }, delay, java.util.concurrent.TimeUnit.MILLISECONDS);
     }
 
     public static String addSlashes(String input) {
