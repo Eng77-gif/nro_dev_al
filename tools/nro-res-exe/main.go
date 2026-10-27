@@ -624,7 +624,7 @@ func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8)
 		if end > len(reqs) {
 			end = len(reqs)
 		}
-		if d.o.Renew > 0 && sessionSent >= d.o.Renew {
+		if d.o.Renew > 0 && cmd == -67 && sessionSent >= d.o.Renew { // chỉ icon cần đổi phiên định kỳ
 			if !d.reconnect(fmt.Sprintf("Đã gửi %d yêu cầu trong phiên này", sessionSent)) {
 				d.j.log("  Dừng: không kết nối lại được server (đã tải %d/%d)", k, len(reqs))
 				return
@@ -678,13 +678,17 @@ func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8)
 			continue
 		}
 		if d.o.Official && d.canary != nil {
-			d.j.log("  %s không có trả lời, thử lại một ảnh đã có để kiểm tra server...", keyName(keys[k:end]...))
+			var miss []string
+			for i := k; i < end; i++ {
+				if !d.got[keys[i]] {
+					miss = append(miss, keyName(keys[i]))
+				}
+			}
+			d.j.log("  %s không có trả lời, thử lại một ảnh đã có để kiểm tra server...", strings.Join(miss, ", "))
 			if d.alive(cmd, wait) {
 				// server vẫn trả lời bình thường: các yêu cầu này không có trên server
-				d.j.log("  Server vẫn trả lời: server không có %s, bỏ qua", keyName(keys[k:end]...))
-				for i := k; i < end; i++ {
-					absent = append(absent, keyName(keys[i]))
-				}
+				d.j.log("  Server vẫn trả lời: server không có %s, bỏ qua", strings.Join(miss, ", "))
+				absent = append(absent, miss...)
 				cool, consec = 0, 0
 				k = end
 				continue
@@ -1117,7 +1121,7 @@ func startDownload(w http.ResponseWriter, r *http.Request) {
 	os.MkdirAll(o.Out, 0o755)
 	if f, err := os.OpenFile(filepath.Join(o.Out, "nhat_ky.txt"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644); err == nil {
 		j.file = f
-		fmt.Fprintf(f, "\n=== %s\nNroResTool  %s  %s:%d  user=%v  official=%v  batch=%d  wait=%.1f  delay=%.2f  renew=%d  zoom=%d\n",
+		fmt.Fprintf(f, "\n=== %s\nNroResTool "+version+"  %s  %s:%d  user=%v  official=%v  batch=%d  wait=%.1f  delay=%.2f  renew=%d  zoom=%d\n",
 			j.Title, time.Now().Format("2006-01-02 15:04:05"), o.Host, o.Port, o.User != "", o.Official, o.Batch, o.Wait, o.Delay, o.Renew, o.Zoom)
 	}
 	go func() {
@@ -1216,6 +1220,9 @@ func openBrowser(url string) {
 	}
 }
 
+// version: ghi vào nhật ký và giao diện để biết đang chạy bản nào
+const version = "v6 (27/10 kiểm tra bằng ảnh có sẵn)"
+
 func main() {
 	port := flag.Int("port", 8765, "cổng giao diện web")
 	bind := flag.String("bind", "127.0.0.1", "địa chỉ lắng nghe (0.0.0.0 để máy khác trong LAN mở được)")
@@ -1244,7 +1251,7 @@ func main() {
 		startDownload(w, r)
 	})
 	mux.HandleFunc("/api/config", func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, 200, map[string]string{"dir": exeDir})
+		writeJSON(w, 200, map[string]string{"dir": exeDir, "version": version})
 	})
 	mux.HandleFunc("/api/jobs", func(w http.ResponseWriter, r *http.Request) {
 		jobsMu.Lock()

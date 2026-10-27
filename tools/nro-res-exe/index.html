@@ -34,7 +34,7 @@ pre{margin:0;background:var(--log);color:var(--logtext);padding:10px 12px;max-he
 @media (max-width:600px){.it{grid-template-columns:1fr auto}.it>input,.it>.hint{grid-column:1/-1;grid-row:2}}
 @media (max-width:600px){header{flex-wrap:wrap}nav{margin-left:0;width:100%}}
 </style></head><body>
-<header><span class="dot"></span><h1>NRO Res Tool</h1>
+<header><span class="dot"></span><h1>NRO Res Tool</h1><span class="hint" id="ver"></span>
 <nav><button data-tab="dl" class="on">Tải res</button><button data-tab="view">Xem</button></nav></header>
 <main>
 <section id="tab-dl" class="card">
@@ -89,7 +89,7 @@ pre{margin:0;background:var(--log);color:var(--logtext);padding:10px 12px;max-he
 </main>
 <script>
 const $ = id => document.getElementById(id);
-fetch('/api/config').then(r=>r.json()).then(c=>{ $('dir_hint').textContent = 'Thư mục tương đối tính từ chỗ đặt file exe: ' + c.dir });
+fetch('/api/config').then(r=>r.json()).then(c=>{ $('dir_hint').textContent = 'Thư mục tương đối tính từ chỗ đặt file exe: ' + c.dir; $('ver').textContent = c.version });
 document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
   document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
   ['dl','items','view'].forEach(t => $('tab-'+t).classList.toggle('hide', !(t === b.dataset.tab || (t === 'items' && b.dataset.tab === 'dl'))));
