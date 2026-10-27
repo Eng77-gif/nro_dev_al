@@ -470,27 +470,7 @@ public class SeasonEventService implements Runnable {
             list = new ArrayList<>();
             for (Zone z : map.zones) {
                 try {
-                    nro.models.mob.Mob base = new nro.models.mob.Mob();
-                    base.id = z.mobs.size();
-                    base.tempId = cfg[0];
-                    base.level = 1;
-                    base.point.setHpFull(cfg[2]);
-                    base.point.sethp(cfg[2]);
-                    base.location.x = freeMobX(map, list.size());
-                    base.location.y = groundY(map, base.location.x);
-                    base.pDame = temp.percentDame;
-                    base.pTiemNang = temp.percentTiemNang;
-                    base.type = temp.type;
-                    base.setTiemNang();
-                    nro.models.mob.Mob m = switch (cfg[0]) {
-                        case nro.models.consts.ConstMob.VOI_CHIN_NGA -> new nro.models.mob_bigboss.VoiChinNga(base);
-                        case nro.models.consts.ConstMob.GA_CHIN_CUA -> new nro.models.mob_bigboss.GaChinCua(base);
-                        default -> new nro.models.mob.Mob(base);
-                    };
-                    m.zone = z;
-                    synchronized (z) {
-                        z.mobs.add(m);
-                    }
+                    nro.models.mob.Mob m = createBigMob(z, cfg[0], cfg[2], freeMobX(map, list.size()), temp);
                     list.add(m);
                 } catch (Exception e) {
                     Logger.error("Không thả được quái sự kiện " + cfg[0] + " ở map " + cfg[1] + ": " + e.getMessage() + "\n");
@@ -498,6 +478,36 @@ public class SeasonEventService implements Runnable {
             }
             eventMobs.put(en.getKey(), list);
         }
+    }
+
+    /** Tạo một quái (to) trong khu z và thêm vào khu. */
+    public static nro.models.mob.Mob createBigMob(Zone z, int tempId, int hp, int x, nro.models.player_system.Template.MobTemplate temp) {
+        if (temp == null) {
+            temp = nro.models.server.Manager.getMobTemplateByTemp(tempId);
+        }
+        nro.models.mob.Mob base = new nro.models.mob.Mob();
+        base.id = z.mobs.size();
+        base.tempId = tempId;
+        base.level = 1;
+        base.point.setHpFull(hp);
+        base.point.sethp(hp);
+        base.location.x = x;
+        base.location.y = groundY(z.map, x);
+        base.pDame = temp.percentDame;
+        base.pTiemNang = temp.percentTiemNang;
+        base.type = temp.type;
+        base.setTiemNang();
+        nro.models.mob.Mob m = switch (tempId) {
+            case nro.models.consts.ConstMob.VOI_CHIN_NGA -> new nro.models.mob_bigboss.VoiChinNga(base);
+            case nro.models.consts.ConstMob.GA_CHIN_CUA -> new nro.models.mob_bigboss.GaChinCua(base);
+            case nro.models.consts.ConstMob.NGUA_CHIN_LMAO -> new nro.models.mob_bigboss.NguaChinLmao(base);
+            default -> new nro.models.mob.Mob(base);
+        };
+        m.zone = z;
+        synchronized (z) {
+            z.mobs.add(m);
+        }
+        return m;
     }
 
     private static int freeMobX(nro.models.map.Map m, int i) {

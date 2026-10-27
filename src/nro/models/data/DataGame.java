@@ -32,7 +32,7 @@ import nro.models.player_system.Template.BgItem;
 public class DataGame {
 
     public static byte vsData = 17; // tăng khi thêm part/vật phẩm mới để client tải lại
-    public static byte vsMap = 2;
+    public static byte vsMap = 3; // tăng khi thêm map (186 Rừng nguyên sinh - bản đồ truyền thuyết)
     public static byte vsSkill = 1;
     public static byte vsItem = 15;
     public static int vsRes = 2; // tăng khi thêm file res để client tải lại

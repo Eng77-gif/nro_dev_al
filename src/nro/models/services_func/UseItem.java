@@ -961,6 +961,10 @@ public class UseItem {
                                     nro.models.boss.event_tet.NguaCon.feed(pl, item);
                                     return;
                                 }
+                                if (item.template.id == nro.models.event.BanDoTruyenThuyet.ITEM) {
+                                    nro.models.event.BanDoTruyenThuyet.use(pl, item);
+                                    return;
+                                }
                                 if (item.template.id == nro.models.boss.event.Halloween.Zombie.RADA) {
                                     nro.models.boss.event.Halloween.Zombie.radar(pl, item);
                                     return;

@@ -600,3 +600,13 @@ Sự kiện tự bật và tắt theo lịch mỗi năm: Tết, Giỗ tổ, Trun
   | Cánh hào khí | KI 40%, KI +40.000, +10% vàng |
 
 - **Sửa lỗi**: option "Giảm 50% sức đánh, HP, KI và +#% SM, TN, vàng" trong code dùng nhầm id 156 (trong DB là 155).
+
+## Đợt 21: Bản đồ truyền thuyết
+- Map mới **186 Rừng nguyên sinh**: bản sao map 17, 30 khu, không có cổng.
+  - Thêm bằng SQL vào `map_template`, chép `data/map/tile_map_data/186` và `data/map/item_bg_map_data/186` từ map 17.
+  - `vsMap` lên 3 để client tải lại danh sách map.
+- Dùng **Bản đồ truyền thuyết** (1565, mua 2 ngọc ở Chi Chi):
+  - Được đưa vào một khu trống riêng của Rừng nguyên sinh, có 1 trong 3 quái to (ngẫu nhiên): Voi Chín Ngà (20 triệu máu), Gà Chín Cựa (12 triệu), Ngựa Chín Hồng Mao (15 triệu).
+  - Thời gian 10 phút. Hạ xong quái thì 30 giây sau, hoặc hết giờ, tự đưa về nhà.
+- **Rơi đồ trong map này**: Ngà voi / Cựa gà / Hồng mao 3–5 cái (100%). Ngựa Chín Hồng Mao ở mọi nơi đều rơi Hồng mao.
+- Quái 84 đổi tên "Ngựa Chín Lmao" thành "Ngựa Chín Hồng Mao".
