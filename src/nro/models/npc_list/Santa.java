@@ -3,13 +3,13 @@ package nro.models.npc_list;
 import nro.models.consts.ConstNpc;
 import nro.models.item.Item;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import nro.models.npc.Npc;
 import nro.models.player.Player;
 import nro.models.shop.ShopService;
 import nro.models.services_func.Input;
 import nro.models.services.InventoryService;
+import nro.models.services.SeasonEventService;
 
 public class Santa extends Npc {
 
@@ -17,94 +17,60 @@ public class Santa extends Npc {
         super(mapId, status, cx, cy, tempId, avartar);
     }
 
+    private static final String EVENT = "event", GIAM_GIA = "SANTA_GIAM_GIA_1", GIFT_CODE = "giftcode";
+
+    /** Danh sách chức năng theo đúng thứ tự nút trong menu. */
+    private List<String[]> menu(Player player) {
+        List<String[]> menu = new ArrayList<>();
+        if (SeasonEventService.gI().hasActive()) {
+            menu.add(new String[]{SeasonEventService.gI().menuLabel(), EVENT});
+        }
+        menu.add(new String[]{"Cửa hàng", "SANTA"});
+        Item pGG = InventoryService.gI().findItem(player.inventory.itemsBag, 459);
+        if (pGG != null && pGG.quantity >= 1) {
+            menu.add(new String[]{"Giảm giá\n80%", GIAM_GIA});
+        }
+        menu.add(new String[]{"Mở rộng\nHành trang\nRương đồ", "SANTA_MO_RONG_HANH_TRANG"});
+        menu.add(new String[]{"Nhập mã\nquà tặng", GIFT_CODE});
+        menu.add(new String[]{"Cửa hàng\nHạn sử dụng", "SANTA_HAN_SU_DUNG"});
+        menu.add(new String[]{"Tiệm\nHớt tóc", "SANTA_HEAD"});
+        menu.add(new String[]{"Danh\nhiệu", "SANTA_DANH_HIEU"});
+        return menu;
+    }
+
     @Override
     public void openBaseMenu(Player player) {
         if (canOpenNpc(player)) {
-
-            Item pGG = InventoryService.gI().findItem(player.inventory.itemsBag, 459);
-            int soLuong = 0;
-            if (pGG != null) {
-                soLuong = pGG.quantity;
+            List<String[]> menu = menu(player);
+            String[] labels = new String[menu.size()];
+            for (int i = 0; i < labels.length; i++) {
+                labels[i] = menu.get(i)[0];
             }
-            List<String> menu = new ArrayList<>(Arrays.asList(
-                    "Cửa hàng",
-                    "Mở rộng\nHành trang\nRương đồ",
-                    "Nhập mã\nquà tặng",
-                    "Cửa hàng\nHạn sử dụng",
-                    "Tiệm\nHớt tóc",
-                    "Danh\nhiệu"));
-
-            if (soLuong >= 1) {
-                menu.add(1, "Giảm giá\n80%");
-            }
-
-            String[] menus = menu.toArray(new String[0]);
-
             createOtherMenu(player, ConstNpc.BASE_MENU,
-                    "Xin chào, ta có một số vật phẩm đặc biệt cậu có muốn xem không?", menus);
+                    "Xin chào, ta có một số vật phẩm đặc biệt cậu có muốn xem không?", labels);
         }
-
     }
 
     @Override
     public void confirmMenu(Player player, int select) {
-        if (canOpenNpc(player)) {
-            Item pGG = InventoryService.gI().findItem(player.inventory.itemsBag, 459);
-            int soLuong = 0;
-            if (pGG != null) {
-                soLuong = pGG.quantity;
+        if (!canOpenNpc(player)) {
+            return;
+        }
+        if (SeasonEventService.gI().confirmMenu(this, player, player.idMark.getIndexMenu(), select)) {
+            return;
+        }
+        if (player.idMark.isBaseMenu() && (this.mapId == 5 || this.mapId == 13 || this.mapId == 20)) {
+            List<String[]> menu = menu(player);
+            if (select < 0 || select >= menu.size()) {
+                return;
             }
-
-            if (this.mapId == 5 || this.mapId == 13 || this.mapId == 20) {
-                if (player.idMark.isBaseMenu()) {
-                    switch (select) {
-                        case 0:
-                            ShopService.gI().opendShop(player, "SANTA", false);
-                            break;
-                        case 1:
-                            if (soLuong >= 1) {
-                                ShopService.gI().opendShop(player, "SANTA_GIAM_GIA_1", false);
-                            } else {
-                                ShopService.gI().opendShop(player, "SANTA_MO_RONG_HANH_TRANG", false);
-                            }
-                            break;
-                        case 2:
-                            if (soLuong >= 1) {
-                                ShopService.gI().opendShop(player, "SANTA_MO_RONG_HANH_TRANG", false);
-                            } else {
-                                Input.gI().createFormGiftCode(player);
-                            }
-                            break;
-                        case 3:
-                            if (soLuong >= 1) {
-                                Input.gI().createFormGiftCode(player);
-                            } else {
-                                ShopService.gI().opendShop(player, "SANTA_HAN_SU_DUNG", false);
-                            }
-                            break;
-                        case 4:
-                            if (soLuong >= 1) {
-                                ShopService.gI().opendShop(player, "SANTA_HAN_SU_DUNG", false);
-                            } else {
-                                ShopService.gI().opendShop(player, "SANTA_HEAD", false);
-                            }
-                            break;
-                        case 5:
-                            if (soLuong >= 1) {
-                                ShopService.gI().opendShop(player, "SANTA_HEAD", false);
-                            } else {
-                                ShopService.gI().opendShop(player, "SANTA_DANH_HIEU", false);
-                            }
-                            break;
-                        case 6:
-                            if (soLuong >= 1) {
-                                ShopService.gI().opendShop(player, "SANTA_DANH_HIEU", false);
-                            } else {
-                                ShopService.gI().opendShop(player, "SHOP_VIP", false);
-                            }
-                            break;
-                    }
-                }
+            switch (menu.get(select)[1]) {
+                case EVENT ->
+                    SeasonEventService.gI().openMenu(this, player);
+                case GIFT_CODE ->
+                    Input.gI().createFormGiftCode(player);
+                default ->
+                    ShopService.gI().opendShop(player, menu.get(select)[1], false);
             }
         }
     }

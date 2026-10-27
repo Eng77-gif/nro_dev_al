@@ -630,6 +630,9 @@ public class Boss extends Player implements IBoss {
 
     @Override
     public void die(Player plKill) {
+        if (plKill != null && !plKill.isBot) {
+            nro.models.services.SeasonEventService.gI().onBossKilled(this, plKill);
+        }
 
         if (plKill != null
                 && (this.zone.map.mapId != 140 || !MapService.gI().isMapMaBu(this.zone.map.mapId)

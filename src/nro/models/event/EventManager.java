@@ -49,7 +49,8 @@ public class EventManager {
           //  new Christmas().init();
         }
         if (HUNG_VUONG) {
-            new HungVuong().init();
+            // boss Hùng Vương do SeasonEventService gọi theo lịch Giỗ tổ
+            // new HungVuong().init();
         }
         if (TRUNG_THU) {
            // new TrungThu().init();

@@ -81,6 +81,11 @@ public class Command {
             }
         });
 
+        parameterizedCommands.put("sukien", (player, text) -> {
+            String r = nro.models.services.SeasonEventService.gI().admin(text.substring("sukien".length()));
+            NpcService.gI().createTutorial(player, -1, r);
+        });
+
         parameterizedCommands.put("toado", (player, text) -> {
             Service.gI().sendThongBaoOK(player, "x: " + player.location.x + " - y: " + player.location.y);
         });

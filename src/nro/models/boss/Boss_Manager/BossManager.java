@@ -121,7 +121,7 @@ public class BossManager implements Runnable {
     }
 
     public BossManager() {
-        this.bosses = new ArrayList<>();
+        this.bosses = new java.util.concurrent.CopyOnWriteArrayList<>();
     }
 
     protected final List<Boss> bosses;

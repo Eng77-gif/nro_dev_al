@@ -132,6 +132,13 @@ public class ServerManager {
             new Thread(TreasureUnderSeaManager.gI(), "Update treasure under sea boss").start();
             new Thread(SnakeWayManager.gI(), "Update snake way boss").start();
             new Thread(GasDestroyManager.gI(), "Update gas destroy boss").start();
+            // boss sự kiện theo mùa (trước đây các luồng này không được chạy nên boss sự kiện đứng im)
+            new Thread(nro.models.boss.Boss_Manager.LunarNewYearEventManager.gI(), "Update tet boss").start();
+            new Thread(nro.models.boss.Boss_Manager.HungVuongEventManager.gI(), "Update hung vuong boss").start();
+            new Thread(nro.models.boss.Boss_Manager.TrungThuEventManager.gI(), "Update trung thu boss").start();
+            new Thread(nro.models.boss.Boss_Manager.HalloweenEventManager.gI(), "Update halloween boss").start();
+            new Thread(nro.models.boss.Boss_Manager.ChristmasEventManager.gI(), "Update christmas boss").start();
+            new Thread(nro.models.services.SeasonEventService.gI(), "Update season event").start();
 
             new Thread(BotManager.gI(), "Thread Bot Game").start();
             new Thread(ChonAiDay_Gem.gI(), "Thread MiniGame").start();

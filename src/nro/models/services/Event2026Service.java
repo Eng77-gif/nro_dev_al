@@ -127,6 +127,14 @@ public class Event2026Service {
         }
     }
 
+    public void reloadBoxes() {
+        try (Connection con = nro.models.data.LocalManager.getConnection()) {
+            loadBoxes(con);
+        } catch (Exception e) {
+            Logger.error("Không tải được item_box_reward: " + e.getMessage() + "\n");
+        }
+    }
+
     public boolean isBox(Item item) {
         return item != null && item.isNotNullItem() && boxes.containsKey((int) item.template.id);
     }

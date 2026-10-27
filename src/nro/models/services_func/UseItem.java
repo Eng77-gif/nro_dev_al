@@ -850,7 +850,11 @@ public class UseItem {
                                 UseItem.gI().OpenHopThanlinh(pl, item.template.id);
                                 break;
                             case 648:
-                                UseItem.gI().NoelItemBox(pl, item);
+                                if (Event2026Service.gI().isBox(item)) { // quà lấy từ item_box_reward
+                                    Event2026Service.gI().openBox(pl, item);
+                                } else {
+                                    UseItem.gI().NoelItemBox(pl, item);
+                                }
                                 break;
                             case 1171:
                                 UseItem.gI().ChuLunBox(pl, item);
