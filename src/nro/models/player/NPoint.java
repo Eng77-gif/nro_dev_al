@@ -177,6 +177,7 @@ public class NPoint {
      * Tỉ lệ giảm sức đánh
      */
     public short tlSubSD;
+    public short tlSubHpKi; // option 155: giảm % HP, KI
 
     public int voHieuChuong;
 
@@ -436,6 +437,7 @@ public class NPoint {
                             break;
                         case 155: //Giảm 50% sức đánh, HP, KI và +#% SM, TN, vàng từ quái (id theo item_option_template)
                             this.tlSubSD += 50;
+                            this.tlSubHpKi += 50;
                             this.tlTNSM.add(io.param);
                             this.tlGold += io.param;
                             break;
@@ -997,6 +999,7 @@ public class NPoint {
                 break;
             case 155: //Giảm 50% sức đánh, HP, KI và +#% SM, TN, vàng từ quái (id theo item_option_template)
                 this.tlSubSD += 50;
+                this.tlSubHpKi += 50;
                 this.tlTNSM.add(io.param);
                 this.tlGold += io.param;
                 break;
@@ -1290,11 +1293,12 @@ public class NPoint {
             }
         }
 
+        hpMax -= hpMax * Math.min(100, tlSubHpKi) / 100L;
         if (hpMax > 2_147_483_647) {
             hpMax = 2_147_483_647;
         }
 
-        this.hpMax = (int) hpMax;
+        this.hpMax = (int) Math.max(1, hpMax);
     }
 
     private void setHp() {
@@ -1399,12 +1403,13 @@ public class NPoint {
             }
         }
 
+        mpMax -= mpMax * Math.min(100, tlSubHpKi) / 100L;
         if (mpMax
                 > 2_147_483_647) {
             mpMax = 2_147_483_647;
         }
 
-        this.mpMax = (int) mpMax;
+        this.mpMax = (int) Math.max(1, mpMax);
     }
 
     private void setMp() {
@@ -1570,9 +1575,7 @@ public class NPoint {
             }
         }
 
-        dame += (dame * tlSexyDame / 100L);
-
-        //Sức đánh đẹp
+        //Sức đánh đẹp (trước bị cộng 2 lần)
         dame += (dame * tlSexyDame / 100L);
 
         // Xử lý giảm dame
@@ -1668,6 +1671,7 @@ public class NPoint {
         this.setNguyetAn = 0;
         this.tlSexyDame = 0;
         this.tlSubSD = 0;
+        this.tlSubHpKi = 0;
         this.tlHpGiamODo = 0;
         this.tlSTChuan = 0;
         this.tlDameBoss = 0;

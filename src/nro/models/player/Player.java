@@ -1065,6 +1065,7 @@ public class Player implements Runnable {
             if (plAtt != null && plAtt.nPoint != null && plAtt.nPoint.isCrit && this.nPoint != null && this.nPoint.tlNeCrit > 0
                     && Util.isTrue(this.nPoint.tlNeCrit, 100)) {
                 damage = damage * 100 / (100 + Math.max(0, plAtt.nPoint.tlSDCM)) / 2;
+                plAtt.nPoint.isCrit = false; // hiện đòn thường thay vì chí mạng
             }
             if (this.nPoint != null) {
                 // option 198 / 199 / 200: giảm #% sát thương từ tộc Trái Đất / Namếc / Xayda

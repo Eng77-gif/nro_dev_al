@@ -679,3 +679,47 @@ Sự kiện tự bật và tắt theo lịch mỗi năm: Tết, Giỗ tổ, Trun
 `vsData` lên 19 để client tải lại tên option.
 
 **Chưa làm:** "Triệu hồi quái 120% sức đánh, CD 360s" của Chổi bay phù thủy cần cơ chế triệu hồi mới, chưa có.
+
+## Đợt 26: Kiểm tra toàn bộ option và nội tại (test thật trên server)
+Cách test:
+- **Từng option:** mặc cải trang chỉ có đúng option đó, đọc biến chỉ số của server (lệnh admin `chisoraw`) và so với lúc không có option. Đã chạy 92 option đang có trên đồ.
+- **Option chiến đấu:** 2 nhân vật đánh nhau thật (lệnh admin `pkall`), đọc sát thương từng đòn trong gói tin.
+- **Set đứng gần:** 2 nhân vật mặc 2 cải trang khác loại đứng cạnh nhau.
+
+**Lỗi đã sửa:**
+| Lỗi | Trước | Sau |
+|---|---|---|
+| Nội tại tải trùng 8 lần | 7/87 lần mở nội tại ra "Chưa kích hoạt" | Mỗi nội tại 1 lần |
+| Nội tại 23 (+% vàng từ quái) | Không có tác dụng | Cộng vàng rơi từ quái |
+| Nội tại 3 (Thái Dương Hạ San −% KI) | Không giảm KI | Giảm KI tiêu hao |
+| Nội tại 9 Masenko | Cộng sát thương 2 lần, còn giảm nhầm hồi chiêu | Chỉ cộng sát thương 1 lần |
+| Nội tại 24 / 25 | Dùng nội tại cũ: đòn đầu tiên hoặc vừa đổi nội tại thì sai | Lấy nội tại hiện tại |
+| Set Picolo 5 món (Makankosappo ×1,5) | Viết `*= 3 / 2` = nhân 1, không tăng | Tăng 50% |
+| Bùa trí tuệ x4 | Bị cộng 2 lần (thành x8) | x4 |
+| Option 117 / 226 Sức đánh đẹp | Bị cộng 2 lần (+10% thành +21%) | +10% |
+| Option 155 "Giảm 50% SĐ, HP, KI…" | Chỉ giảm SĐ | Giảm cả HP, KI |
+| Option 100 / 155 +% vàng | Không có tác dụng | Cộng vàng rơi |
+| Option 114 / 148 +% tốc độ | Không có tác dụng | Tăng tốc chạy |
+| Option 191 Né chí mạng | Khi né vẫn hiện chữ chí mạng | Hiện đòn thường |
+
+**Kết quả test chiến đấu** (B tộc Namếc đánh A, mỗi kịch bản 8 đòn):
+| Option trên A | Sát thương / đòn | Kết quả |
+|---|---|---|
+| không có | ~96.000 | gốc |
+| 199 giảm 50% ST từ Namếc | ~47.000 | đúng |
+| 198 giảm 50% ST từ Trái Đất | ~96.000 | đúng (không giảm đòn Namếc) |
+| 157 giảm 50% ST khi KI < 20% | ~48.000 khi KI thấp, ~96.000 khi KI đầy | đúng |
+| 4 hồi 10% KI khi bị đánh | KI +88 triệu sau 8 đòn | đúng |
+| 15 phản 100.000 ST cận chiến | B mất đúng 800.000 HP | đúng |
+| B chí mạng 100%, A không có 191 | ~188.000 | gốc chí mạng |
+| B chí mạng 100%, A có 191 100% | ~96.000 | đúng |
+
+**Kết quả set đứng gần:** đúng hết, gồm:
+- 145/146 Dr Slum: +20% SĐ, +66% tốc độ.
+- 150 Póc–Píc–King Kong: +10% SĐ/HP/KI cho cả 2 người.
+- 177 Gohan Bư gần Mabư: +2%.
+- 179 Demons Frost: +2%.
+- 193 Cầu thủ, 196 Thỏ.
+- 256 Hầu gái: +5%; cùng loại thì không cộng.
+
+**Option chỉ để hiện chữ** (hạn dùng, không giao dịch, sách kỹ năng…), không cần code: 1, 9, 30, 93, 210, 231…
