@@ -280,6 +280,10 @@ parameterizedCommands.put("upp", (player, text) -> {
             nro.models.services.StatsInfoService.gI().show(player, false);
             return true;
         }
+        if (text.equals("pkall") && player.isAdmin()) { // admin: bật PK để thử chiến đấu
+            PlayerService.gI().changeAndSendTypePK(player, ConstPlayer.PK_ALL);
+            return true;
+        }
         if (text.equals("chisoraw") && player.isAdmin()) {
             // admin: in mọi biến chỉ số (dùng để kiểm tra option có tác dụng hay không)
             StringBuilder sb = new StringBuilder("RAW|");

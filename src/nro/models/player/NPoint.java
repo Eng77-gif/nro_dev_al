@@ -1752,6 +1752,8 @@ public class NPoint {
     }
 
     private void setIsCrit() {
+        // lấy nội tại hiện tại (trước dùng bản của đòn đánh trước, đòn đầu tiên / vừa đổi nội tại bị sai)
+        intrinsic = this.player.playerIntrinsic != null ? this.player.playerIntrinsic.intrinsic : null;
         if (intrinsic != null && intrinsic.id == 25
                 && this.getCurrPercentHP() <= intrinsic.param1) {
             isCrit = true;
@@ -1821,14 +1823,14 @@ public class NPoint {
                 percentDameSkill = skillSelect.damage;
                 break;
             case Skill.MASENKO:
+                // trước đây cộng % nội tại / set Nail vào % chiêu rồi lại nhân thêm lần nữa ở dưới (tính 2 lần)
                 if (intrinsic != null && intrinsic.id == 9) {
-                    percentXDame += intrinsic.param1;
+                    percentDameIntrinsic = intrinsic.param1;
                 }
                 if (this.player.setClothes.nail == 5) {
-                    percentXDame += 80;
+                    percentXDame = 80;
                 }
-
-                percentDameSkill = skillSelect.damage + percentXDame;
+                percentDameSkill = skillSelect.damage;
                 break;
 
             case Skill.LIEN_HOAN:
@@ -1856,7 +1858,7 @@ public class NPoint {
                 percentDameSkill = skillSelect.damage;
                 int dameSkill = (int) Math.min(2_147_483_647L, (long) this.mpMax * percentDameSkill / 100);
                 if (this.player.setClothes.picolo == 5) {
-                    dameSkill *= 3 / 2;
+                    dameSkill = (int) Math.min(2_147_483_647L, (long) dameSkill * 3 / 2); // trước là *= 3 / 2 = nhân 1
                 }
                 return dameSkill;
             case Skill.QUA_CAU_KENH_KHI:
@@ -2036,9 +2038,6 @@ public class NPoint {
             if (this.player.charms.tdTriTue4 > System.currentTimeMillis()) {
                 tiemNang += tn * 4;
             }
-            if (this.player.charms.tdTriTue4 > System.currentTimeMillis()) {
-                tiemNang += tn * 4;
-            }
             if (this.player.timevip > System.currentTimeMillis()) {
                 tiemNang += tn * 3;
             }
@@ -2066,6 +2065,7 @@ public class NPoint {
             if (this.player.satellite != null && this.player.satellite.isIntelligent) {
                 tiemNang += tn / 5;
             }
+            this.intrinsic = this.player.playerIntrinsic != null ? this.player.playerIntrinsic.intrinsic : null;
             if (this.intrinsic != null && this.intrinsic.id == 24) {
                 tiemNang += ((long) tiemNang * this.intrinsic.param1 / 100);
             }

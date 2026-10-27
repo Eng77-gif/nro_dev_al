@@ -1183,9 +1183,7 @@ public class SkillService {
                 }
             }
             case Skill.MASENKO -> {
-                if (intrinsic.id == 9) {
-                    subTimeParam = intrinsic.param1;
-                }
+                // nội tại 9 chỉ tăng sát thương Masenko, không giảm hồi chiêu
                 if (player.setClothes.nail == 4) {
                     subTimeParam = subTimeParam + 20; // Nếu nail = 4, cộng thêm 20
                 }
