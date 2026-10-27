@@ -400,14 +400,16 @@ Mỗi lần chạy hiện nhật ký trực tiếp và có nút Dừng. Tool ch�
 
 ## Đợt 12: `tools/NroResTool.exe`, tool tải res chạy thẳng trên Windows
 - Một file exe duy nhất, không cần cài Python hay Java. Bấm đúp là tool tự mở giao diện trên trình duyệt; tắt bằng cách đóng cửa sổ đen.
-- Tab **Tải res**: điền host/port của server, chọn:
+- Tab **Tải res**: phần **Server** điền host/port/tài khoản một lần; phần **Tải từng mục** có nút tải riêng cho:
+  - res (`data/res`)
+  - part (ghi ra `Nr_Part.sql`)
   - icon (id)
-  - toàn bộ part (ghi ra `Nr_Part.sql`)
+  - effect (id, cần tài khoản để vào game)
   - mount (id)
   - aura (id)
-  - ảnh khác theo tên
-  - effect (id, cần tài khoản để vào game)
-  - file res (`data/res`)
+  - ảnh theo tên
+- Mỗi lần chỉ chạy một mục để không dồn yêu cầu làm server quá tải. Ô "Bỏ qua file đã có" (bật sẵn) chỉ tải những id còn thiếu, nên server bảo trì giữa chừng thì tải lại cùng khoảng id là chạy tiếp. Nhật ký các lần tải được ghi nối vào `nhat_ky.txt`.
+- Server chính thức ngừng trả lời sau khoảng 100 yêu cầu mỗi phiên: tool tự mở phiên mới (đăng nhập lại) khi 2 đợt liền không nhận được gì, và khi tích "Server TeaMobi chính thức" thì cứ 90 yêu cầu lại mở phiên mới.
 - Ô "Server TeaMobi chính thức" bật thêm định dạng gói của server gốc. Nếu bị server chặn vì tải nhanh, chỉnh mục "Nâng cao" (số yêu cầu mỗi đợt, thời gian chờ).
 - Tab **Xem**: duyệt icon, mount/aura, effect vừa tải.
 - Kết quả lưu vào thư mục `res_out` cạnh file exe, cùng cấu trúc với `data/` của server: `icon/x4`, `img_by_name/x4`, `effect/x4`, `effdata`, `res/x4`, `Nr_Part.sql`, `img_by_name.json`.

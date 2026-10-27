@@ -272,6 +272,7 @@ type options struct {
 	Batch    int     `json:"batch,string"`
 	Wait     float64 `json:"wait,string"`
 	Delay    float64 `json:"delay,string"`
+	Skip     bool    `json:"skip"`         // bỏ qua id đã có file trong thư mục lưu
 	Renew    int     `json:"renew,string"` // số yêu cầu tối đa mỗi phiên rồi kết nối lại (0 = không giới hạn)
 }
 
@@ -362,7 +363,7 @@ func (d *downloader) onMsg(m msg) {
 			d.write("img_by_name/x"+z+"/"+filepath.Base(name)+".png", img)
 			d.frames[name] = int(nf)
 			if d.mark("img:" + name) {
-				d.stats["mount/aura"]++
+				d.stats[nameLabel(name)]++
 			}
 		}
 	case -66: // effect
@@ -413,6 +414,44 @@ func (d *downloader) onMsg(m msg) {
 		} else if t == 3 {
 			d.resEnd = true
 		}
+	}
+}
+
+// nameLabel: nhóm thống kê của ảnh theo tên.
+func nameLabel(name string) string {
+	switch {
+	case strings.HasPrefix(name, "mount_"):
+		return "mount"
+	case strings.HasPrefix(name, "aura_"):
+		return "aura"
+	}
+	return "ảnh"
+}
+
+// have: file đã tải trước đó (khi bật bỏ qua file đã có).
+func (d *downloader) have(rel string) bool {
+	if !d.o.Skip {
+		return false
+	}
+	st, err := os.Stat(filepath.Join(d.o.Out, filepath.FromSlash(rel)))
+	return err == nil && st.Size() > 0
+}
+
+// fetch gửi các yêu cầu còn thiếu; rels là file kết quả tương ứng để bỏ qua cái đã có.
+func (d *downloader) fetch(label string, reqs [][]byte, keys, rels []string, cmd int8) {
+	var r2 [][]byte
+	var k2 []string
+	for i := range reqs {
+		if !d.have(rels[i]) {
+			r2 = append(r2, reqs[i])
+			k2 = append(k2, keys[i])
+		}
+	}
+	if n := len(reqs) - len(r2); n > 0 {
+		d.j.log("Bỏ qua %d %s đã có", n, label)
+	}
+	if len(r2) > 0 {
+		d.batch(label, r2, k2, cmd)
 	}
 }
 
@@ -686,35 +725,46 @@ func (d *downloader) run() error {
 			d.j.log("  %d part → Nr_Part.sql", len(d.parts))
 		}
 	}
-	if strings.TrimSpace(o.Icons) != "" {
+	z := strconv.Itoa(o.Zoom)
+	if ids := parseRange(o.Icons); len(ids) > 0 {
 		var reqs [][]byte
-		var keys []string
-		for _, id := range parseRange(o.Icons) {
+		var keys, rels []string
+		for _, id := range ids {
 			reqs = append(reqs, (&pkt{}).i(int32(id)).Bytes())
 			keys = append(keys, "icon:"+strconv.Itoa(id))
+			rels = append(rels, "icon/x"+z+"/"+strconv.Itoa(id)+".png")
 		}
-		d.batch("icon", reqs, keys, -67)
+		d.fetch("icon", reqs, keys, rels, -67)
 	}
-	var names []string
+	byName := func(label string, names []string) {
+		if len(names) == 0 || d.j.isStopped() {
+			return
+		}
+		var reqs [][]byte
+		var keys, rels []string
+		for _, n := range names {
+			reqs = append(reqs, (&pkt{}).u(n).Bytes())
+			keys = append(keys, "img:"+n)
+			rels = append(rels, "img_by_name/x"+z+"/"+filepath.Base(n)+".png")
+		}
+		d.fetch(label, reqs, keys, rels, 66)
+	}
+	var mounts, auras, names []string
 	for _, id := range parseRange(o.Mounts) {
-		names = append(names, fmt.Sprintf("mount_%d_0", id), fmt.Sprintf("mount_%d_1", id))
+		mounts = append(mounts, fmt.Sprintf("mount_%d_0", id), fmt.Sprintf("mount_%d_1", id))
 	}
 	for _, id := range parseRange(o.Auras) {
-		names = append(names, fmt.Sprintf("aura_%d_0", id), fmt.Sprintf("aura_%d_1", id))
+		auras = append(auras, fmt.Sprintf("aura_%d_0", id), fmt.Sprintf("aura_%d_1", id))
 	}
 	for _, n := range strings.Split(o.Names, ",") {
 		if n = strings.TrimSpace(n); n != "" {
 			names = append(names, n)
 		}
 	}
-	if len(names) > 0 {
-		var reqs [][]byte
-		var keys []string
-		for _, n := range names {
-			reqs = append(reqs, (&pkt{}).u(n).Bytes())
-			keys = append(keys, "img:"+n)
-		}
-		d.batch("mount/aura", reqs, keys, 66)
+	byName("mount", mounts)
+	byName("aura", auras)
+	byName("ảnh", names)
+	if len(d.frames) > 0 {
 		jf := filepath.Join(o.Out, "img_by_name.json")
 		all := map[string]int{}
 		if b, err := os.ReadFile(jf); err == nil {
@@ -727,17 +777,18 @@ func (d *downloader) run() error {
 		os.MkdirAll(o.Out, 0o755)
 		os.WriteFile(jf, b, 0o644)
 	}
-	if strings.TrimSpace(o.Effects) != "" {
+	if ids := parseRange(o.Effects); len(ids) > 0 && !d.j.isStopped() {
 		if o.User == "" {
 			d.j.log("Bỏ qua effect: cần tài khoản để vào game")
 		} else {
 			var reqs [][]byte
-			var keys []string
-			for _, id := range parseRange(o.Effects) {
+			var keys, rels []string
+			for _, id := range ids {
 				reqs = append(reqs, (&pkt{}).s(int16(id)).Bytes())
 				keys = append(keys, "eff:"+strconv.Itoa(id))
+				rels = append(rels, "effect/x"+z+"/ImgEffect_"+strconv.Itoa(id)+".png")
 			}
-			d.batch("effect", reqs, keys, -66)
+			d.fetch("effect", reqs, keys, rels, -66)
 		}
 	}
 	keys := make([]string, 0, len(d.stats))
@@ -748,6 +799,9 @@ func (d *downloader) run() error {
 	var sum []string
 	for _, k := range keys {
 		sum = append(sum, fmt.Sprintf("%s: %d", k, d.stats[k]))
+	}
+	if len(sum) == 0 {
+		sum = append(sum, "không nhận được dữ liệu mới")
 	}
 	d.j.log("Xong. %s", strings.Join(sum, ", "))
 	d.j.log("Lưu tại: %s", o.Out)
@@ -806,16 +860,41 @@ func startDownload(w http.ResponseWriter, r *http.Request) {
 		o.Version = "2.3.3"
 	}
 	o.Out = resolve(o.Out)
-	j := &job{ID: strconv.FormatInt(time.Now().UnixNano(), 36), Title: fmt.Sprintf("Tải từ %s:%d", o.Host, o.Port), Status: "running", stop: make(chan struct{})}
+	var what []string
+	for _, w := range []struct {
+		on   bool
+		name string
+	}{{o.Res, "res"}, {o.Parts, "part"}, {strings.TrimSpace(o.Icons) != "", "icon"}, {strings.TrimSpace(o.Mounts) != "", "mount"},
+		{strings.TrimSpace(o.Auras) != "", "aura"}, {strings.TrimSpace(o.Names) != "", "ảnh theo tên"}, {strings.TrimSpace(o.Effects) != "", "effect"}} {
+		if w.on {
+			what = append(what, w.name)
+		}
+	}
+	if len(what) == 0 {
+		writeJSON(w, 400, map[string]string{"error": "Chưa chọn mục nào để tải"})
+		return
+	}
+	j := &job{ID: strconv.FormatInt(time.Now().UnixNano(), 36), Title: fmt.Sprintf("Tải %s từ %s:%d", strings.Join(what, ", "), o.Host, o.Port), Status: "running", stop: make(chan struct{})}
 	jobsMu.Lock()
+	// mỗi lần chỉ một tiến trình, tránh dồn yêu cầu làm server quá tải
+	for _, id := range order {
+		jobs[id].mu.Lock()
+		busy := jobs[id].Status == "running"
+		jobs[id].mu.Unlock()
+		if busy {
+			jobsMu.Unlock()
+			writeJSON(w, 409, map[string]string{"error": "Đang có tiến trình tải (" + jobs[id].Title + "). Chờ xong hoặc bấm Dừng rồi tải mục khác."})
+			return
+		}
+	}
 	jobs[j.ID] = j
 	order = append(order, j.ID)
 	jobsMu.Unlock()
 	os.MkdirAll(o.Out, 0o755)
-	if f, err := os.Create(filepath.Join(o.Out, "nhat_ky.txt")); err == nil {
+	if f, err := os.OpenFile(filepath.Join(o.Out, "nhat_ky.txt"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644); err == nil {
 		j.file = f
-		fmt.Fprintf(f, "NroResTool  %s  %s:%d  user=%v  official=%v  batch=%d  wait=%.1f  delay=%.2f  renew=%d  zoom=%d\n",
-			time.Now().Format("2006-01-02 15:04:05"), o.Host, o.Port, o.User != "", o.Official, o.Batch, o.Wait, o.Delay, o.Renew, o.Zoom)
+		fmt.Fprintf(f, "\n=== %s\nNroResTool  %s  %s:%d  user=%v  official=%v  batch=%d  wait=%.1f  delay=%.2f  renew=%d  zoom=%d\n",
+			j.Title, time.Now().Format("2006-01-02 15:04:05"), o.Host, o.Port, o.User != "", o.Official, o.Batch, o.Wait, o.Delay, o.Renew, o.Zoom)
 	}
 	go func() {
 		defer func() {
