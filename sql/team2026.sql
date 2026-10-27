@@ -10922,6 +10922,7 @@ CREATE TABLE `player_extra` (
   `hdba_count` int(11) NOT NULL DEFAULT 0 COMMENT 'số Hộp đen bí ẩn đã mua (đua top)',
   `hdba_reward_rank` int(11) NOT NULL DEFAULT 0 COMMENT 'hạng top Hộp đen bí ẩn đang chờ nhận quà',
   `hlw_buffs` varchar(128) NOT NULL DEFAULT '' COMMENT 'hết hạn điều ước Rồng Xương (ms): x3 TNSM đệ, x3 TNSM bản thân, HP, KI, sức đánh',
+  `collection` mediumtext DEFAULT NULL COMMENT 'Rương sưu tập: mảng ô [id, số lượng, [[option, param]...], thời gian tạo], ô trống []',
   PRIMARY KEY (`player_id`),
   KEY `ql_points` (`ql_points`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

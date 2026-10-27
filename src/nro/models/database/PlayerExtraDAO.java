@@ -29,6 +29,7 @@ public class PlayerExtraDAO {
                 player.qlRewardRank = rs.getInt("ql_reward_rank");
                 player.hdbaCount = rs.getInt("hdba_count");
                 player.hdbaRewardRank = rs.getInt("hdba_reward_rank");
+                player.itemsCollection = parseList(rs.getString("collection"));
                 String[] hlw = String.valueOf(rs.getString("hlw_buffs")).split(",");
                 if (hlw.length == 5) {
                     player.hlwPetX3Until = Long.parseLong(hlw[0]);
@@ -50,9 +51,9 @@ public class PlayerExtraDAO {
     public static void save(Player player) {
         try {
             String hlw = player.hlwPetX3Until + "," + player.hlwSelfX3Until + "," + player.hlwHpUntil + "," + player.hlwKiUntil + "," + player.hlwDameUntil;
-            LocalManager.executeUpdate("replace into player_extra (player_id, item_foot, ql_points, aura_reward, aura_until, ql_reward_rank, hdba_count, hdba_reward_rank, hlw_buffs) values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            LocalManager.executeUpdate("replace into player_extra (player_id, item_foot, ql_points, aura_reward, aura_until, ql_reward_rank, hdba_count, hdba_reward_rank, hlw_buffs, collection) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     player.id, toJson(player.itemFoot), player.qlPoints, player.auraReward, player.auraRewardUntil, player.qlRewardRank,
-                    player.hdbaCount, player.hdbaRewardRank, hlw);
+                    player.hdbaCount, player.hdbaRewardRank, hlw, toJsonList(player.itemsCollection));
         } catch (Exception e) {
             Logger.logException(PlayerExtraDAO.class, e, "Lỗi lưu player_extra " + player.name);
         }
@@ -114,6 +115,37 @@ public class PlayerExtraDAO {
             data.add(item.createTime);
         }
         return data.toJSONString();
+    }
+
+    /** Rương sưu tập: mảng các ô, ô trống là []. null = chưa từng mở (giữ mặc định). */
+    static String toJsonList(List<Item> items) {
+        if (items == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < items.size(); i++) {
+            if (i > 0) {
+                sb.append(',');
+            }
+            sb.append(toJson(items.get(i)));
+        }
+        return sb.append(']').toString();
+    }
+
+    static List<Item> parseList(String json) {
+        if (json == null || json.isEmpty()) {
+            return null;
+        }
+        JSONArray arr = (JSONArray) JSONValue.parse(json);
+        if (arr == null) {
+            return null;
+        }
+        List<Item> list = new ArrayList<>();
+        for (Object o : arr) {
+            Item it = parseItem(((JSONArray) o).toJSONString());
+            list.add(it != null ? it : ItemService.gI().createItemNull());
+        }
+        return list;
     }
 
     static Item parseItem(String json) {

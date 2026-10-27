@@ -12,6 +12,7 @@ public class RuongDo extends Npc {
     @Override
     public void openBaseMenu(Player player) {
         if (canOpenNpc(player)) {
+            player.collectionOpen = false; // về lại rương đồ thường
             InventoryService.gI().sendItemBox(player);
         }
     }

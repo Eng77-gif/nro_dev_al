@@ -1,6 +1,7 @@
 package nro.models.npc;
 
 import nro.models.npc_list.Whis;
+import nro.models.npc_list.RuongSuuTam;
 import nro.models.npc_list.LinhCanh;
 import nro.models.npc_list.Bulma;
 import nro.models.npc_list.Cargo;
@@ -147,6 +148,8 @@ public class NpcFactory {
                     new BaHatMit(mapId, status, cx, cy, tempId, avatar);
                 case ConstNpc.RUONG_DO ->
                     new RuongDo(mapId, status, cx, cy, tempId, avatar);
+                case ConstNpc.RUONG_SUU_TAM ->
+                    new RuongSuuTam(mapId, status, cx, cy, tempId, avatar);
                 case ConstNpc.DR_MYUU ->
                     new DrMyuu(mapId, status, cx, cy, tempId, avatar);
                 case ConstNpc.DAU_THAN ->

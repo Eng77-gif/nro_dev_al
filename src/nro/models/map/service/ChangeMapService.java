@@ -321,6 +321,7 @@ public class ChangeMapService {
     }
 
     private void changeMap(Player pl, Zone zoneJoin, int mapId, int zoneId, int x, int y, byte typeSpace) {
+        pl.collectionOpen = false;
         Map target = zoneJoin != null ? zoneJoin.map : (mapId >= 0 ? MapService.gI().getMapById(mapId) : null);
         if (target != null && target.tileMap == null) { // map thiếu dữ liệu ô gạch: vào sẽ kẹt
             resetPoint(pl);

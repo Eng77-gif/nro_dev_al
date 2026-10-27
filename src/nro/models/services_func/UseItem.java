@@ -103,13 +103,25 @@ public class UseItem {
             }
             switch (type) {
                 case ITEM_BOX_TO_BODY_OR_BAG:
+                    if (player.collectionOpen) {
+                        nro.models.services.CollectionService.gI().collectionToBag(player, index);
+                        break;
+                    }
                     InventoryService.gI().itemBoxToBodyOrBag(player, index);
                     TaskService.gI().checkDoneTaskGetItemBox(player);
                     break;
                 case ITEM_BAG_TO_BOX:
+                    if (player.collectionOpen) {
+                        nro.models.services.CollectionService.gI().bagToCollection(player, index);
+                        break;
+                    }
                     InventoryService.gI().itemBagToBox(player, index);
                     break;
                 case ITEM_BODY_TO_BOX:
+                    if (player.collectionOpen) {
+                        nro.models.services.CollectionService.gI().bodyToCollection(player, index);
+                        break;
+                    }
                     InventoryService.gI().itemBodyToBox(player, index);
                     break;
                 case ITEM_BAG_TO_BODY:

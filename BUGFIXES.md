@@ -799,3 +799,15 @@ Cách test:
 - Phòng thí nghiệm Myuu (166) và Rừng nguyên sinh (186): đăng nhập lại vẫn ở đó, mà map không có lối ra → kẹt. Nay đưa về nhà.
 - 7 map thiếu dữ liệu ô gạch (78, 95, 101, 121, 125, 130, 134): vào là kẹt. Nay không cho dịch chuyển vào (báo "Bản đồ này chưa mở"); đăng nhập ở đó thì đưa về nhà.
 - Các map còn lại (phó bản, doanh trại, Ngọc Rồng Sao Đen, Bụng Mabư, kho báu…) đăng nhập lại đều được đưa ra đúng chỗ. Mọi cổng dẫn tới map có thật và có đất để đứng.
+
+## Đợt 34: Rương sưu tập (NPC Rương Sưu Tầm, Nhà Bunma)
+Theo ảnh bản chính thức:
+- **Menu:** "Vàng bạc châu báu gì cứ yên tâm giao hết cho tôi" — **Mở rương** / **Nâng cấp rương** / **Từ chối**.
+- **Mở rương:** mở giao diện rương đồ của client, nhưng là một rương riêng, mặc định 20 ô.
+  - Chỉ cất được: cải trang, đeo lưng, thú cưỡi (ván bay, cân đẩu…), pet (đồ loại 27 có hình đi theo), có hạn sử dụng hay không đều được.
+  - Đồ khác bị từ chối: "Rương sưu tập chỉ cất được cải trang, đeo lưng, pet và thú cưỡi".
+  - Cất từ hành trang hoặc cởi thẳng từ trên người; lấy về hành trang.
+- **Nâng cấp rương:** hỏi "Bạn có chắc muốn mở thêm ô 21 với giá 1,5 Tỷ vàng?", mỗi lần +1 ô.
+  - Ô sau đắt thêm 10% giá gốc (ô 22: 1,65 tỷ…), tối đa 100 ô. Giá ô 22 trở đi tự đặt; sửa ở `CollectionService.BASE_PRICE`.
+- **Lưu dữ liệu:** cột mới `player_extra.collection`, không đụng rương đồ thường. Mở lại rương đồ ở nhà hoặc chuyển map là quay về rương đồ thường.
+- **Test trên server:** mở 20 ô → cất cải trang, pet được, đồ ăn bị từ chối → nâng cấp lên 21 ô → đăng nhập lại vẫn còn đồ → lấy về hành trang được. Rương đồ thường vẫn đúng 30 ô.
