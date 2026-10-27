@@ -232,9 +232,9 @@ public class EffectSkill {
         if (isChibi && Util.canDoWithTime(lastTimeChibi, timeChibi)) {
             EffectSkillService.gI().removeChibi(this.player);
         }
-//        if (isHalloween && Util.canDoWithTime(lastTimeHalloween, timeHalloween)) {
-//            EffectSkillService.gI().removeHalloween(this.player);
-//        }
+        if (isHalloween && Util.canDoWithTime(lastTimeHalloween, timeHalloween)) {
+            EffectSkillService.gI().removeHalloween(this.player);
+        }
         if (isUseMafuba && Util.canDoWithTime(lastTimeUseMafuba, timeUseMafuba)) {
             EffectSkillService.gI().finishUseMafuba(player);
         }

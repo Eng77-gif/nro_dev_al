@@ -454,4 +454,24 @@ Sự kiện tự bật và tắt theo lịch mỗi năm: Tết, Giỗ tổ, Trun
   - Menu Santa xếp lại theo danh sách chức năng, không còn lệch nút khi có Phiếu giảm giá.
 - **Phần đơn giản hóa so với bản chính thức**:
   - Nguyên liệu lấy từ võ đài, nhiệm vụ Bò Mộng, phó bản được chuyển thành rơi khi đánh quái, có giới hạn mỗi ngày.
-  - Không làm các phần sau: Ra Đa Ngọc Rồng VIP (không có vật phẩm), KOL, Ngựa ăn cỏ, Hái lộc, Zombie, Ngũ Hành Sơn, Thành Cổ, rước đèn, thời gian chờ trồng hoa.
+  - Không làm các phần sau: Ra Đa Ngọc Rồng VIP (không có vật phẩm), KOL, Hái lộc, Ngũ Hành Sơn, Thành Cổ, rước đèn, thời gian chờ trồng hoa.
+
+
+## Đợt 14: Ngựa ăn cỏ (Tết), Đại chiến Zombie (Halloween), hình pet ngựa
+- **Ngựa ăn cỏ** (Tết):
+  - Ba ngựa con (Ngựa Đỏ, Ngựa Be, Ngựa Trắng) xuất hiện ngẫu nhiên ở các bản đồ ba hành tinh, có thông báo toàn server.
+  - Ngựa không đánh ai và không bị đánh chết.
+  - Đứng gần ngựa (trong khoảng 150) và dùng **Bó rơm** để cho ngựa ăn, nhận 1 Capsule Tết 2026.
+  - Ngựa Đỏ có 1% cho **Pet Ngựa Đỏ** vĩnh viễn.
+  - Mỗi con ăn 30 bó rơm (hoặc sau 10-15 phút) thì chạy sang bản đồ khác.
+  - Bó rơm: đánh quái (99/ngày) hoặc mua 1 ngọc ở Santa.
+- **Đại chiến Zombie** (Halloween):
+  - Từ 21h00 đến 22h00 mỗi ngày (giờ Việt Nam), 30 Zombie lang thang ở khu 2 trở lên, không vào làng tân thủ.
+  - Zombie cắn ai thì người đó hóa bộ xương 5 phút.
+  - Mỗi đòn đánh chỉ trừ tối đa 1% máu Zombie nên phải hợp lực.
+  - Người hạ Zombie nhận 1 phần quà ngẫu nhiên (Cá Koi zombie, Cải trang bộ xương có hạn hoặc vĩnh viễn, Ngọc bí ngô, hồng ngọc...), kèm Kẹo bàn tay rơi ra đất.
+  - **Rađa dò Zombie** (1 ngọc ở Santa) hiện bản đồ và khu của các Zombie đang lang thang.
+  - Admin gọi Zombie ngay để thử: `sukien zombie [phút]`.
+- **Hình pet**: thêm part cho Pet Ngựa Đỏ, Ngựa Be, Ngựa Trắng, Ngựa Thần Tài, Kirby, Rồng xương. Trước đây các pet này mặc vào không hiện hình. `vsData` lên 16 để client tải lại part. Quà top Hộp bánh Trung Thu Chay đổi từ Pet ngựa chiến (chưa có hình) sang Pet Ngựa Be.
+- **Sửa lỗi**: hiệu ứng hóa ma Halloween (Bí ma, Ma trơi, Dơi, Zombie) trước đây không bao giờ hết; giờ hết đúng thời gian.
+- **SQL**: tất cả nằm trong một file `sql/team2026.sql`.

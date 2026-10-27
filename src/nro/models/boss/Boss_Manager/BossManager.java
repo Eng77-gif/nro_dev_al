@@ -343,6 +343,10 @@ public class BossManager implements Runnable {
                     new ThuyTinh();
                 case BossID.LAN_CON ->
                     new LanCon();
+                case BossID.NGUA_DO, BossID.NGUA_BE, BossID.NGUA_TRANG ->
+                    new nro.models.boss.event_tet.NguaCon(bossID, nro.models.boss.event_tet.NguaCon.data(bossID));
+                case BossID.ZOMBIE ->
+                    new nro.models.boss.event.Halloween.Zombie();
                 case BossID.SOI_HEC_QUYN1 ->
                     new SoiHecQuyn();
                 case BossID.O_DO1 ->

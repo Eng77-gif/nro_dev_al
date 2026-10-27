@@ -1031,6 +1031,11 @@ public class SeasonEventService implements Runnable {
                     update();
                     return "Ngày sự kiện: " + today() + (testDate != null ? " (giả lập)" : "");
                 }
+                case "zombie" -> {
+                    int m = a.length > 1 ? Integer.parseInt(a[1]) : 15;
+                    nro.models.boss.event.Halloween.Zombie.force(m);
+                    return "Zombie xuất hiện trong " + m + " phút tới (cần sự kiện Halloween đang chạy)";
+                }
                 case "top" -> {
                     StringBuilder sb = new StringBuilder("Các đua top (sukien chottop <id>):\n");
                     for (Top t : tops.values()) {
@@ -1080,7 +1085,7 @@ public class SeasonEventService implements Runnable {
             }
             sb.append("\n");
         }
-        sb.append("Lệnh: sukien bat|tat|tudong <id>, sukien reload, sukien ngay yyyy-mm-dd, sukien top, sukien chottop <id>");
+        sb.append("Lệnh: sukien bat|tat|tudong <id>, sukien reload, sukien ngay yyyy-mm-dd, sukien top, sukien chottop <id>, sukien zombie [phút]");
         return sb.toString();
     }
 

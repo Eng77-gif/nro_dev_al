@@ -2528,6 +2528,66 @@ public class BossesData {
             AppearType.CALL_BY_ANOTHER
     );
 
+    public static final BossData NGUA_DO = new BossData(
+            "Ngựa Đỏ", //name
+            ConstPlayer.XAYDA, //gender
+            new short[]{2178, 2179, 2180, -1, -1, -1}, //outfit {head, body, leg, bag, aura, eff}
+            0, //dame
+            new int[]{2000000000}, //hp
+            new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37}, //map join
+            new int[][]{
+                {Skill.TAI_TAO_NANG_LUONG, 1, 1000}},
+            new String[]{}, //text chat 1
+            new String[]{"|-1|Hí hí hí..."}, //text chat 2
+            new String[]{}, //text chat 3
+            REST_1_M //type appear
+    );
+
+    public static final BossData NGUA_BE = new BossData(
+            "Ngựa Be", //name
+            ConstPlayer.XAYDA, //gender
+            new short[]{2181, 2182, 2183, -1, -1, -1}, //outfit {head, body, leg, bag, aura, eff}
+            0, //dame
+            new int[]{2000000000}, //hp
+            new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37}, //map join
+            new int[][]{
+                {Skill.TAI_TAO_NANG_LUONG, 1, 1000}},
+            new String[]{}, //text chat 1
+            new String[]{"|-1|Hí hí hí..."}, //text chat 2
+            new String[]{}, //text chat 3
+            REST_1_M //type appear
+    );
+
+    public static final BossData NGUA_TRANG = new BossData(
+            "Ngựa Trắng", //name
+            ConstPlayer.XAYDA, //gender
+            new short[]{1971, 1972, 1973, -1, -1, -1}, //outfit {head, body, leg, bag, aura, eff}
+            0, //dame
+            new int[]{2000000000}, //hp
+            new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37}, //map join
+            new int[][]{
+                {Skill.TAI_TAO_NANG_LUONG, 1, 1000}},
+            new String[]{}, //text chat 1
+            new String[]{"|-1|Hí hí hí..."}, //text chat 2
+            new String[]{}, //text chat 3
+            REST_1_M //type appear
+    );
+
+    public static final BossData ZOMBIE = new BossData(
+            "Zombie", //name
+            ConstPlayer.XAYDA, //gender
+            new short[]{545, 548, 549, -1, -1, -1}, //outfit {head, body, leg, bag, aura, eff}
+            100, //dame
+            new int[]{2000000}, //hp
+            new int[]{3, 4, 5, 6, 9, 10, 11, 12, 13, 17, 18, 19, 20, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 79, 80, 81, 82, 83, 84, 92, 93, 94, 96, 97, 98, 99, 100, 102, 103, 104, 105, 106, 107, 108, 109, 110}, //map join
+            new int[][]{
+                {Skill.DRAGON, 7, 1000}, {Skill.GALICK, 7, 1000}},
+            new String[]{}, //text chat 1
+            new String[]{"|-1|Grừừ... thịt người..."}, //text chat 2
+            new String[]{}, //text chat 3
+            REST_30_S //type appear
+    );
+
     public static final BossData LAN_CON = new BossData(
             "Lân con", //name
             ConstPlayer.XAYDA, //gender

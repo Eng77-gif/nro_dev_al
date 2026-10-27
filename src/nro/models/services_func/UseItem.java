@@ -957,6 +957,14 @@ public class UseItem {
                                     Event2026Service.gI().equipFoot(pl, item);
                                     return;
                                 }
+                                if (item.template.id == nro.models.boss.event_tet.NguaCon.BO_ROM) {
+                                    nro.models.boss.event_tet.NguaCon.feed(pl, item);
+                                    return;
+                                }
+                                if (item.template.id == nro.models.boss.event.Halloween.Zombie.RADA) {
+                                    nro.models.boss.event.Halloween.Zombie.radar(pl, item);
+                                    return;
+                                }
                                 if (item.template.id == Event2026Service.SKH_BEERUS_BOX) {
                                     Event2026Service.gI().openSkhBeerusMenu(pl);
                                     return;
