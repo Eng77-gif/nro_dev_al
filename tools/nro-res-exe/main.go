@@ -321,6 +321,7 @@ type downloader struct {
 	hinted    bool
 	waitLogin int  // server bảo chờ bao nhiêu giây mới cho đăng nhập (lệnh 122)
 	inGame    bool // đã vào bản đồ sau khi đăng nhập
+	sessBytes int  // dung lượng ảnh nhận được trong phiên hiện tại
 }
 
 // mark ghi nhận đã nhận key; trả về true nếu là lần đầu.
@@ -359,6 +360,7 @@ func (d *downloader) onMsg(m msg) {
 			}
 		}
 	case 66: // ảnh theo tên
+		d.sessBytes += len(m.data)
 		name, err := r.utf()
 		nf, _ := r.i8()
 		img, err2 := r.blob()
@@ -573,8 +575,9 @@ func (d *downloader) reconnect(why string) bool {
 			d.j.log("  Gợi ý: nhiều server ngắt kết nối nếu không đăng nhập, hãy điền tài khoản; hoặc tăng thời gian chờ / giảm số yêu cầu mỗi đợt ở mục Nâng cao")
 		}
 	} else {
-		d.j.log("  %s, mở phiên mới...", why)
+		d.j.log("  %s, mở phiên mới (phiên vừa rồi nhận %.1f MB ảnh)...", why, float64(d.sessBytes)/1048576)
 	}
+	d.sessBytes = 0
 	d.c.conn.Close()
 	for try := 1; try <= 5 && !d.j.isStopped(); try++ {
 		time.Sleep(time.Duration(try*2) * time.Second)
@@ -600,8 +603,12 @@ func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8)
 	// Khi một đợt không nhận được gì: mở phiên mới (đăng nhập lại) rồi gửi lại đúng đợt đó;
 	// nếu phiên mới vẫn im thì chờ lâu dần (1, 2, 5, 10 phút) trước khi mở phiên tiếp.
 	// Hết các lần thử vẫn không có thì mới bỏ qua.
+	// Một ảnh không có trả lời có thể do server không có ảnh đó: tạm bỏ qua, thử ảnh kế tiếp;
+	// ảnh kế tiếp cũng im thì mới coi là bị giới hạn. Ảnh bỏ qua được thử lại ở cuối.
 	cooldowns := []int{0, 60, 120, 300, 600}
 	retries, cool, stalls, stallAt, renewedAt, sessionSent := 0, 0, 0, -1, -1, 0
+	consec := 0
+	var deferred []int
 	for k := 0; k < len(reqs) && !d.j.isStopped(); {
 		end := k + size
 		if end > len(reqs) {
@@ -645,7 +652,7 @@ func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8)
 		}
 		d.j.log("  %d/%d  đã nhận %d", end, len(reqs), d.stats[label])
 		if sent == 0 || len(d.got) > before {
-			cool, stalls = 0, 0
+			cool, stalls, consec = 0, 0, 0
 			if d.o.Official && d.missing(keys[k:end]) > 0 && len(d.got) > before {
 				continue // nhận được một phần: gửi lại phần còn thiếu
 			}
@@ -653,6 +660,15 @@ func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8)
 			continue
 		}
 		if d.o.Official {
+			consec++
+			if consec == 1 && end < len(reqs) {
+				d.j.log("  %s không có trả lời, tạm bỏ qua để thử cái tiếp theo", keyName(keys[k:end]...))
+				for i := k; i < end; i++ {
+					deferred = append(deferred, i)
+				}
+				k = end
+				continue
+			}
 			if cool < len(cooldowns) {
 				sec := cooldowns[cool]
 				cool++
@@ -668,7 +684,10 @@ func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8)
 				continue
 			}
 			d.j.log("  Bỏ qua %d yêu cầu không có trả lời", d.missing(keys[k:end]))
-			cool = 0
+			for i := k; i < end; i++ {
+				deferred = append(deferred, i)
+			}
+			cool, consec = 0, 0
 			k = end
 			continue
 		}
@@ -690,6 +709,66 @@ func (d *downloader) batch(label string, reqs [][]byte, keys []string, cmd int8)
 		k = end
 	}
 	d.pump(d.o.Wait * 2)
+	if len(deferred) > 0 && !d.j.isStopped() {
+		d.retryDeferred(label, reqs, keys, cmd, deferred, wait)
+	}
+}
+
+// retryDeferred thử lại một lần các yêu cầu đã tạm bỏ qua (phiên mới), rồi ghi danh sách còn thiếu.
+func (d *downloader) retryDeferred(label string, reqs [][]byte, keys []string, cmd int8, idx []int, wait float64) {
+	var left []int
+	for _, i := range idx {
+		if !d.got[keys[i]] {
+			left = append(left, i)
+		}
+	}
+	if len(left) == 0 {
+		return
+	}
+	d.j.log("Thử lại %d %s chưa tải được...", len(left), label)
+	if !d.reconnect("Thử lại với phiên mới") {
+		return
+	}
+	var miss []string
+	silent := 0
+	for _, i := range left {
+		if d.j.isStopped() {
+			return
+		}
+		if d.c.send(cmd, reqs[i]) != nil {
+			return
+		}
+		d.waitKeys(keys[i:i+1], wait)
+		if d.got[keys[i]] {
+			silent = 0
+			continue
+		}
+		miss = append(miss, keyName(keys[i]))
+		if silent++; silent >= 3 {
+			// 3 cái liền không có: có thể lại bị giới hạn, mở phiên mới
+			if !d.reconnect("Server ngừng trả lời") {
+				return
+			}
+			silent = 0
+		}
+	}
+	if len(miss) > 0 {
+		f := "chua_tai_duoc_" + strings.ReplaceAll(label, "/", "_") + ".txt"
+		d.write(f, []byte(strings.Join(miss, "\n")+"\n"))
+		d.j.log("  Còn %d %s không tải được (server không có hoặc đang giới hạn), danh sách ở %s. Để vài giờ sau tải lại mục này (tích Bỏ qua file đã có).", len(miss), label, f)
+	}
+}
+
+// keyName bỏ tiền tố loại (icon:, img:, eff:) cho dễ đọc.
+func keyName(keys ...string) string {
+	out := make([]string, len(keys))
+	for i, k := range keys {
+		if j := strings.Index(k, ":"); j >= 0 {
+			k = k[j+1:]
+		}
+		out[i] = k
+	}
+	return strings.Join(out, ", ")
 }
 
 func (d *downloader) missing(keys []string) int {

@@ -416,6 +416,7 @@ Mỗi lần chạy hiện nhật ký trực tiếp và có nút Dừng. Tool ch�
 - Server chính thức giới hạn lưu lượng (ảnh aura, mount có thể gần 1 MB mỗi ảnh). Tool xử lý như sau:
   - Tải mount/aura từng ảnh một.
   - Mỗi phiên server chỉ trả vài ảnh rồi im, nên khi server ngừng trả lời thì tool mở phiên mới ngay và gửi lại đúng chỗ đó. Phiên mới vẫn im thì chờ 1, 2, 5 rồi 10 phút trước khi mở phiên tiếp.
+  - Một ảnh không có trả lời thì tạm bỏ qua và thử cái kế tiếp (có thể server không có ảnh đó). Cái kế tiếp cũng im mới coi là bị giới hạn. Cuối cùng thử lại các ảnh đã bỏ qua với phiên mới; còn thiếu thì ghi vào `chua_tai_duoc_<mục>.txt`. Nhật ký ghi dung lượng ảnh nhận được mỗi phiên.
   - Hiểu lệnh 122 của server ("chờ N giây mới cho đăng nhập" khi đăng nhập lại quá nhanh): chờ đủ rồi tự đăng nhập lại. Nhật ký cảnh báo nếu đăng nhập xong mà chưa vào được game.
   - Chỉ bỏ qua khi chờ hết các lần trên mà vẫn không có trả lời.
 - Chỉ dùng với server bạn có quyền tải dữ liệu.
