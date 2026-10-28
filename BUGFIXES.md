@@ -928,3 +928,25 @@ Chỉ số Ngọc rồng xanh (ngẫu nhiên mỗi lần khảm):
 - Đồ +8 vẫn nâng được lên +9. Đồ +9 báo "đã đạt cấp tối đa".
 - Kiểm tra DB: không có người chơi nào giữ đồ trên +9.
 - Bảng giá và tỉ lệ cho +10 trở lên vẫn để trong code nhưng không còn dùng tới.
+
+## Đợt 39: Đá cấp 9 dùng nâng cấp +8 lên +9 (thay cho khảm lỗ 9)
+- Nâng đồ từ +8 lên +9 phải dùng đá cấp 9 đúng loại đồ, mỗi lần 10 viên, 300 Tr vàng. Tỉ lệ và rớt cấp như cũ.
+
+| Đồ | Đá |
+|---|---|
+| Áo | Đá Hiện Thực (2001) |
+| Quần | Đá Không Gian (2003) |
+| Găng | Đá Sức Mạnh (2002) |
+| Giày | Đá Thời Gian (2004) |
+| Rada | Đá Linh Hồn (2000) |
+
+- Cấp khác vẫn dùng đá thường (Titan, Ruby, Thạch anh tím, Saphia, Lục bảo). Đá cấp 9 không dùng được ở cấp khác.
+- Bỏ sai đá ở +8, Bà Hạt Mít báo đúng tên đá cần.
+- Item 2034 lấy lại tên "Hộp đá nâng cấp +9", vẫn chọn 1 trong 5 đá.
+- Lỗ sao pha lê 9 trở về khảm đá pha lê thường. Đá cấp 9 không còn khảm được.
+- Lỗ 10 vẫn chỉ khảm Ngọc rồng xanh.
+- Đã thử:
+  - +8 với Titan hoặc Sức Mạnh bị chặn.
+  - +8 với Hiện Thực hiện "Cần 10 Đá Hiện Thực". Bấm thất bại thì trừ đúng 10 viên và rớt về +7.
+  - +7 với Hiện Thực bị chặn.
+  - Lỗ 9 khảm đá thường được.

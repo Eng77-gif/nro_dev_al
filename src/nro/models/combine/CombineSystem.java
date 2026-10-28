@@ -31,8 +31,7 @@ public class CombineSystem {
     }
 
     public static boolean isDaPhaLe(Item item) {
-        return item != null && item.template != null && (item.template.type == 30 || (item.template.id >= 14 && item.template.id <= 20)
-                || nro.models.services.SaoPhaLe10Service.isDaCap9(item));
+        return item != null && item.template != null && (item.template.type == 30 || (item.template.id >= 14 && item.template.id <= 20));
     }
 
     public static int getGemEpSao(int star) {
@@ -238,8 +237,24 @@ public class CombineSystem {
         return 0;
     }
 
+    /** Đá cấp 9 cho từng loại đồ (áo, quần, găng, giày, rada) khi nâng từ +8 lên +9. */
+    public static final int[] DA_NANG_CAP_9 = {2001, 2003, 2002, 2004, 2000};
+
+    public static int getLevelNangCap(Item trangBi) {
+        for (Item.ItemOption io : trangBi.itemOptions) {
+            if (io.optionTemplate.id == 72) {
+                return io.param;
+            }
+        }
+        return 0;
+    }
+
     public static boolean isCoupleItemNangCapCheck(Item trangBi, Item daNangCap) {
-        if (trangBi != null && daNangCap != null) {
+        if (trangBi != null && daNangCap != null && trangBi.template.type < 5) {
+            // +8 -> +9 chỉ dùng đá cấp 9, các cấp khác dùng đá thường
+            if (getLevelNangCap(trangBi) == 8) {
+                return daNangCap.template.id == DA_NANG_CAP_9[trangBi.template.type];
+            }
             if (trangBi.template.type == 0 && daNangCap.template.id == 223) {
                 return true;
             } else if (trangBi.template.type == 1 && daNangCap.template.id == 222) {
@@ -275,7 +290,7 @@ public class CombineSystem {
             case 7:
                 return 70;
             case 8:
-                return 90;
+                return 10; // +8 -> +9: 10 đá cấp 9
             case 9:
                 return 110;
             case 10:

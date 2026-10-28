@@ -18,9 +18,8 @@ public class EpSaoTrangBi {
 
     private static String wrongStone(int slot) {
         return switch (slot) {
-            case 9 -> "Lỗ sao pha lê thứ 9 chỉ khảm được Đá cấp 9 (Linh Hồn, Hiện Thực, Sức Mạnh, Không Gian, Thời Gian)";
             case 10 -> "Lỗ sao pha lê thứ 10 chỉ khảm được Ngọc rồng xanh";
-            default -> "Đá cấp 9 và Ngọc rồng xanh chỉ khảm được vào lỗ thứ 9 và thứ 10";
+            default -> "Ngọc rồng xanh chỉ khảm được vào lỗ sao pha lê thứ 10";
         };
     }
 
@@ -65,7 +64,7 @@ public class EpSaoTrangBi {
                         }
                     }
 
-                    if (SaoPhaLe10Service.isDaCap9(daPhaLe) || SaoPhaLe10Service.isNgocRongXanh(daPhaLe)) {
+                    if (SaoPhaLe10Service.isNgocRongXanh(daPhaLe)) {
                         npcSay += "|7|" + SaoPhaLe10Service.describe(daPhaLe) + "\n";
                     } else if (daPhaLe.template.type == 30) {
                         for (ItemOption io : daPhaLe.itemOptions) {
@@ -146,7 +145,7 @@ public class EpSaoTrangBi {
 
             player.inventory.subGem(gem);
 
-            if (SaoPhaLe10Service.isDaCap9(daPhaLe) || SaoPhaLe10Service.isNgocRongXanh(daPhaLe)) {
+            if (SaoPhaLe10Service.isNgocRongXanh(daPhaLe)) {
                 trangBi.itemOptions.addAll(SaoPhaLe10Service.rollOptions(daPhaLe));
                 if (optionStar != null) {
                     optionStar.param += 1;

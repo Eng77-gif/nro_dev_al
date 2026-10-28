@@ -9,6 +9,7 @@ import nro.models.player.Player;
 import nro.models.server.ServerNotify;
 import nro.models.services.ChatGlobalService;
 import nro.models.services.InventoryService;
+import nro.models.services.ItemService;
 import nro.models.services.Service;
 import nro.models.task.BadgesTaskService;
 import nro.models.utils.Util;
@@ -111,6 +112,9 @@ public class NangCapVatPham {
                 } else {
                     CombineService.gI().baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU, "Trang bị của ngươi đã đạt cấp tối đa", "Đóng");
                 }
+            } else if (itemDo != null && CombineSystem.getLevelNangCap(itemDo) == 8) {
+                CombineService.gI().baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU, "Nâng cấp " + itemDo.template.name + " từ +8 lên +9 cần "
+                        + ItemService.gI().getTemplate(CombineSystem.DA_NANG_CAP_9[itemDo.template.type]).name, "Đóng");
             } else {
                 CombineService.gI().baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU, "Hãy chọn 1 trang bị và 1 loại đá nâng cấp", "Đóng");
             }

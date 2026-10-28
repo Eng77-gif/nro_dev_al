@@ -11,9 +11,9 @@ import nro.models.player.Player;
 import nro.models.utils.Util;
 
 /**
- * Sao pha lê 10 (Bà Hạt Mít): lỗ 9 chỉ khảm Đá cấp 9 (Linh Hồn, Hiện Thực, Sức Mạnh, Không Gian, Thời Gian),
- * lỗ 10 chỉ khảm Ngọc rồng xanh 1 - 7 sao (chỉ số ngẫu nhiên theo khoảng). Hộp đá +9 và Hộp ngọc rồng xanh
- * cho chọn 1 viên. Nhiệm vụ mốc theo số món đã khảm đủ 10 sao.
+ * Sao pha lê 10 (Bà Hạt Mít): lỗ 10 chỉ khảm Ngọc rồng xanh 1 - 7 sao (chỉ số ngẫu nhiên theo khoảng).
+ * Đá cấp 9 (Linh Hồn, Hiện Thực, Sức Mạnh, Không Gian, Thời Gian) dùng nâng cấp đồ +8 lên +9 (CombineSystem.DA_NANG_CAP_9).
+ * Hộp đá nâng cấp +9 và Hộp ngọc rồng xanh cho chọn 1 viên. Nhiệm vụ mốc theo số món đã khảm đủ 10 sao.
  */
 public class SaoPhaLe10Service {
 
@@ -24,8 +24,6 @@ public class SaoPhaLe10Service {
     /** Menu nhận thưởng nhiệm vụ (Bà Hạt Mít) */
     public static final int MENU_NHIEM_VU = 2064_10;
 
-    /** Đá cấp 9: Linh Hồn, Hiện Thực, Sức Mạnh, Không Gian, Thời Gian -> {option, chỉ số} */
-    private static final int[][] DA_9 = {{14, 2}, {94, 5}, {50, 5}, {77, 10}, {103, 10}};
     /** Ngọc rồng xanh 1 - 7 sao -> {option, min, max}; 7 sao thêm cả dòng 96 (biến tấn công thành KI) */
     private static final int[][] NRX = {{251, 1, 3}, {50, 3, 10}, {77, 5, 20}, {103, 5, 20}, {14, 1, 5}, {94, 3, 10}, {95, 5, 10}};
 
@@ -55,22 +53,13 @@ public class SaoPhaLe10Service {
 
     /** Đá này có khảm được vào lỗ thứ slot (1 - 10) không. */
     public static boolean canSocket(Item da, int slot) {
-        if (slot == 9) {
-            return isDaCap9(da);
-        }
-        if (slot == 10) {
-            return isNgocRongXanh(da);
-        }
-        return !isDaCap9(da) && !isNgocRongXanh(da);
+        return slot == 10 ? isNgocRongXanh(da) : !isNgocRongXanh(da);
     }
 
     /** Các dòng chỉ số sẽ thêm vào trang bị khi khảm (ngọc rồng xanh: ngẫu nhiên trong khoảng). */
     public static List<ItemOption> rollOptions(Item da) {
         List<ItemOption> list = new ArrayList<>();
-        if (isDaCap9(da)) {
-            int[] d = DA_9[da.template.id - DA_9_FIRST];
-            list.add(new ItemOption(d[0], d[1]));
-        } else if (isNgocRongXanh(da)) {
+        if (isNgocRongXanh(da)) {
             int[] d = NRX[da.template.id - NRX_FIRST];
             int param = Util.nextInt(d[1], d[2]);
             list.add(new ItemOption(d[0], param));
@@ -83,10 +72,6 @@ public class SaoPhaLe10Service {
 
     /** Mô tả chỉ số cho bảng thông tin ép sao. */
     public static String describe(Item da) {
-        if (isDaCap9(da)) {
-            int[] d = DA_9[da.template.id - DA_9_FIRST];
-            return optName(d[0], String.valueOf(d[1]));
-        }
         int[] d = NRX[da.template.id - NRX_FIRST];
         String range = d[1] + "-" + d[2];
         String s = optName(d[0], range);
@@ -115,7 +100,7 @@ public class SaoPhaLe10Service {
         }
         names[names.length - 1] = "Đóng";
         NpcService.gI().createMenuConMeo(pl, box.template.id, -1,
-                box.template.id == HOP_DA_9 ? "Chọn 1 viên đá cấp 9 (khảm vào lỗ sao pha lê thứ 9)"
+                box.template.id == HOP_DA_9 ? "Chọn 1 viên đá nâng cấp trang bị +8 lên +9\nÁo: Hiện Thực, Quần: Không Gian, Găng: Sức Mạnh, Giày: Thời Gian, Rada: Linh Hồn"
                         : "Chọn 1 viên ngọc rồng xanh (khảm vào lỗ sao pha lê thứ 10)", names);
     }
 
