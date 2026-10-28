@@ -1032,3 +1032,29 @@ Bảng "chiso" có dòng "Set Thần hủy diệt Champa: N món".
 - Broly → Super Broly cùng khu, HP khoảng 9,8 triệu, hạ thì nhận Đệ tử.
 - 25 lần hạ Baby: 2 món Champa, 200 sao pha lê.
 - Mặc 0 / 2 / 4 / 5 món Champa: sát thương lên boss 0 / 10 / 20 / 35%, chí mạng +20% khi đủ 5 món.
+
+## Đợt 42: Thông báo top 1 đăng nhập, nhặt set kích hoạt riêng, mở hộp ra cải trang
+Code mới: `services/AnnounceService.java`.
+
+**Top 1 đăng nhập** (chat thế giới, tên người đó hiện ở đầu dòng)
+- Áp dụng cho các bảng top ở Chi Chi: Hộp quà thiếu nhi, Nước mía, Kem trái cây, Hộp đen bí ẩn.
+- Ví dụ: "Top 1 sự kiện Nước mía, Hộp đen bí ẩn vừa đăng nhập!"
+- Top đang 0 điểm thì không báo. Mỗi lần đăng nhập chỉ báo 1 lần.
+
+**Đánh quái nhặt được set kích hoạt riêng** (thông báo server, dòng chạy chữ)
+- Chỉ áp dụng cho 3 set riêng: Thần Vũ Trụ Kaio, Nail chiến binh Namếc, Cađic M. Đây là 30% đồ kích hoạt rơi từ quái ở map up SKH và map riêng tư.
+- Ví dụ: "admin vừa đánh quái may mắn nhận được 1 trang bị Set kích hoạt Set Thần Vũ Trụ Kaio".
+- Báo lúc nhặt lên, không báo lúc rơi.
+
+**Mở hộp được cải trang, pet, đeo lưng, thú cưỡi** (thông báo server)
+- Áp dụng cho mọi hộp quà dữ liệu (`item_box_reward`, 38 loại hộp) và đổi quà sự kiện theo mùa.
+- Ví dụ: "Chúc mừng admin đã may mắn mở Hộp quà 20/10 nhận được CT Frieren hạn dùng 15 ngày", hoặc "... hạn dùng vĩnh viễn".
+
+**Sửa thêm:** danh sách thông báo server (`ServerNotify`) không an toàn khi nhiều người cùng thêm. Đã đổi sang danh sách đồng bộ.
+
+**Lệnh admin `roiskh`:** thả 1 món set kích hoạt riêng như quái rơi, để thử thông báo nhặt.
+
+**Đã thử trên server**
+- Đăng nhập khi đứng top 1 Nước mía và Hộp đen thì có chat thế giới.
+- Nhặt món set Thần Vũ Trụ Kaio thì có thông báo server.
+- Mở 40 Hộp quà 20/10 ra 13 lần cải trang / thú cưỡi, lần nào cũng có thông báo kèm hạn dùng.

@@ -385,6 +385,7 @@ public class Zone {
                                     player.sendMessage(msg);
                                     msg.cleanup();
                                     Service.gI().sendToAntherMePickItem(player, itemMapId);
+                                    nro.models.services.AnnounceService.gI().onPickItem(player, itemMap, item);
 
                                     if (!(this.map.mapId >= 21 && this.map.mapId <= 23
                                             && itemMap.itemTemplate != null && itemMap.itemTemplate.id == 74

@@ -854,6 +854,7 @@ public class Mob {
                     }
                 }
                 it.options.add(new Item.ItemOption(30, 0));
+                it.fromMob = true;
                 list.add(it);
 
                 //  ChatGlobalService.gI().ThongBaoRoiDo(player, player.name + " vừa nhặt được " + it.itemTemplate.name + " sét kích hoạt tại " + this.zone.map.mapName + " khu " + this.zone.zoneId);
@@ -902,6 +903,7 @@ public class Mob {
                     }
                 }
                 it.options.add(new Item.ItemOption(30, 0));
+                it.fromMob = true;
                 list.add(it);
 
                 //  ChatGlobalService.gI().ThongBaoRoiDo(player, player.name + " vừa nhặt được " + it.itemTemplate.name + " sét kích hoạt tại " + this.zone.map.mapName + " khu " + this.zone.zoneId);

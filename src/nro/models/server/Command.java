@@ -303,6 +303,20 @@ parameterizedCommands.put("upp", (player, text) -> {
             Service.gI().sendThongBao(player, "Không thấy boss " + want);
             return true;
         }
+        if (text.equals("roiskh") && player.isAdmin()) { // admin: thả 1 món set kích hoạt riêng như quái rơi (thử thông báo nhặt)
+            int[][] sets = {{245, 246, 247, 248}, {237, 238, 239, 240}, {241, 242, 243, 244}};
+            int g = Math.min(Math.max(player.gender, 0), 2);
+            short temp = (short) ItemService.gI().randTempItemKichHoat(player.gender);
+            nro.models.map.ItemMap it = new nro.models.map.ItemMap(player.zone, temp, 1, player.location.x, player.zone.map.yPhysicInTop(player.location.x, player.location.y - 24), player.id);
+            it.options.addAll(ItemService.gI().getListOptionItemShop(temp));
+            for (int id : sets[g]) {
+                it.options.add(new nro.models.item.Item.ItemOption(id, 0));
+            }
+            it.fromMob = true;
+            Service.gI().dropItemMap(player.zone, it);
+            Service.gI().sendThongBao(player, "itemMapId=" + it.itemMapId);
+            return true;
+        }
         if (text.equals("giet boss") && player.isAdmin()) { // admin: hạ mọi boss trong khu, nhận thưởng
             for (Player p : player.zone.getBossesCopy()) {
                 if (p instanceof nro.models.boss.Boss b && !b.isDie()) {

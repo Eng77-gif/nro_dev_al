@@ -31,6 +31,7 @@ public class ItemMap {
     public boolean isBlackBall;
     public boolean isNamecBall;
     public volatile boolean isPickedUp;
+    public boolean fromMob; // rơi từ quái (thông báo nhặt set kích hoạt riêng)
     public String id;
 
     public ItemMap(Zone zone, int tempId, int quantity, int x, int y, long playerId) {
@@ -82,6 +83,7 @@ public class ItemMap {
         this.options = itemMap.options;
         this.isBlackBall = itemMap.isBlackBall;
         this.isNamecBall = itemMap.isNamecBall;
+        this.fromMob = itemMap.fromMob;
         this.lastTimeMoveToPlayer = itemMap.lastTimeMoveToPlayer;
         this.createTime = System.currentTimeMillis();
         this.zone.addItem(this);

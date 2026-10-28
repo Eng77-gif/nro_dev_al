@@ -182,6 +182,7 @@ public class Event2026Service {
             }
             Item it = createItem(pick.itemId, qty, days);
             InventoryService.gI().addItemBag(pl, it);
+            AnnounceService.gI().onOpenBox(pl, boxId, it);
             got = (qty > 1 ? "x" + qty + " " : "") + it.template.name + (days > 0 ? " (" + days + " ngày)" : (pick.days.length > 0 ? " (vĩnh viễn)" : ""));
         }
         return got;
