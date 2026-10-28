@@ -1066,3 +1066,19 @@ Code mới: `services/AnnounceService.java`.
   - 3 set riêng (Thần Vũ Trụ Kaio, Nail chiến binh Namếc, Cađic M): vẫn báo kèm tên set.
 - **Lệnh admin:** `roiskh cu` thả 1 món set cũ để thử (`roiskh` thả set riêng như trước).
 - **Đã thử:** top 2 Nước mía + top 1 Hộp đen báo đúng hạng. Nhặt set cũ báo câu chung, nhặt set Kaio báo kèm tên set.
+
+## Đợt 44: Panel web quản lý
+- Panel chạy cùng server, mặc định cổng 8088. Code ở `src/nro/models/panel/`, giao diện ở `data/panel/index.html`, hướng dẫn ở `HUONG_DAN_PANEL.md`.
+- Các mục: tổng quan, người chơi, tài khoản, bảng xếp hạng, bang hội, ký gửi, nạp thẻ, vật phẩm, hộp quà, giftcode, cửa hàng, bản đồ & NPC, sự kiện, boss, quái, thông báo & quà toàn server, bảo trì, nhật ký console, nhật ký thao tác, cấu hình, truy vấn SQL chỉ đọc.
+- Bảo mật:
+  - Đăng nhập bằng tài khoản / mật khẩu trong Config.properties, phiên lưu 12 giờ.
+  - Sai 5 lần khóa IP 5 phút.
+  - Yêu cầu sửa đổi phải có header riêng của panel (chống CSRF).
+  - Ghi nhật ký thao tác.
+- **Đã thử:**
+  - 30 API và 21 trang trên trình duyệt thật, không có lỗi JavaScript.
+  - Người chơi offline: cộng tiền, gửi đồ thẳng vào database.
+  - Người chơi online: cộng tiền, gửi đồ, thông báo, dịch chuyển, kick. Người chơi nhận được ngay.
+  - Tạo / xóa giftcode và thêm / xóa quà trong hộp: server nạp lại ngay.
+  - Đặt / xóa NPC ở Đảo Kamê, bật / tắt sự kiện, gọi boss, tỉ lệ EXP, nạp lại shop.
+  - SQL chặn câu sửa dữ liệu.

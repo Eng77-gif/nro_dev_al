@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel quản lý NRO</title>
+<style>
+:root{--bg:#0f1420;--panel:#171e2e;--panel2:#1e2739;--line:#2a3550;--text:#e6ebf5;--mute:#93a0bb;--acc:#f5a524;--acc2:#3b82f6;--ok:#22c55e;--bad:#ef4444;--r:10px}
+:root[data-theme="light"]{--bg:#f3f5f9;--panel:#fff;--panel2:#f7f8fb;--line:#dde3ee;--text:#18202f;--mute:#5d6b85}
+[hidden]{display:none!important}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,Segoe UI,Roboto,sans-serif}
+a{color:var(--acc2)}button,input,select,textarea{font:inherit;color:inherit}
+input,select,textarea{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 9px;min-width:0}
+textarea{width:100%;min-height:90px;font-family:ui-monospace,Consolas,monospace;font-size:13px}
+button{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
+button:hover{border-color:var(--acc)}button.p{background:var(--acc);border-color:var(--acc);color:#1b1300;font-weight:600}
+button.d{background:transparent;border-color:var(--bad);color:var(--bad)}button.s{padding:4px 8px;font-size:12px}
+#app{display:flex;min-height:100vh}
+nav{width:220px;flex:none;background:var(--panel);border-right:1px solid var(--line);padding:14px 10px;position:sticky;top:0;height:100vh;overflow:auto}
+nav h1{font-size:16px;margin:4px 8px 14px;color:var(--acc)}
+nav a{display:block;padding:8px 10px;border-radius:8px;color:var(--text);text-decoration:none;margin:1px 0}
+nav a.on,nav a:hover{background:var(--panel2)}nav .g{color:var(--mute);font-size:11px;text-transform:uppercase;margin:12px 10px 4px;letter-spacing:.05em}
+main{flex:1;min-width:0;padding:20px 24px}
+h2{margin:0 0 14px;font-size:20px}h3{margin:18px 0 8px;font-size:15px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>*{flex:none}.grow{flex:1 1 180px!important}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px}.stat b{display:block;font-size:22px}.stat span{color:var(--mute);font-size:12px}
+.tw{overflow:auto;border:1px solid var(--line);border-radius:var(--r);max-height:70vh}
+table{border-collapse:collapse;width:100%;background:var(--panel)}th,td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;white-space:nowrap}
+th{position:sticky;top:0;background:var(--panel2);font-weight:600;font-size:12px;color:var(--mute);z-index:1}td.w{white-space:normal;min-width:220px}
+tr:hover td{background:var(--panel2)}
+.ic{width:28px;height:28px;object-fit:contain;vertical-align:middle;image-rendering:pixelated}
+.tag{display:inline-block;padding:1px 7px;border-radius:99px;font-size:11px;border:1px solid var(--line)}
+.on1{color:var(--ok);border-color:var(--ok)}.off1{color:var(--mute)}.bad1{color:var(--bad);border-color:var(--bad)}
+.mute{color:var(--mute)}.mono{font-family:ui-monospace,Consolas,monospace;font-size:12px}
+#toast{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:6px;z-index:99}
+#toast div{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--ok);padding:9px 12px;border-radius:8px;max-width:420px}
+#toast div.e{border-left-color:var(--bad)}
+.modal{position:fixed;inset:0;background:#0009;display:flex;align-items:flex-start;justify-content:center;padding:40px 12px;z-index:50;overflow:auto}
+.modal .box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;width:min(860px,100%)}
+.modal .box h3{margin-top:0}
+#login{display:flex;align-items:center;justify-content:center;min-height:100vh}
+#login form{width:min(340px,92vw);display:flex;flex-direction:column;gap:10px}
+.log{background:#05070c;color:#cfe3c8;height:60vh;overflow:auto;padding:10px;border-radius:var(--r);white-space:pre-wrap;font:12px/1.4 ui-monospace,Consolas,monospace}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mute)}label.f>*{color:var(--text)}
+.pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px;max-height:55vh;overflow:auto;margin-top:10px}
+.pick div{display:flex;gap:8px;align-items:center;padding:6px;border:1px solid var(--line);border-radius:8px;cursor:pointer}.pick div:hover{border-color:var(--acc)}
+@media(max-width:760px){#app{flex-direction:column}nav{width:auto;height:auto;position:static;display:flex;flex-wrap:wrap;gap:2px}nav .g,nav h1{display:none}main{padding:14px 16px}}
+</style>
+</head>
+<body>
+<div id="login" hidden>
+  <form class="card" onsubmit="doLogin(event)">
+    <h2>Panel quản lý NRO</h2>
+    <input id="lu" placeholder="Tài khoản" autocomplete="username" required>
+    <input id="lp" type="password" placeholder="Mật khẩu" autocomplete="current-password" required>
+    <button class="p">Đăng nhập</button><div id="lerr" class="mute"></div>
+  </form>
+</div>
+<div id="app" hidden>
+  <nav id="nav"></nav>
+  <main id="main"></main>
+</div>
+<div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>n==null?'':Number(n).toLocaleString('vi-VN');
+const icon=id=>id>=0?`<img class="ic" loading="lazy" src="/icon/${id}" onerror="this.style.visibility='hidden'">`:'';
+async function api(path,body){
+  const o=body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json','X-Panel':'panel'},body:JSON.stringify(body)};
+  const r=await fetch('/api/'+path,o);let j;try{j=await r.json()}catch(e){j={error:'Lỗi '+r.status}}
+  if(r.status===401&&path!=='login'){showLogin();throw new Error('Chưa đăng nhập')}
+  if(!r.ok||j.error){throw new Error(j.error||('Lỗi '+r.status))}return j}
+function toast(m,err){const d=document.createElement('div');d.textContent=m;if(err)d.className='e';$('#toast').append(d);setTimeout(()=>d.remove(),4500)}
+async function act(fn,ok){try{const r=await fn();toast(ok||(r&&r.note)||'Đã xong');return r}catch(e){toast(e.message,1)}}
+function table(rows,cols,actions){
+  if(!rows||!rows.length)return '<div class="mute">Không có dữ liệu</div>';
+  cols=cols||Object.keys(rows[0]).map(k=>[k,k]);
+  return `<div class="tw"><table><thead><tr>${cols.map(c=>`<th>${esc(c[1])}</th>`).join('')}${actions?'<th></th>':''}</tr></thead><tbody>${rows.map((r,i)=>`<tr>${cols.map(c=>`<td class="${c[3]||''}">${c[2]?c[2](r[c[0]],r):esc(r[c[0]])}</td>`).join('')}${actions?`<td>${actions(r,i)}</td>`:''}</tr>`).join('')}</tbody></table></div>`}
+function modal(html){const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="box">${html}</div>`;m.onclick=e=>{if(e.target===m)m.remove()};document.body.append(m);return m}
+
+const PAGES=[
+ ['g','Máy chủ'],['dash','Tổng quan'],['notify','Thông báo & quà'],['maint','Bảo trì & lưu'],['logs','Nhật ký console'],['audit','Nhật ký thao tác'],['config','Cấu hình'],
+ ['g','Người chơi'],['players','Người chơi'],['accounts','Tài khoản'],['tops','Bảng xếp hạng'],['clans','Bang hội'],
+ ['g','Nội dung'],['items','Vật phẩm'],['boxes','Hộp quà'],['giftcode','Giftcode'],['shop','Cửa hàng'],['kygui','Ký gửi'],
+ ['g','Thế giới'],['maps','Bản đồ & NPC'],['events','Sự kiện'],['bosses','Boss'],['mobs','Quái'],
+ ['g','Khác'],['napthe','Nạp thẻ'],['sql','Truy vấn SQL']];
+function buildNav(){$('#nav').innerHTML='<h1>⚙ Panel NRO</h1>'+PAGES.map(p=>p[0]==='g'?`<div class="g">${p[1]}</div>`:`<a href="#${p[0]}" data-p="${p[0]}">${p[1]}</a>`).join('')+'<div class="g">Tài khoản</div><a href="#" onclick="toggleTheme();return false">Đổi sáng / tối</a><a href="#" onclick="logout();return false">Đăng xuất</a>'}
+function toggleTheme(){const t=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=t;try{localStorage.setItem('theme',t)}catch(e){}}
+try{document.documentElement.dataset.theme=localStorage.getItem('theme')||'dark'}catch(e){}
+let logTimer=null;
+async function route(){
+  clearInterval(logTimer);const p=(location.hash||'#dash').slice(1);
+  document.querySelectorAll('nav a[data-p]').forEach(a=>a.classList.toggle('on',a.dataset.p===p));
+  const f=window['page_'+p]||page_dash;$('#main').innerHTML='<div class="mute">Đang tải…</div>';
+  try{await f()}catch(e){$('#main').innerHTML=`<div class="card">${esc(e.message)}</div>`}}
+window.onhashchange=route;
+function showLogin(){$('#app').hidden=true;$('#login').hidden=false}
+async function doLogin(e){e.preventDefault();try{await api('login',{user:$('#lu').value,pass:$('#lp').value});$('#login').hidden=true;$('#app').hidden=false;buildNav();route()}catch(x){$('#lerr').textContent=x.message}}
+async function logout(){await api('logout',{}).catch(()=>{});showLogin()}
+
+/* ---------- chọn vật phẩm ---------- */
+function pickItem(cb){
+  const m=modal(`<h3>Chọn vật phẩm</h3><div class="row"><input class="grow" id="pq" placeholder="Tên hoặc ID"><select id="pt"><option value="">Mọi loại</option>${[[0,'Áo'],[1,'Quần'],[2,'Găng'],[3,'Giày'],[4,'Rada'],[5,'Cải trang'],[11,'Đeo lưng'],[12,'Ngọc rồng'],[14,'Đá'],[23,'Thú cưỡi'],[27,'Vật phẩm/Pet'],[29,'Item thời gian'],[30,'Sao pha lê'],[33,'Thẻ/mảnh'],[72,'Hào quang']].map(t=>`<option value="${t[0]}">${t[1]}</option>`).join('')}</select><button onclick="this.closest('.modal').remove()">Đóng</button></div><div class="pick" id="pl"></div>`);
+  const load=async()=>{const r=await api(`items?q=${encodeURIComponent(m.querySelector('#pq').value)}&type=${m.querySelector('#pt').value}`);
+    m.querySelector('#pl').innerHTML=r.map(i=>`<div data-id="${i.id}" data-name="${esc(i.name)}" data-icon="${i.icon}">${icon(i.icon)}<span><b>${esc(i.name)}</b><br><span class="mute">#${i.id} · loại ${i.type}</span></span></div>`).join('')||'<span class="mute">Không thấy</span>'};
+  let t;m.querySelector('#pq').oninput=()=>{clearTimeout(t);t=setTimeout(load,250)};m.querySelector('#pt').onchange=load;
+  m.querySelector('#pl').onclick=e=>{const d=e.target.closest('[data-id]');if(d){m.remove();cb({id:+d.dataset.id,name:d.dataset.name,icon:+d.dataset.icon})}};
+  load();m.querySelector('#pq').focus()}
+function itemField(prefix){return `<div class="row"><input id="${prefix}id" type="number" placeholder="ID vật phẩm" style="width:120px"><span id="${prefix}nm" class="mute"></span><button type="button" onclick="pickItem(i=>{$('#${prefix}id').value=i.id;$('#${prefix}nm').innerHTML=icon(i.icon)+' '+esc(i.name)})">Chọn…</button></div>`}
+function parseOps(s){return (s||'').split(/[;\n]/).map(x=>x.trim()).filter(Boolean).map(x=>x.split(/[:,\s]+/).map(Number)).filter(a=>a.length>=2&&!isNaN(a[0]))}
+
+/* ---------- tổng quan ---------- */
+async function page_dash(){
+  const s=await api('stats');const up=s.uptimeSec;
+  $('#main').innerHTML=`<h2>Tổng quan — ${esc(s.server)}</h2><div class="stats">
+  ${[['Đang online',fmt(s.online)+' / '+fmt(s.maxPlayer)],['Tài khoản',fmt(s.accounts)],['Nhân vật',fmt(s.players)],['Boss đang có mặt',fmt(s.bosses)],
+     ['RAM',fmt(s.memUsedMb)+' / '+fmt(s.memMaxMb)+' MB'],['CPU (tải TB)',s.cpuLoad<0?'—':s.cpuLoad.toFixed(2)+' / '+s.cpus+' nhân'],['Luồng',fmt(s.threads)],
+     ['Chạy được',Math.floor(up/86400)+'n '+Math.floor(up%86400/3600)+'g '+Math.floor(up%3600/60)+'p'],['Bảo trì',s.maintenance?'Đang bảo trì':'Không']]
+    .map(x=>`<div class="stat"><span>${x[0]}</span><b>${esc(x[1])}</b></div>`).join('')}</div>
+  <div class="card" style="margin-top:14px"><b>Sự kiện đang chạy:</b> ${s.seasons.length?s.seasons.map(n=>`<span class="tag on1">${esc(n)}</span>`).join(' '):'<span class="mute">không có</span>'}<br><span class="mute">Khởi động lúc ${esc(s.startedAt)}</span></div>
+  <h3>Người chơi đang online</h3><div id="onl"></div>`;
+  const p=await api('players?online=1');$('#onl').innerHTML=playerTable(p)}
+
+/* ---------- người chơi ---------- */
+const GENDER=['Trái Đất','Namếc','Xayda'];
+function playerTable(rows){return table(rows,[['id','ID'],['name','Tên',(v,r)=>`<a href="#" onclick="openPlayer(${r.id});return false">${esc(v)}</a>`],['username','Tài khoản'],['gender','Hành tinh',v=>GENDER[v]||v],['power','Sức mạnh',fmt],['gold','Vàng',fmt],['gem','Ngọc',fmt],['ruby','Hồng ngọc',fmt],['map','Đang ở'],['online','Trạng thái',v=>v?'<span class="tag on1">online</span>':'<span class="tag off1">offline</span>'],['ban','Khóa',v=>v==1?'<span class="tag bad1">bị khóa</span>':'']])}
+async function page_players(){
+  $('#main').innerHTML=`<h2>Người chơi</h2><div class="card row"><input class="grow" id="q" placeholder="Tên nhân vật, tài khoản hoặc ID"><label class="row"><input type="checkbox" id="oo"> Chỉ online</label><button class="p" onclick="loadPlayers()">Tìm</button><button onclick="act(()=>api('player/save',{}),'Đã lưu toàn bộ người chơi online')">Lưu tất cả</button></div><div id="pt"></div>`;
+  $('#q').onkeydown=e=>{if(e.key==='Enter')loadPlayers()};loadPlayers()}
+async function loadPlayers(){$('#pt').innerHTML=playerTable(await api(`players?q=${encodeURIComponent($('#q').value)}&online=${$('#oo').checked?1:''}`))}
+async function openPlayer(id){
+  const p=await api('player?id='+id);
+  const inv=list=>list&&list.length?`<div class="tw" style="max-height:260px"><table>${list.map(i=>`<tr><td>${icon(i.icon)}</td><td class="w"><b>${esc(i.name)}</b> <span class="mute">#${i.id} ×${fmt(i.qty)}</span><br><span class="mute">${i.options.map(esc).join(' · ')}</span></td></tr>`).join('')}</table></div>`:'<span class="mute">trống</span>';
+  const m=modal(`<h3>${esc(p.name)} <span class="mute">#${p.id} · ${esc(p.username||'')}</span> ${p.online?'<span class="tag on1">online</span>':'<span class="tag off1">offline</span>'}</h3>
+  <div class="mute">Sức mạnh ${fmt(p.power)} · Vàng ${fmt(p.gold)} · Ngọc ${fmt(p.gem)} · Hồng ngọc ${fmt(p.ruby)} · ${esc(p.map)} · IP ${esc(p.ip||p.ip_address||'')} · Nạp ${fmt(p.tongnap)} · Đăng nhập ${esc(p.last_time_login||'')}</div>
+  <div class="grid2" style="margin-top:12px">
+   <div class="card"><b>Cộng / trừ tiền</b> <span class="mute">(số âm để trừ)</span><div class="row" style="margin-top:6px"><input id="mg" type="number" placeholder="Vàng" style="width:120px"><input id="mn" type="number" placeholder="Ngọc" style="width:90px"><input id="mr" type="number" placeholder="Hồng ngọc" style="width:100px"><button class="p" id="bm">Gửi</button></div></div>
+   <div class="card"><b>Gửi vật phẩm</b>${itemField('gi')}<div class="row" style="margin-top:6px"><input id="gq" type="number" value="1" style="width:80px" title="Số lượng"><input id="go" class="grow" placeholder="Chỉ số thêm: 50:10; 77:15"><label class="row"><input type="checkbox" id="gs" checked> chỉ số mặc định</label><button class="p" id="bg">Gửi</button></div></div>
+   <div class="card"><b>Thao tác</b><div class="row" style="margin-top:6px">${p.online?`<button id="bk">Kick</button><input id="tm" type="number" placeholder="Map ID" style="width:90px"><button id="bt">Dịch chuyển</button>`:''}<button class="${p.ban==1?'':'d'}" id="bb">${p.ban==1?'Mở khóa':'Khóa tài khoản'}</button><button id="ba">${p.is_admin==1?'Bỏ admin':'Cấp admin'}</button></div></div>
+  </div>
+  <div class="grid2"><div><h3>Đang mặc</h3>${inv(p.body)}</div><div><h3>Hành trang</h3>${inv(p.bag)}</div><div><h3>Rương</h3>${inv(p.box)}</div></div>
+  <div class="row" style="margin-top:12px;justify-content:flex-end"><button onclick="this.closest('.modal').remove()">Đóng</button></div>`);
+  const re=()=>{m.remove();openPlayer(id)};
+  m.querySelector('#bm').onclick=()=>act(()=>api('player/money',{id,gold:+$('#mg').value||0,gem:+$('#mn').value||0,ruby:+$('#mr').value||0})).then(re);
+  m.querySelector('#bg').onclick=()=>act(()=>api('player/give',{id,itemId:+$('#giid').value,qty:+$('#gq').value||1,shopOptions:$('#gs').checked,options:parseOps($('#go').value)})).then(re);
+  m.querySelector('#bb').onclick=()=>act(()=>api('account/update',{id:p.account_id,ban:p.ban==1?0:1})).then(re);
+  m.querySelector('#ba').onclick=()=>act(()=>api('account/update',{id:p.account_id,is_admin:p.is_admin==1?0:1})).then(re);
+  if(p.online){m.querySelector('#bk').onclick=()=>act(()=>api('player/kick',{id})).then(()=>m.remove());m.querySelector('#bt').onclick=()=>act(()=>api('player/teleport',{id,mapId:+$('#tm').value}))}}
+
+/* ---------- tài khoản ---------- */
+async function page_accounts(){
+  $('#main').innerHTML=`<h2>Tài khoản</h2><div class="card row"><input class="grow" id="q" placeholder="Tài khoản, tên nhân vật hoặc ID"><button class="p" onclick="loadAcc()">Tìm</button></div><div id="at"></div>`;
+  $('#q').onkeydown=e=>{if(e.key==='Enter')loadAcc()};loadAcc()}
+async function loadAcc(){const r=await api('accounts?q='+encodeURIComponent($('#q').value));
+  $('#at').innerHTML=table(r,[['id','ID'],['username','Tài khoản'],['players','Nhân vật'],['vnd','Số dư',fmt],['tongnap','Tổng nạp',fmt],['ban','Khóa',v=>v==1?'<span class="tag bad1">khóa</span>':''],['is_admin','Admin',v=>v==1?'<span class="tag on1">admin</span>':''],['last_time_login','Đăng nhập cuối'],['ip_address','IP']],
+  r2=>`<button class="s" onclick="editAcc(${r2.id})">Sửa</button>`);window._acc=r}
+function editAcc(id){const a=_acc.find(x=>x.id===id);const m=modal(`<h3>Tài khoản ${esc(a.username)}</h3><div class="grid2">
+ <label class="f">Mật khẩu mới (để trống nếu không đổi)<input id="ap"></label><label class="f">Số dư<input id="av" type="number" value="${a.vnd||0}"></label><label class="f">Tổng nạp<input id="an" type="number" value="${a.tongnap||0}"></label>
+ <label class="f">Khóa<select id="ab"><option value="0">Không</option><option value="1" ${a.ban==1?'selected':''}>Khóa</option></select></label><label class="f">Admin<select id="aa"><option value="0">Không</option><option value="1" ${a.is_admin==1?'selected':''}>Có</option></select></label></div>
+ <div class="row" style="margin-top:12px;justify-content:flex-end"><button onclick="this.closest('.modal').remove()">Hủy</button><button class="p" id="as">Lưu</button></div>`);
+ m.querySelector('#as').onclick=()=>act(()=>api('account/update',{id,password:$('#ap').value,vnd:+$('#av').value,tongnap:+$('#an').value,ban:+$('#ab').value,is_admin:+$('#aa').value})).then(()=>{m.remove();loadAcc()})}
+
+/* ---------- top, bang hội, ký gửi, nạp thẻ ---------- */
+async function page_tops(){$('#main').innerHTML=`<h2>Bảng xếp hạng</h2><div class="card row"><select id="tk">${[['power','Sức mạnh'],['sukien','Hộp quà thiếu nhi'],['sukien1','Nước mía'],['sukien2','Kem trái cây'],['hopden','Hộp đen bí ẩn'],['naptien','Tổng nạp']].map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('')}</select><button class="p" onclick="loadTop()">Xem</button></div><div id="tt"></div>`;loadTop()}
+async function loadTop(){const r=await api('tops?kind='+$('#tk').value);$('#tt').innerHTML=table(r.map((x,i)=>({...x,rank:i+1})),[['rank','Hạng'],['id','ID'],['name','Tên'],['point','Điểm',fmt]])}
+async function page_clans(){$('#main').innerHTML='<h2>Bang hội</h2>'+table(await api('clans'),[['id','ID'],['name','Tên'],['slogan','Khẩu hiệu','','w'],['level','Cấp'],['power_point','Sức mạnh',fmt],['clan_point','Điểm',fmt],['max_member','Tối đa'],['create_time','Ngày lập']])}
+async function page_kygui(){$('#main').innerHTML='<h2>Ký gửi</h2>'+table(await api('kygui'),[['id','ID'],['icon_id','',v=>icon(v)],['name','Vật phẩm'],['quantity','SL',fmt],['player','Người bán'],['gold','Giá vàng',fmt],['gem','Giá ngọc',fmt],['isBuy','Đã bán',v=>v==1?'<span class="tag on1">đã bán</span>':'']])}
+async function page_napthe(){$('#main').innerHTML='<h2>Lịch sử nạp thẻ</h2>'+table(await api('napthe'))}
+
+/* ---------- vật phẩm ---------- */
+async function page_items(){$('#main').innerHTML=`<h2>Vật phẩm</h2><div class="card row"><input class="grow" id="q" placeholder="Tên hoặc ID"><input id="ty" type="number" placeholder="Loại" style="width:90px"><button class="p" onclick="loadItems()">Tìm</button><input class="grow" id="oq" placeholder="Tìm chỉ số (option)"><button onclick="loadOps()">Tìm chỉ số</button></div><div id="it"></div>`;
+  $('#q').onkeydown=e=>{if(e.key==='Enter')loadItems()};loadItems()}
+async function loadItems(){const r=await api(`items?q=${encodeURIComponent($('#q').value)}&type=${$('#ty').value}`);$('#it').innerHTML=table(r,[['icon','',v=>icon(v)],['id','ID'],['name','Tên'],['type','Loại'],['gender','Hành tinh'],['level','Cấp'],['desc','Mô tả','','w']],x=>`<button class="s" onclick="itemInfo(${x.id})">Chi tiết</button>`)}
+async function loadOps(){const r=await api('options?q='+encodeURIComponent($('#oq').value));$('#it').innerHTML=table(r,[['id','ID'],['name','Chỉ số']])}
+async function itemInfo(id){const i=await api('item?id='+id);modal(`<h3>${icon(i.icon)} ${esc(i.name)} <span class="mute">#${i.id}</span></h3><div class="mute">Loại ${i.type} · hành tinh ${i.gender} · cấp ${i.level} · part ${i.part} · sức mạnh ${fmt(i.strRequire)}</div><p>${esc(i.desc)}</p><b>Chỉ số mặc định</b>${table(i.options,[['id','ID'],['param','Giá trị'],['text','Hiển thị']])}<div class="row" style="justify-content:flex-end;margin-top:10px"><button onclick="this.closest('.modal').remove()">Đóng</button></div>`)}
+
+/* ---------- hộp quà ---------- */
+async function page_boxes(){const r=await api('boxes');
+  $('#main').innerHTML=`<h2>Hộp quà</h2><div class="card"><div class="row"><b>Hộp:</b><select id="bx" class="grow">${r.map(b=>`<option value="${b.box_id}">#${b.box_id} ${esc(b.name)} (${b.n} quà)</option>`).join('')}</select><button onclick="loadBox()">Mở</button><span class="mute">hoặc tạo hộp mới cho vật phẩm bất kỳ:</span>${itemField('nb')}<button onclick="if(+$('#nbid').value>=0){const o=document.createElement('option');o.value=$('#nbid').value;o.textContent='#'+o.value+' (mới)';$('#bx').prepend(o);$('#bx').value=o.value;loadBox()}">Dùng làm hộp</button></div></div><div id="bt"></div>`;
+  $('#bx').onchange=loadBox;loadBox()}
+async function loadBox(){const id=+$('#bx').value;const r=await api('box?id='+id);const tw=r.reduce((a,x)=>a+x.weight,0);
+  $('#bt').innerHTML=`<div class="card"><b>Thêm vật phẩm vào hộp #${id}</b> <span class="mute">(id âm: -1 vàng, -2 ngọc, -3 hồng ngọc)</span>${itemField('bi')}<div class="row" style="margin-top:6px"><label class="f">SL từ<input id="b1" type="number" value="1" style="width:80px"></label><label class="f">đến<input id="b2" type="number" value="1" style="width:80px"></label><label class="f">Trọng số<input id="bw" type="number" value="10" style="width:90px"></label><label class="f">Hạn dùng (ngày, nhiều mức: 3,7,15)<input id="bd" style="width:170px"></label><label class="f">% vĩnh viễn<input id="bp" type="number" value="0" style="width:90px"></label><button class="p" onclick="saveBox(${id})">Thêm</button></div></div>`+
+  table(r,[['icon_id','',v=>icon(v)],['item_id','ID'],['name','Vật phẩm',(v,x)=>esc(v||({'-1':'Vàng','-2':'Ngọc xanh','-3':'Hồng ngọc'})[x.item_id]||'')],['qty_min','SL',(v,x)=>x.qty_min===x.qty_max?v:v+' – '+x.qty_max],['weight','Trọng số'],['weight','Tỉ lệ',v=>(v*100/tw).toFixed(2)+'%'],['hsd_days','Hạn (ngày)'],['perm_rate','% vĩnh viễn']],
+   x=>`<button class="s" onclick='editBox(${JSON.stringify(x)})'>Sửa</button> <button class="s d" onclick="delBox(${x.id})">Xóa</button>`)}
+function saveBox(boxId,id){return act(()=>api('box/save',{id,box_id:boxId,item_id:+$('#biid').value,qty_min:+$('#b1').value,qty_max:+$('#b2').value,weight:+$('#bw').value,hsd_days:$('#bd').value,perm_rate:+$('#bp').value}),'Đã lưu, hộp quà đã nạp lại').then(loadBox)}
+function editBox(x){$('#biid').value=x.item_id;$('#binm').innerHTML=icon(x.icon_id)+' '+esc(x.name||'');$('#b1').value=x.qty_min;$('#b2').value=x.qty_max;$('#bw').value=x.weight;$('#bd').value=x.hsd_days||'';$('#bp').value=x.perm_rate;
+  const b=document.querySelector('#bt .card button.p');b.textContent='Lưu dòng #'+x.id;b.onclick=()=>saveBox(x.box_id,x.id);window.scrollTo(0,0)}
+function delBox(id){if(confirm('Xóa dòng quà này?'))act(()=>api('box/delete',{id})).then(loadBox)}
+
+/* ---------- giftcode ---------- */
+async function page_giftcode(){const r=await api('giftcodes');
+  $('#main').innerHTML=`<h2>Giftcode</h2><div class="card"><div class="grid2"><label class="f">Mã<input id="gc"></label><label class="f">Số lượt (-1 = không giới hạn)<input id="gn" type="number" value="100"></label><label class="f">Hết hạn<input id="ge" type="datetime-local"></label></div>
+  <h3>Quà trong code</h3>${itemField('gi')}<div class="row" style="margin-top:6px"><input id="gq" type="number" value="1" style="width:80px" title="Số lượng"><input id="go" class="grow" placeholder="Chỉ số: 30:0; 93:7"><button onclick="addGcItem()">Thêm vào danh sách</button></div>
+  <textarea id="gd" style="margin-top:8px">[]</textarea><div class="row" style="justify-content:flex-end"><input type="hidden" id="gid"><button onclick="gcReset()">Làm mới</button><button class="p" onclick="saveGc()">Lưu giftcode</button></div></div>`+
+  table(r,[['id','ID'],['code','Mã'],['count_left','Còn lại',fmt],['detail','Quà','','w mono'],['datecreate','Tạo'],['expired','Hết hạn']],x=>`<button class="s" onclick='editGc(${JSON.stringify(x).replace(/'/g,"&#39;")})'>Sửa</button> <button class="s d" onclick="delGc(${x.id})">Xóa</button>`);
+  const d=new Date(Date.now()+30*864e5);$('#ge').value=d.toISOString().slice(0,16)}
+function addGcItem(){let a=[];try{a=JSON.parse($('#gd').value)}catch(e){}a.push({id:+$('#giid').value,quantity:+$('#gq').value||1,options:parseOps($('#go').value).map(o=>({id:o[0],param:o[1]}))});$('#gd').value=JSON.stringify(a,null,1)}
+function gcReset(){$('#gid').value='';$('#gc').value='';$('#gd').value='[]'}
+function editGc(x){$('#gid').value=x.id;$('#gc').value=x.code;$('#gn').value=x.count_left;$('#gd').value=x.detail;const e=new Date(x.expired);if(!isNaN(e))$('#ge').value=new Date(e-e.getTimezoneOffset()*6e4).toISOString().slice(0,16);window.scrollTo(0,0)}
+function saveGc(){act(()=>api('giftcode/save',{id:+$('#gid').value||0,code:$('#gc').value,count:+$('#gn').value,expired:$('#ge').value,detail:$('#gd').value}),'Đã lưu, giftcode đã nạp lại').then(page_giftcode)}
+function delGc(id){if(confirm('Xóa giftcode?'))act(()=>api('giftcode/delete',{id})).then(page_giftcode)}
+
+/* ---------- cửa hàng ---------- */
+async function page_shop(){const r=await api('shops');
+  $('#main').innerHTML=`<h2>Cửa hàng</h2><div class="card row"><select id="st" class="grow">${r.map(t=>`<option value="${t.tab_id}">${esc(t.tag_name)} (NPC ${t.npc_id}) › ${esc(t.tab_name)} — ${t.n} món</option>`).join('')}</select><button onclick="loadShop()">Xem</button><button onclick="act(()=>api('shop/reload',{}),'Đã nạp lại cửa hàng')">Nạp lại shop</button></div><div id="sh"></div>`;
+  $('#st').onchange=loadShop;loadShop()}
+const SELL=['Vàng','Ngọc','Hồng ngọc','Thỏi vàng','Item'];
+async function loadShop(){const tab=+$('#st').value;const r=await api('shop/items?tab='+tab);
+  $('#sh').innerHTML=`<div class="card"><b>Thêm / sửa món</b>${itemField('si')}<div class="row" style="margin-top:6px"><label class="f">Giá<input id="sc" type="number" value="1" style="width:120px"></label><label class="f">Loại tiền<select id="sy">${SELL.map((s,i)=>`<option value="${i}">${s}</option>`).join('')}</select></label><label class="f">Đang bán<select id="ss"><option value="1">Có</option><option value="0">Không</option></select></label><label class="f">Mới<select id="sn"><option value="0">Không</option><option value="1">Có</option></select></label><input type="hidden" id="sid"><button class="p" onclick="saveShop(${tab})">Lưu</button></div></div>`+
+  table(r,[['icon_id','',v=>icon(v)],['id','ID'],['temp_id','Item'],['name','Tên'],['cost','Giá',fmt],['type_sell','Tiền',v=>SELL[v]??v],['is_sell','Bán',v=>v==1?'<span class="tag on1">bán</span>':'<span class="tag off1">ẩn</span>'],['is_new','Mới',v=>v==1?'mới':'']],
+   x=>`<button class="s" onclick='editShop(${JSON.stringify(x)})'>Sửa</button> <button class="s d" onclick="delShop(${x.id})">Xóa</button>`)}
+function editShop(x){$('#sid').value=x.id;$('#siid').value=x.temp_id;$('#sinm').innerHTML=icon(x.icon_id)+' '+esc(x.name);$('#sc').value=x.cost;$('#sy').value=x.type_sell;$('#ss').value=x.is_sell;$('#sn').value=x.is_new;window.scrollTo(0,0)}
+function saveShop(tab){act(()=>api('shop/save',{id:+$('#sid').value||0,tab_id:tab,temp_id:+$('#siid').value,cost:+$('#sc').value,type_sell:+$('#sy').value,is_sell:+$('#ss').value,is_new:+$('#sn').value}),'Đã lưu và nạp lại shop').then(loadShop)}
+function delShop(id){if(confirm('Xóa món này khỏi shop?'))act(()=>api('shop/delete',{id})).then(loadShop)}
+
+/* ---------- bản đồ & NPC ---------- */
+let NPCS=null;
+async function page_maps(){const r=await api('maps');NPCS=NPCS||await api('npcs');
+  $('#main').innerHTML=`<h2>Bản đồ & NPC</h2><div class="card row"><input id="mq" class="grow" placeholder="Lọc tên / ID bản đồ"></div><div id="ml"></div>`;
+  const draw=()=>{const k=$('#mq').value.toLowerCase();$('#ml').innerHTML=table(r.filter(m=>!k||String(m.id)===k||String(m.name).toLowerCase().includes(k)),[['id','ID'],['name','Tên'],['planet_id','Hành tinh'],['zones','Khu'],['online','Đang có',fmt],['npcCount','NPC'],['loaded','Đã tải',v=>v?'':'<span class="tag off1">chưa tải</span>']],m=>m.loaded?`<button class="s" onclick="openMap(${m.id})">Quản lý NPC</button>`:'')};
+  $('#mq').oninput=draw;draw()}
+async function openMap(id){const m=await api('map?id='+id);
+  const md=modal(`<h3>${esc(m.name)} <span class="mute">#${m.id} · rộng ${m.width}px · ${m.zones} khu</span></h3>
+  <div class="card"><b>Đặt NPC vào bản đồ</b><div class="row" style="margin-top:6px"><select id="nt" class="grow">${NPCS.map(n=>`<option value="${n.id}">#${n.id} ${esc(n.name)}</option>`).join('')}</select><input id="nx" type="number" placeholder="X (trống = giữa)" style="width:130px"><input id="ny" type="number" placeholder="Y (trống = mặt đất)" style="width:140px"><label class="row"><input type="checkbox" id="np" checked> lưu vào database</label><button class="p" id="na">Đặt NPC</button></div></div>
+  <b>NPC đang có</b>${table(m.npcs,[['tempId','ID'],['name','Tên'],['x','X'],['y','Y']],n=>`<button class="s d" data-t="${n.tempId}" data-x="${n.x}">Xóa</button>`)}
+  <div class="mute" style="margin-top:8px">NPC lưu trong database: <span class="mono">${esc(m.dbNpcs)}</span><br>Người chơi đang ở bản đồ cần vào lại bản đồ để thấy thay đổi.</div>
+  <div class="row" style="justify-content:flex-end;margin-top:10px"><button onclick="this.closest('.modal').remove()">Đóng</button></div>`);
+  md.querySelector('#na').onclick=()=>act(()=>api('map/npc/add',{mapId:id,tempId:+$('#nt').value,x:+$('#nx').value||0,y:+$('#ny').value||0,persist:$('#np').checked})).then(()=>{md.remove();openMap(id)});
+  md.querySelectorAll('button[data-t]').forEach(b=>b.onclick=()=>{if(confirm('Xóa NPC này khỏi bản đồ?'))act(()=>api('map/npc/remove',{mapId:id,tempId:+b.dataset.t,x:+b.dataset.x,persist:$('#np').checked})).then(()=>{md.remove();openMap(id)})})}
+
+/* ---------- sự kiện ---------- */
+async function page_events(){const r=await api('seasons');
+  $('#main').innerHTML=`<h2>Sự kiện theo mùa</h2><div class="card row"><button onclick="sev('reload')">Nạp lại dữ liệu sự kiện</button><input id="sd" type="date"><button onclick="sev('ngay '+$('#sd').value)">Giả lập ngày</button><button onclick="sev('ngay')">Về ngày thật</button><span class="mute">Bật tay: chạy ngay bất kể lịch · Tắt tay: dừng ngay · Tự động: theo lịch âm/dương</span></div>`+
+  table(r,[['id','ID'],['name','Sự kiện'],['active','Trạng thái',v=>v?'<span class="tag on1">đang chạy</span>':'<span class="tag off1">không chạy</span>'],['mode','Chế độ'],['anchor','Mốc'],['window','Lần diễn ra'],['drops','Rơi đồ'],['exchanges','Đổi quà'],['tops','Đua top']],
+  x=>`<button class="s p" onclick="sev('bat ${x.id}')">Bật</button> <button class="s d" onclick="sev('tat ${x.id}')">Tắt</button> <button class="s" onclick="sev('tudong ${x.id}')">Tự động</button> <button class="s" onclick="sev('chottop ${x.id}')">Chốt top</button>`)}
+async function sev(cmd){const r=await act(()=>api('season/cmd',{cmd}));if(r)toast(r.result);page_events()}
+
+/* ---------- boss ---------- */
+async function page_bosses(){const r=await api('bosses');
+  $('#main').innerHTML=`<h2>Boss</h2><div class="card row"><select id="bi" class="grow">${r.ids.map(b=>`<option value="${b.id}">${esc(b.key)} (${b.id})</option>`).join('')}</select><button class="p" onclick="act(()=>api('boss/spawn',{bossId:+$('#bi').value})).then(page_bosses)">Gọi boss</button><button onclick="page_bosses()">Làm mới</button></div>`+
+  table(r.bosses.filter(b=>b.alive),[['id','ID'],['name','Tên'],['map','Đang ở'],['hp','HP',(v,b)=>fmt(v)+' / '+fmt(b.hpMax)]],b=>`<button class="s d" onclick="act(()=>api('boss/remove',{id:${b.id}})).then(page_bosses)">Cho rời bản đồ</button>`)+
+  `<h3>Boss đang nghỉ / chờ xuất hiện</h3>`+table(r.bosses.filter(b=>!b.alive),[['id','ID'],['name','Tên'],['hpMax','HP tối đa',fmt]])}
+async function page_mobs(){$('#main').innerHTML='<h2>Quái</h2>'+table(await api('mobs'),[['id','ID'],['name','Tên'],['type','Loại'],['hp','HP',fmt]])}
+
+/* ---------- thông báo & quà toàn server ---------- */
+async function page_notify(){const e=await api('exprate',{});
+  $('#main').innerHTML=`<h2>Thông báo & quà toàn server</h2><div class="grid2">
+  <div class="card"><b>Gửi thông báo</b><textarea id="nt" placeholder="Nội dung"></textarea><div class="row"><select id="ny"><option value="ticker">Dòng chữ chạy (thông báo server)</option><option value="popup">Hộp thông báo cho mọi người</option><option value="world">Chat thế giới</option></select><button class="p" onclick="act(()=>api('notify',{type:$('#ny').value,text:$('#nt').value}),'Đã gửi')">Gửi</button></div></div>
+  <div class="card"><b>Tặng quà cho mọi người đang online</b>${itemField('ga')}<div class="row" style="margin-top:6px"><input id="gaq" type="number" value="1" style="width:80px" title="Số lượng"><input id="gag" type="number" placeholder="Vàng" style="width:110px"><input id="gan" type="number" placeholder="Ngọc" style="width:90px"><input id="gar" type="number" placeholder="Hồng ngọc" style="width:100px"><button class="p" onclick="giveAll()">Tặng</button></div></div>
+  <div class="card"><b>Tỉ lệ EXP server</b><div class="row" style="margin-top:6px"><input id="er" type="number" min="1" max="100" value="${e.rate}" style="width:90px"><button class="p" onclick="act(()=>api('exprate',{rate:+$('#er').value}),'Đã đổi tỉ lệ EXP (áp dụng ngay, khởi động lại về giá trị trong cấu hình)')">Áp dụng</button></div></div></div>`}
+function giveAll(){if(!confirm('Tặng cho mọi người đang online?'))return;const id=$('#gaid').value;
+  act(()=>api('giveall',{itemId:id===''?-1:+id,qty:+$('#gaq').value||1,gold:+$('#gag').value||0,gem:+$('#gan').value||0,ruby:+$('#gar').value||0}).then(r=>{toast(`Đã tặng ${r.given} người, ${r.bagFull} người đầy hành trang`);return r}))}
+
+/* ---------- bảo trì, nhật ký, cấu hình, SQL ---------- */
+async function page_maint(){$('#main').innerHTML=`<h2>Bảo trì & lưu dữ liệu</h2><div class="card"><div class="row"><button onclick="act(()=>api('player/save',{}).then(r=>{toast('Đã lưu '+r.saved+' người chơi');return r}))">Lưu toàn bộ người chơi online</button></div></div>
+  <div class="card"><b>Bảo trì server</b><p class="mute">Lưu dữ liệu, đếm ngược báo cho người chơi, rồi tắt server. Dùng bat/sh khởi động lại để chạy lại.</p><div class="row"><input id="ms" type="number" value="60" style="width:100px"> giây <button class="d" onclick="if(confirm('Bảo trì server?'))act(()=>api('maintenance',{seconds:+$('#ms').value}),'Đã bắt đầu đếm ngược bảo trì')">Bảo trì</button></div></div>`}
+let logNext=0;
+async function page_logs(){$('#main').innerHTML=`<h2>Nhật ký console</h2><div class="row" style="margin-bottom:8px"><input id="lf" class="grow" placeholder="Lọc (vd: Exception)"><label class="row"><input type="checkbox" id="la" checked> tự cuộn</label></div><div class="log" id="lg"></div>`;
+  logNext=0;const lines=[];const draw=()=>{const k=$('#lf').value.toLowerCase();$('#lg').textContent=lines.filter(l=>!k||l.toLowerCase().includes(k)).join('\n');if($('#la').checked)$('#lg').scrollTop=1e9};
+  const pull=async()=>{try{const r=await api('logs?since='+logNext);logNext=r.next;lines.push(...r.lines);if(lines.length>3000)lines.splice(0,lines.length-3000);draw()}catch(e){}};
+  $('#lf').oninput=draw;await pull();logTimer=setInterval(pull,2000)}
+async function page_audit(){const r=await api('audit');$('#main').innerHTML='<h2>Nhật ký thao tác panel</h2><div class="log">'+r.map(esc).join('\n')+'</div>'}
+async function page_config(){const c=await api('config');
+  $('#main').innerHTML=`<h2>Cấu hình (Config.properties)</h2><div class="card"><p class="mute">Chỉ sửa được các mục an toàn; mật khẩu hiện dạng ******. Khởi động lại server để áp dụng.</p><div class="grid2">${Object.entries(c.values).map(([k,v])=>`<label class="f">${esc(k)}<input data-k="${esc(k)}" value="${esc(v)}" ${c.editable.includes(k)?'':'disabled'}></label>`).join('')}${c.editable.filter(k=>!(k in c.values)).map(k=>`<label class="f">${esc(k)} <span>(chưa có)</span><input data-k="${esc(k)}" value=""></label>`).join('')}</div><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="p" onclick="saveCfg()">Lưu</button></div></div>`}
+function saveCfg(){const values={};document.querySelectorAll('input[data-k]:not([disabled])').forEach(i=>{if(i.value!=='')values[i.dataset.k]=i.value});act(()=>api('config/save',{values}))}
+async function page_sql(){$('#main').innerHTML=`<h2>Truy vấn SQL (chỉ đọc)</h2><div class="card"><textarea id="sq">select id, name from player order by id desc limit 50</textarea><div class="row" style="justify-content:flex-end"><button class="p" onclick="runSql()">Chạy</button></div></div><div id="sr"></div>`}
+async function runSql(){try{$('#sr').innerHTML=table(await api('sql',{query:$('#sq').value}))}catch(e){toast(e.message,1)}}
+
+/* ---------- khởi động ---------- */
+api('me').then(()=>{$('#app').hidden=false;buildNav();route()}).catch(()=>{});
+</script>
+</body>
+</html>

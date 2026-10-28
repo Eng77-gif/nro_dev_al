@@ -365,6 +365,30 @@ public class SeasonEventService implements Runnable {
         return s.enabled && window(s, d) != null;
     }
 
+    /** Danh sách sự kiện cho panel web. */
+    public List<java.util.Map<String, Object>> panelList() {
+        List<java.util.Map<String, Object>> out = new ArrayList<>();
+        LocalDate d = today();
+        for (Season s : seasons.values()) {
+            java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
+            m.put("id", s.id);
+            m.put("name", s.name);
+            m.put("enabled", s.enabled);
+            m.put("active", s.active);
+            Boolean f = forced.get(s.id);
+            m.put("mode", f == null ? "tự động" : f ? "bật tay" : "tắt tay");
+            m.put("lunar", s.lunar);
+            m.put("anchor", s.day + "/" + s.month + (s.lunar ? " âm lịch" : ""));
+            LocalDate[] w = next(s, d);
+            m.put("window", w == null ? "" : w[0] + " → " + w[1]);
+            m.put("drops", s.drops.size());
+            m.put("exchanges", s.exchanges.size());
+            m.put("tops", s.tops.size());
+            out.add(m);
+        }
+        return out;
+    }
+
     public boolean isActive(int seasonId) {
         Season s = seasons.get(seasonId);
         return s != null && s.active;
