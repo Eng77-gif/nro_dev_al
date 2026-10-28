@@ -1058,3 +1058,11 @@ Code mới: `services/AnnounceService.java`.
 - Đăng nhập khi đứng top 1 Nước mía và Hộp đen thì có chat thế giới.
 - Nhặt món set Thần Vũ Trụ Kaio thì có thông báo server.
 - Mở 40 Hộp quà 20/10 ra 13 lần cải trang / thú cưỡi, lần nào cũng có thông báo kèm hạn dùng.
+
+## Đợt 43: Thông báo top 1 – 10 và set kích hoạt cũ
+- **Đăng nhập:** đứng top 1 – 10 bảng nào ở Chi Chi cũng có chat thế giới. Trước đây chỉ top 1. Ví dụ: "Top 2 sự kiện Nước mía, Top 1 sự kiện Hộp đen bí ẩn vừa đăng nhập!"
+- **Nhặt set kích hoạt từ quái:**
+  - Set cũ (Sôngôku, Kakarot, Kirin, Picolo, Ốc tiêu, Pikkoro Daimao, Ca Đíc, Nappa, Gohan…): báo chung "admin vừa đánh quái may mắn nhận được 1 trang bị Set kích hoạt", không kèm tên set.
+  - 3 set riêng (Thần Vũ Trụ Kaio, Nail chiến binh Namếc, Cađic M): vẫn báo kèm tên set.
+- **Lệnh admin:** `roiskh cu` thả 1 món set cũ để thử (`roiskh` thả set riêng như trước).
+- **Đã thử:** top 2 Nước mía + top 1 Hộp đen báo đúng hạng. Nhặt set cũ báo câu chung, nhặt set Kaio báo kèm tên set.
