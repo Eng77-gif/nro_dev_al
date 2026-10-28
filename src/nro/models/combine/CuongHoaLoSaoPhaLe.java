@@ -16,6 +16,8 @@ import nro.models.utils.Util;
 public class CuongHoaLoSaoPhaLe {
 
     private static final int COST = 500_000_000;
+    /** Lỗ thứ 10: 100 ngọc bất kỳ thay cho vàng */
+    private static final int GEM_LO_10 = 100;
 
     public static void showInfoCombine(Player player) {
         if (InventoryService.gI().getCountEmptyBag(player) > 0) {
@@ -63,7 +65,7 @@ public class CuongHoaLoSaoPhaLe {
                             + "\nTỉ lệ thành công: " + rate + "\n"
                             + "|7| Cần 1 " + Hematite.template.name
                             + "\n|7| Cần 1 " + DuiDuc.template.name
-                            + "\nCần " + Util.numberToMoney(COST) + " vàng";
+                            + (next >= 10 ? "\nCần " + GEM_LO_10 + " ngọc (xanh hoặc hồng)" : "\nCần " + Util.numberToMoney(COST) + " vàng");
 
                     CombineService.gI().baHatMit.createOtherMenu(player, ConstNpc.MENU_START_COMBINE, npcSay, "Cường Hóa", "Từ chối");
                 } else {
@@ -83,11 +85,6 @@ public class CuongHoaLoSaoPhaLe {
     public static void cuongHoaLoSaoPhaLe(Player player) {
         if (InventoryService.gI().getCountEmptyBag(player) == 0) {
             Service.gI().sendThongBao(player, "Cần ít nhất 1 ô trống trong hành trang.");
-            return;
-        }
-
-        if (player.inventory.gold < COST) {
-            Service.gI().sendThongBao(player, "Con cần thêm vàng để cường hóa...");
             return;
         }
 
@@ -152,9 +149,17 @@ public class CuongHoaLoSaoPhaLe {
             Service.gI().sendThongBao(player, "Cần pha lê hóa trang bị lên " + next + " sao trước khi cường hóa lỗ thứ " + next + ".");
             return;
         }
+        if (next >= 10 ? !CombineSystem.hasNgocBatKy(player, GEM_LO_10) : player.inventory.gold < COST) {
+            Service.gI().sendThongBao(player, next >= 10 ? "Con cần " + GEM_LO_10 + " ngọc để cường hóa lỗ thứ 10" : "Con cần thêm vàng để cường hóa...");
+            return;
+        }
         // lỗ 8 luôn thành công (như cũ), lỗ 9: 25%, lỗ 10: 15%
         boolean success = next == 8 || (next == 9 ? Util.isTrue(50, 200) : Util.isTrue(30, 200));
-        player.inventory.gold -= COST;
+        if (next >= 10) {
+            CombineSystem.subNgocBatKy(player, GEM_LO_10);
+        } else {
+            player.inventory.gold -= COST;
+        }
         if (success) {
             if (opt228 == null) {
                 item.itemOptions.add(new ItemOption(228, next));

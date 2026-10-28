@@ -45,7 +45,8 @@ public class BaHatMit extends Npc {
                             "Chuyển hóa\nTrang bị",
                             "Võ đài\nSinh tử",
                             "Phân rã\nTrang bị\nKích hoạt",
-                            "Tái tạo\nCapsule\nKích hoạt"
+                            "Tái tạo\nCapsule\nKích hoạt",
+                            "Nhiệm vụ\nSao pha lê\n10"
                     );
 
                 case 112 -> {
@@ -155,6 +156,13 @@ public class BaHatMit extends Npc {
                                 CombineService.gI().openTabCombine(player, CombineService.PHAN_RA_TRANG_BI_KH);
                             case 4 ->
                                 CombineService.gI().openTabCombine(player, CombineService.TAI_TAO_CAPSULE_KH);
+                            case 5 ->
+                                nro.models.services.SaoPhaLe10Service.gI().showQuest(player, this);
+                        }
+                    } else if (player.idMark.getIndexMenu() == nro.models.services.SaoPhaLe10Service.MENU_NHIEM_VU) {
+                        if (select == 0) {
+                            nro.models.services.SaoPhaLe10Service.gI().claim(player);
+                            nro.models.services.SaoPhaLe10Service.gI().showQuest(player, this);
                         }
                     } else if (player.idMark.getIndexMenu() == 3) {
                         switch (select) {

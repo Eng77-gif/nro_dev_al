@@ -981,6 +981,10 @@ public class UseItem {
                                     nro.models.boss.event.Halloween.Zombie.radar(pl, item);
                                     return;
                                 }
+                                if (nro.models.services.SaoPhaLe10Service.gI().isBox(item)) {
+                                    nro.models.services.SaoPhaLe10Service.gI().openMenu(pl, item);
+                                    return;
+                                }
                                 if (item.template.id == Event2026Service.SKH_BEERUS_BOX) {
                                     Event2026Service.gI().openSkhBeerusMenu(pl);
                                     return;

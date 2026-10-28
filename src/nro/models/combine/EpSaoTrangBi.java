@@ -6,6 +6,7 @@ import nro.models.item.Item.ItemOption;
 import nro.models.player.Player;
 import nro.models.services.InventoryService;
 import nro.models.services.ItemService;
+import nro.models.services.SaoPhaLe10Service;
 import nro.models.services.Service;
 import nro.models.utils.Util;
 
@@ -14,6 +15,14 @@ import nro.models.utils.Util;
  * @author By Mr Blue
  */
 public class EpSaoTrangBi {
+
+    private static String wrongStone(int slot) {
+        return switch (slot) {
+            case 9 -> "Lỗ sao pha lê thứ 9 chỉ khảm được Đá cấp 9 (Linh Hồn, Hiện Thực, Sức Mạnh, Không Gian, Thời Gian)";
+            case 10 -> "Lỗ sao pha lê thứ 10 chỉ khảm được Ngọc rồng xanh";
+            default -> "Đá cấp 9 và Ngọc rồng xanh chỉ khảm được vào lỗ thứ 9 và thứ 10";
+        };
+    }
 
     public static void showInfoCombine(Player player) {
         if (player.combineNew.itemsCombine.size() == 2) {
@@ -44,6 +53,10 @@ public class EpSaoTrangBi {
                         return;
                     }
 
+                    if (star < starEmpty && !SaoPhaLe10Service.canSocket(daPhaLe, star + 1)) {
+                        CombineService.gI().baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU, wrongStone(star + 1), "Đóng");
+                        return;
+                    }
                     player.combineNew.gemCombine = CombineSystem.getGemEpSao(star);
                     String npcSay = trangBi.template.name + "\n|2|";
                     for (ItemOption io : trangBi.itemOptions) {
@@ -52,7 +65,9 @@ public class EpSaoTrangBi {
                         }
                     }
 
-                    if (daPhaLe.template.type == 30) {
+                    if (SaoPhaLe10Service.isDaCap9(daPhaLe) || SaoPhaLe10Service.isNgocRongXanh(daPhaLe)) {
+                        npcSay += "|7|" + SaoPhaLe10Service.describe(daPhaLe) + "\n";
+                    } else if (daPhaLe.template.type == 30) {
                         for (ItemOption io : daPhaLe.itemOptions) {
                             npcSay += "|7|" + io.getOptionString() + "\n";
                         }
@@ -123,11 +138,31 @@ public class EpSaoTrangBi {
                 return;
             }
 
+            int currentSlot = star + 1;
+            if (!SaoPhaLe10Service.canSocket(daPhaLe, currentSlot)) {
+                Service.gI().sendThongBao(player, wrongStone(currentSlot));
+                return;
+            }
+
             player.inventory.subGem(gem);
+
+            if (SaoPhaLe10Service.isDaCap9(daPhaLe) || SaoPhaLe10Service.isNgocRongXanh(daPhaLe)) {
+                trangBi.itemOptions.addAll(SaoPhaLe10Service.rollOptions(daPhaLe));
+                if (optionStar != null) {
+                    optionStar.param += 1;
+                } else {
+                    trangBi.itemOptions.add(new ItemOption(102, 1));
+                }
+                InventoryService.gI().subQuantityItemsBag(player, daPhaLe, 1);
+                CombineService.gI().sendEffectSuccessCombine(player);
+                InventoryService.gI().sendItemBags(player);
+                Service.gI().sendMoney(player);
+                CombineService.gI().reOpenItemCombine(player);
+                return;
+            }
 
             int optionId = CombineSystem.getOptionDaPhaLe(daPhaLe);
             int param = CombineSystem.getParamDaPhaLe(daPhaLe);
-            int currentSlot = star + 1;
             boolean shouldSplitOption;
 
             if (currentSlot >= 8) { // lỗ 8, 9, 10 cộng thành dòng riêng

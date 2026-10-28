@@ -855,3 +855,70 @@ Theo ảnh bản chính thức:
 - Cường hóa lỗ 10 thành công sau 2 lần.
 - Ép sao lỗ 10 → 10/10 sao (+2% né đòn).
 - Không có lỗi server.
+
+## Đợt 37: Sao pha lê 10 theo bài cập nhật chính thức (Đá cấp 9, Ngọc rồng xanh)
+Code mới: `services/SaoPhaLe10Service.java`.
+
+**Chi phí**
+- Pha lê hóa 9 → 10 sao: 500 Tr vàng + 50 ngọc bất kỳ. Trừ ngọc xanh trước, thiếu thì trừ hồng ngọc. Trước đây là 280 ngọc xanh.
+- Cường hóa lỗ 10: 1 Hematite + 1 Dùi đục + 100 ngọc bất kỳ, không tốn vàng. Lỗ 8 và 9 vẫn tốn 500 Tr vàng.
+
+**Luật khảm theo lỗ** (Ép sao, Bà Hạt Mít)
+
+| Lỗ | Chỉ nhận |
+|---|---|
+| 1 – 8 | Đá pha lê thường. Không nhận Đá cấp 9 hay Ngọc rồng xanh |
+| 9 | Đá cấp 9 (2000 – 2004) |
+| 10 | Ngọc rồng xanh 1 – 7 sao (2064 – 2070) |
+
+Chỉ số Đá cấp 9 (cố định):
+
+| Đá | Chỉ số |
+|---|---|
+| Linh Hồn | Chí mạng +2% |
+| Hiện Thực | Giảm 5% sát thương |
+| Sức Mạnh | Sức đánh +5% |
+| Không Gian | HP +10% |
+| Thời Gian | KI +10% |
+
+Chỉ số Ngọc rồng xanh (ngẫu nhiên mỗi lần khảm):
+
+| Viên | Chỉ số |
+|---|---|
+| 1 sao | Sát thương cuối 1 – 3% |
+| 2 sao | Sức đánh 3 – 10% |
+| 3 sao | HP 5 – 20% |
+| 4 sao | KI 5 – 20% |
+| 5 sao | Chí mạng 1 – 5% |
+| 6 sao | Giảm sát thương 3 – 10% |
+| 7 sao | Biến tấn công thành HP và KI 5 – 10% (2 dòng cùng giá trị) |
+
+**Hộp**
+- Hộp đá cấp 9 (2034, đổi tên từ "Hộp đá nâng cấp +9"): mở ra chọn 1 trong 5 đá cấp 9.
+- Hộp ngọc rồng xanh (2071): chọn 1 trong 7 viên.
+
+**Nguồn rơi từ boss**
+- Boss từ 50 Tr HP: 5% rơi Hộp đá cấp 9.
+- Boss từ 500 Tr HP: 5% rơi 1 Ngọc rồng xanh ngẫu nhiên.
+
+**Nhiệm vụ Sao pha lê 10** (Bà Hạt Mít đảo Kame, nút mới)
+- Đếm số món đủ 10 sao ở người, hành trang và rương.
+- Phần thưởng theo mốc:
+
+| Số món | Phần thưởng |
+|---|---|
+| 1 | 1 Hộp ngọc rồng xanh |
+| 2 | 2 Hộp ngọc rồng xanh |
+| 3 | 1 Capsule vỡ |
+| 5 | 2 Capsule vỡ |
+| 7 | Capsule kích hoạt tự chọn + Bóng mờ hoa hồng (bước chân) |
+
+- Mỗi mốc nhận 1 lần, lưu ở `player_extra.spl10_reward`. Cột này đã thêm vào cả 2 DB.
+
+**Đã thử trên server**
+- Khảm sai đá bị chặn đúng thông báo.
+- Lỗ 9 + Đá Sức Mạnh → Sức đánh +5%.
+- Lỗ 10 + NRX 7 sao → 2 dòng Biến 5% thành HP và KI.
+- Còn 0 ngọc xanh, 1000 hồng ngọc: sau pha lê hóa và cường hóa lỗ 10 còn 850 hồng ngọc.
+- Mở 2 hộp chọn đúng viên.
+- Nhận mốc 1 món, lưu lại sau khi thoát.

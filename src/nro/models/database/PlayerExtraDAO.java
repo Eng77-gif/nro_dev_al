@@ -30,6 +30,7 @@ public class PlayerExtraDAO {
                 player.hdbaCount = rs.getInt("hdba_count");
                 player.hdbaRewardRank = rs.getInt("hdba_reward_rank");
                 player.itemsCollection = parseList(rs.getString("collection"));
+                player.spl10Reward = rs.getInt("spl10_reward");
                 String[] hlw = String.valueOf(rs.getString("hlw_buffs")).split(",");
                 if (hlw.length == 5) {
                     player.hlwPetX3Until = Long.parseLong(hlw[0]);
@@ -51,9 +52,9 @@ public class PlayerExtraDAO {
     public static void save(Player player) {
         try {
             String hlw = player.hlwPetX3Until + "," + player.hlwSelfX3Until + "," + player.hlwHpUntil + "," + player.hlwKiUntil + "," + player.hlwDameUntil;
-            LocalManager.executeUpdate("replace into player_extra (player_id, item_foot, ql_points, aura_reward, aura_until, ql_reward_rank, hdba_count, hdba_reward_rank, hlw_buffs, collection) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            LocalManager.executeUpdate("replace into player_extra (player_id, item_foot, ql_points, aura_reward, aura_until, ql_reward_rank, hdba_count, hdba_reward_rank, hlw_buffs, collection, spl10_reward) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     player.id, toJson(player.itemFoot), player.qlPoints, player.auraReward, player.auraRewardUntil, player.qlRewardRank,
-                    player.hdbaCount, player.hdbaRewardRank, hlw, toJsonList(player.itemsCollection));
+                    player.hdbaCount, player.hdbaRewardRank, hlw, toJsonList(player.itemsCollection), player.spl10Reward);
         } catch (Exception e) {
             Logger.logException(PlayerExtraDAO.class, e, "Lỗi lưu player_extra " + player.name);
         }

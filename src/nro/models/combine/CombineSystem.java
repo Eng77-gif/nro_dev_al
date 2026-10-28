@@ -18,8 +18,21 @@ public class CombineSystem {
         }
     }
 
+    /** Ngọc bất kỳ: tổng ngọc xanh + hồng ngọc. */
+    public static boolean hasNgocBatKy(Player player, int n) {
+        return (long) player.inventory.gem + player.inventory.ruby >= n;
+    }
+
+    /** Trừ ngọc bất kỳ: ngọc xanh trước, thiếu thì trừ hồng ngọc. */
+    public static void subNgocBatKy(Player player, int n) {
+        int g = Math.min(Math.max(player.inventory.gem, 0), n);
+        player.inventory.gem -= g;
+        player.inventory.ruby -= n - g;
+    }
+
     public static boolean isDaPhaLe(Item item) {
-        return item != null && item.template != null && (item.template.type == 30 || (item.template.id >= 14 && item.template.id <= 20));
+        return item != null && item.template != null && (item.template.type == 30 || (item.template.id >= 14 && item.template.id <= 20)
+                || nro.models.services.SaoPhaLe10Service.isDaCap9(item));
     }
 
     public static int getGemEpSao(int star) {
@@ -214,7 +227,7 @@ public class CombineSystem {
             case 8:
                 return 9;
             case 9:
-                return 280;
+                return 50; // sao 10: 50 ngọc bất kỳ
             case 10:
                 return 560;
             case 11:
