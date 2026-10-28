@@ -979,3 +979,56 @@ Chỉ số Ngọc rồng xanh (ngẫu nhiên mỗi lần khảm):
   - Mua bùa nhận icon 10 phút. Thoát game còn đúng thời gian.
   - Đánh Cadic tích Kilis vào bình.
   - Bình 3000 Kilis + đệ Mabư 40 tỷ sức mạnh: đổi được đệ (ra Uub), bình bị trừ. Bình 2999 Kilis bị từ chối.
+
+## Đợt 41: Broly Super (SSJ Broly) tách khỏi Super Broly; Baby rơi Set Champa và nhiều sao pha lê
+**Hai boss khác nhau**
+
+| | Super Broly | Broly Super (mới, theo video "Boss mới SSJ Broly") |
+|---|---|---|
+| Xuất hiện | Hóa từ Broly ngay khu Broly chết | Các map tuyết của Cooler: Cánh đồng tuyết, Rừng tuyết, Núi tuyết, Dòng sông băng, Rừng băng, Hang băng (105 – 110) |
+| HP | Như bản gốc (1,5 – 16 triệu) | 2 tỷ |
+| Ngoại hình | Super Broly cũ (part 294 – 296) | Broly tóc xanh lá (part 2099 – 2101) |
+| Phần thưởng | Như bản gốc: chưa có đệ thì nhận Đệ tử | Theo bảng phần thưởng trong video, xem dưới |
+| Hồi sinh | Theo Broly | 15 phút |
+
+Bảng rơi của Super Broly ở đợt trước đã chuyển hết sang Broly Super.
+
+Phần thưởng Broly Super:
+- Hộp đá nâng cấp +9
+- Cuồng bạo (item tăng chí mạng mới)
+- Đồ thần linh (cả găng)
+- Ngọc rồng 1 – 4 sao
+- Item cấp 2 (Cuồng nộ, Bổ khí, Bổ huyết, Giáp Xên, Ẩn danh cấp 2)
+- Đồ 1 – 3 sao
+- Đồ cấp 8 – 11
+- Vàng ngẫu nhiên
+- Mảnh khỉ Oozaru
+- Đồ cấp 11 – 12 từ 5 – 8 sao
+- 1% Set Beerus
+
+Sát thương mỗi đòn tối đa 1% HP, giáp boss 65%.
+
+**Baby**
+- 10% rơi 1 món **Set Thần hủy diệt Champa**: hành tinh, loại đồ (áo / quần / găng / giày / rada) và cấp 1 – 8 đều ngẫu nhiên.
+- Mỗi lần hạ rơi 3 – 6 sao pha lê, 30% thêm sao pha lê cấp 2.
+
+**Set Thần hủy diệt Champa** (option mới 257 – 260, đã thêm vào cả 2 DB):
+
+| Số món | Hiệu lực |
+|---|---|
+| 2 | +10% sát thương lên boss |
+| 4 | +20% sát thương lên boss |
+| 5 | +35% sát thương lên boss, +20% sức đánh chí mạng |
+
+Bảng "chiso" có dòng "Set Thần hủy diệt Champa: N món".
+
+**Lệnh admin mới** (dùng để thử boss):
+- `goiboss <BossID>`: gọi boss.
+- `den boss <tên>`: dịch chuyển tới boss.
+- `giet boss`: hạ mọi boss trong khu, tính như mình giết, có nhận thưởng.
+
+**Đã thử trên server**
+- Broly Super ở Hang băng / Rừng tuyết / Dòng sông băng, HP 2.000.000.000. Hạ 3 lần ra đồ theo bảng.
+- Broly → Super Broly cùng khu, HP khoảng 9,8 triệu, hạ thì nhận Đệ tử.
+- 25 lần hạ Baby: 2 món Champa, 200 sao pha lê.
+- Mặc 0 / 2 / 4 / 5 món Champa: sát thương lên boss 0 / 10 / 20 / 35%, chí mạng +20% khi đủ 5 món.

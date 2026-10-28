@@ -517,6 +517,32 @@ public class Event2026Service {
         return type == 4 ? RADA_CAP_12 : SKH_BEERUS_GEAR[Math.min(Math.max(gender, 0), 2)][type];
     }
 
+    // ------------------------------------------------------------------ SKH Thần hủy diệt Champa (boss Baby rơi)
+
+    /** [hành tinh][Áo, Quần, Găng, Giày, Rada][cấp 1 - 8] */
+    private static final int[][][] SKH_CHAMPA_GEAR = {
+        {{0, 3, 33, 34, 136, 137, 138, 139}, {6, 9, 35, 36, 140, 141, 142, 143}, {21, 24, 37, 38, 144, 145, 146, 147},
+            {27, 30, 39, 40, 148, 149, 150, 151}, {12, 57, 58, 59, 184, 185, 186, 187}},
+        {{1, 4, 41, 42, 152, 153, 154, 155}, {7, 10, 43, 44, 156, 157, 158, 159}, {22, 25, 45, 46, 160, 161, 162, 163},
+            {28, 31, 47, 48, 164, 165, 166, 167}, {12, 57, 58, 59, 184, 185, 186, 187}},
+        {{2, 5, 49, 50, 168, 169, 170, 171}, {8, 11, 51, 52, 172, 173, 174, 175}, {23, 26, 53, 54, 176, 177, 178, 179},
+            {29, 32, 55, 56, 180, 181, 182, 183}, {12, 57, 58, 59, 184, 185, 186, 187}}};
+
+    /** 1 món Set Thần hủy diệt Champa: hành tinh, loại đồ, cấp ngẫu nhiên. */
+    public static int randomSkhChampaGear() {
+        int[][] g = SKH_CHAMPA_GEAR[nro.models.utils.Util.nextInt(0, 2)];
+        int[] t = g[nro.models.utils.Util.nextInt(0, 4)];
+        return t[nro.models.utils.Util.nextInt(0, t.length - 1)];
+    }
+
+    /** Dòng set Champa (257), mô tả 2/4/5 món (258, 259, 260). */
+    public static void addSkhChampaOptions(List<Item.ItemOption> options) {
+        options.add(new Item.ItemOption(257, 0));
+        options.add(new Item.ItemOption(258, 0));
+        options.add(new Item.ItemOption(259, 0));
+        options.add(new Item.ItemOption(260, 0));
+    }
+
     public void openSkhBeerusMenu(Player pl) {
         nro.models.map.service.NpcService.gI().createMenuConMeo(pl, SKH_BEERUS_BOX, -1,
                 "Chọn 1 món Set Thần hủy diệt Beerus", "Áo", "Quần", "Găng", "Giày", "Rada", "Đóng");

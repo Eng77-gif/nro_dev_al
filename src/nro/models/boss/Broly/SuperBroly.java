@@ -1,10 +1,6 @@
 package nro.models.boss.Broly;
 
 import nro.models.boss.Boss;
-import nro.models.services.Service;
-import nro.models.services.ItemService;
-import nro.models.map.ItemMap;
-import nro.models.item.Item;
 import nro.models.boss.Boss_Manager.BrolyManager;
 import nro.models.boss.BossData;
 import nro.models.boss.BossID;
@@ -57,79 +53,6 @@ public class SuperBroly extends Boss {
         if (plKill.pet == null) {
             PetService.gI().createNormalPet(plKill);
         }
-        if (this.zone == null) {
-            return;
-        }
-        int x = this.location.x;
-        int y = this.zone.map.yPhysicInTop(x, this.location.y - 24);
-        // Đá nâng cấp (thay cho "Hộp đá cấp 9", server chưa có vật phẩm này)
-        if (Util.isTrue(30, 100)) {
-            drop(plKill, Util.nextInt(1074, 1078), 1, x, y);
-        }
-        // Item chí mạng
-        if (Util.isTrue(10, 100)) {
-            drop(plKill, Util.isTrue(1, 2) ? 1404 : 1405, 1, x, y);
-        }
-        // Đồ thần linh (cả găng)
-        if (Util.isTrue(10, 100)) {
-            ItemMap tl = ItemService.gI().randDoTLBoss(this.zone, 1, x, y, plKill.id);
-            if (tl != null) {
-                Service.gI().dropItemMap(this.zone, tl);
-            }
-        }
-        // Ngọc rồng 1 - 4 sao
-        if (Util.isTrue(50, 100)) {
-            drop(plKill, Util.nextInt(14, 17), 1, x, y);
-        }
-        // Item cấp 2 x4 - 8 (sao pha lê cấp 2)
-        if (Util.isTrue(30, 100)) {
-            drop(plKill, Util.nextInt(1416, 1422), Util.nextInt(4, 8), x, y);
-        }
-        // Sao pha lê
-        if (Util.isTrue(30, 100)) {
-            drop(plKill, Util.nextInt(441, 447), 1, x, y);
-        }
-        // Đồ cấp 8 - 11, đặc biệt có tỉ lệ rơi đồ 8 sao
-        if (Util.isTrue(30, 100)) {
-            dropEquip(plKill, 8, 11, Util.isTrue(3, 100) ? 8 : Util.nextInt(1, 5), x, y);
-        }
-        // Set kích hoạt Thần hủy diệt Beerus: đồ cấp 12 (jean Calic / vàng Zealot / lưỡng long, rada 12)
-        if (Util.isTrue(1, 100)) {
-            ItemMap skh = dropEquip(plKill, 12, 12, 0, x, y);
-            if (skh != null) {
-                nro.models.services.Event2026Service.addSkhBeerusOptions(skh.options);
-            }
-        }
-        // 1 triệu vàng (tỉ lệ thấp)
-        if (Util.isTrue(5, 100)) {
-            Service.gI().dropItemMap(this.zone, new ItemMap(this.zone, 190, 1_000_000, x, y, plKill.id));
-        }
-    }
-
-    private void drop(Player plKill, int tempId, int quantity, int x, int y) {
-        ItemMap it = new ItemMap(this.zone, tempId, quantity, x + Util.nextInt(-30, 30), y, plKill.id);
-        it.options.addAll(ItemService.gI().getListOptionItemShop((short) tempId));
-        Service.gI().dropItemMap(this.zone, it);
-    }
-
-    private ItemMap dropEquip(Player plKill, int minLevel, int maxLevel, int stars, int x, int y) {
-        java.util.List<Integer> ids = new java.util.ArrayList<>();
-        for (nro.models.player_system.Template.ItemTemplate t : nro.models.server.Manager.ITEM_TEMPLATES) {
-            if (t.type >= 0 && t.type <= 4 && t.level >= minLevel && t.level <= maxLevel) {
-                ids.add((int) t.id);
-            }
-        }
-        if (ids.isEmpty()) {
-            return null;
-        }
-        int tempId = ids.get(Util.nextInt(0, ids.size() - 1));
-        ItemMap it = new ItemMap(this.zone, tempId, 1, x + Util.nextInt(-30, 30), y, plKill.id);
-        it.options.addAll(ItemService.gI().getListOptionItemShop((short) tempId));
-        if (stars > 0) {
-            it.options.add(new Item.ItemOption(107, stars));
-        }
-        Service.gI().dropItemMap(this.zone, it);
-        return it;
     }
 
     @Override

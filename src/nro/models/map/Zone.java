@@ -104,6 +104,13 @@ public class Zone {
         }
     }
 
+    /** Bản sao danh sách boss trong khu (lệnh admin). */
+    public List<Player> getBossesCopy() {
+        synchronized (bosses) {
+            return new ArrayList<>(bosses);
+        }
+    }
+
     public List<BotAttackplayer> getBots() {
         synchronized (bots) {
             return new ArrayList<>(bots);

@@ -628,6 +628,13 @@ public class Boss extends Player implements IBoss {
         return 500;
     }
 
+    /** Lệnh admin: hạ boss ngay, tính như plKill đánh chết (nhận thưởng). */
+    public void adminKill(Player plKill) {
+        this.nPoint.hp = 0;
+        this.setDie(plKill);
+        this.die(plKill);
+    }
+
     @Override
     public void die(Player plKill) {
         if (plKill != null && !plKill.isBot) {

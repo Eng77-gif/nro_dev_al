@@ -87,6 +87,9 @@ public class StatsInfoService {
             add(l, "Nappa", s.nappa);
             add(l, "Cađíc M", s.cadicM);
         }
+        if (p.nPoint.skhChampa >= 2) {
+            l.add("Set Thần hủy diệt Champa: " + p.nPoint.skhChampa + " món");
+        }
         if (p.nPoint.skhBeerus >= 2) {
             l.add("Set Thần hủy diệt Beerus: " + p.nPoint.skhBeerus + " món");
         }

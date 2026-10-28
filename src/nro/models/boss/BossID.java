@@ -64,6 +64,7 @@ public class BossID {
 
     public static final int BROLY = -1822;
     public static final int SUPER_BROLY = -82282;
+    public static final int BROLY_SUPER = -82283; // SSJ Broly (vùng tuyết của Cooler), khác Super Broly cho đệ tử
 
     //================MINIBOSSS=============
     public static final int SOI_HEC_QUYN1 = -77;

@@ -280,6 +280,38 @@ parameterizedCommands.put("upp", (player, text) -> {
             nro.models.services.StatsInfoService.gI().show(player, false);
             return true;
         }
+        if (text.startsWith("goiboss ") && player.isAdmin()) { // admin: gọi boss theo BossID
+            try {
+                nro.models.boss.Boss b = nro.models.boss.Boss_Manager.BossManager.gI().createBoss(Integer.parseInt(text.substring(8).trim()));
+                Service.gI().sendThongBao(player, b == null ? "Không gọi được boss" : "Đã gọi " + b.name + (b.zone != null ? " tại " + b.zone.map.mapName : ""));
+            } catch (Exception e) {
+                Service.gI().sendThongBao(player, "Lỗi: " + e.getMessage());
+            }
+            return true;
+        }
+        if (text.startsWith("den boss ") && player.isAdmin()) { // admin: dịch chuyển tới boss theo tên
+            String want = text.substring(9).trim().toLowerCase();
+            java.util.List<nro.models.boss.Boss> all = new java.util.ArrayList<>(nro.models.boss.Boss_Manager.BossManager.gI().getBosses());
+            all.addAll(nro.models.boss.Boss_Manager.BrolyManager.gI().getBosses());
+            for (nro.models.boss.Boss b : all) {
+                if (b.zone != null && !b.isDie() && b.name.toLowerCase().startsWith(want)) {
+                    nro.models.map.service.ChangeMapService.gI().changeMap(player, b.zone, b.location.x, b.location.y);
+                    Service.gI().sendThongBao(player, "Đến " + b.name + " tại " + b.zone.map.mapName + " khu " + b.zone.zoneId + " HP " + b.nPoint.hpMax);
+                    return true;
+                }
+            }
+            Service.gI().sendThongBao(player, "Không thấy boss " + want);
+            return true;
+        }
+        if (text.equals("giet boss") && player.isAdmin()) { // admin: hạ mọi boss trong khu, nhận thưởng
+            for (Player p : player.zone.getBossesCopy()) {
+                if (p instanceof nro.models.boss.Boss b && !b.isDie()) {
+                    Service.gI().sendThongBao(player, "Hạ " + b.name + " (HP " + b.nPoint.hpMax + ")");
+                    b.adminKill(player);
+                }
+            }
+            return true;
+        }
         if (text.equals("pkall") && player.isAdmin()) { // admin: bật PK để thử chiến đấu
             PlayerService.gI().changeAndSendTypePK(player, ConstPlayer.PK_ALL);
             return true;

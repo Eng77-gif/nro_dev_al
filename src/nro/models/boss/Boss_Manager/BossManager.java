@@ -160,6 +160,7 @@ public class BossManager implements Runnable {
         this.createBoss(BossID.AN_TROM, 5);
         this.createBoss(BossID.O_DO1, 5);
         this.createBoss(BossID.BABY, 2);
+        this.createBoss(BossID.BROLY_SUPER, 1);
         this.createBoss(BossID.MAT_TROI, 20);
 
     }
@@ -175,6 +176,8 @@ public class BossManager implements Runnable {
             return switch (bossID) {               
                 case BossID.BROLY ->
                     new Broly();
+                case BossID.BROLY_SUPER ->
+                    new nro.models.boss.Broly.BrolySuper();
                 case BossID.TAP_SU_0 ->
                     new TAPSU0();
                 case BossID.TAP_SU_1 ->

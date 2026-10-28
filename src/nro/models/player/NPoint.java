@@ -226,6 +226,7 @@ public class NPoint {
     // hiệu ứng "ở gần cải trang khác loại" (145, 146, 150, 177, 179, 193, 196, 256), cập nhật mỗi 3 giây
     public int nearDame, nearHp, nearKi, nearSpeed;
     public int skhBeerus; // số món SKH Thần hủy diệt Beerus đang mặc (option 115)
+    public int skhChampa; // số món SKH Thần hủy diệt Champa đang mặc (option 257)
 
     public boolean isGogeta;
 
@@ -505,7 +506,7 @@ public class NPoint {
                     teleport = true;
                 }
                 for (ItemOption io : item.itemOptions) {
-                    if (io.optionTemplate.id == 115 && (this.player.inventory.itemsBody.indexOf(item) > 4)) {
+                    if ((io.optionTemplate.id == 115 || io.optionTemplate.id == 257) && (this.player.inventory.itemsBody.indexOf(item) > 4)) {
                         continue; // set kích hoạt chỉ tính trên 5 món trang bị
                     }
                     addOption(io);
@@ -558,6 +559,13 @@ public class NPoint {
             this.tlDame.add(skhDame);
             this.tlDameCrit.add(skhSDCM);
             this.tlSDCM += skhSDCM;
+        }
+        // SKH Thần hủy diệt Champa: 2 món +10% sát thương lên boss, 4 món +20%, 5 món +35% và +20% sức đánh chí mạng
+        int champaBoss = skhChampa >= 5 ? 35 : skhChampa >= 4 ? 20 : skhChampa >= 2 ? 10 : 0;
+        this.tlDameBoss += champaBoss;
+        if (skhChampa >= 5) {
+            this.tlDameCrit.add(20);
+            this.tlSDCM += 20;
         }
         if (setCritWithSkhBeerus > 0 && skhBeerus >= 2) {
             this.critAdd += setCritWithSkhBeerus;
@@ -791,6 +799,9 @@ public class NPoint {
                 break;
             case 115: //Set Thần hủy diệt Beerus
                 this.skhBeerus++;
+                break;
+            case 257: //Set Thần hủy diệt Champa
+                this.skhChampa++;
                 break;
             case 169: //Đi cùng Pet Xên hoàn thiện tăng #% sát thương chí mạng
                 this.setSDCMWithXenHT += io.param;
@@ -1704,6 +1715,7 @@ public class NPoint {
 
         this.setGiapWithXenMax = 0;
         this.skhBeerus = 0;
+        this.skhChampa = 0;
         this.tlSpeed = 0;
         this.teleport = false;
         this.wearingVoHinh = false;

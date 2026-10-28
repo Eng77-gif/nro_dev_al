@@ -2866,7 +2866,11 @@ INSERT INTO `item_option_template` VALUES
 (253,'+#% TN, SM cho đệ tử khi sư phụ mặc'),
 (254,'Khi HP dưới 50% tăng #% sức đánh trong 3 giây (hồi 180 giây)'),
 (255,'Đi cùng Lưỡi hái hồng tăng #% sức đánh chí mạng'),
-(256,'+#% sức đánh, tối đa 12% khi ở gần Lý Tiểu Nương : Hầu Gái xanh,hồng,bikini');
+(256,'+#% sức đánh, tối đa 12% khi ở gần Lý Tiểu Nương : Hầu Gái xanh,hồng,bikini'),
+(257,'Set Thần hủy diệt Champa'),
+(258,'$[2] Tăng vừa phải sát thương lên boss'),
+(259,'$[4] Tăng đáng kể sát thương lên boss'),
+(260,'$[5] Tăng mạnh sát thương lên boss và tăng đáng kể sức đánh chí mạng');
 /*!40000 ALTER TABLE `item_option_template` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `item_shop`;

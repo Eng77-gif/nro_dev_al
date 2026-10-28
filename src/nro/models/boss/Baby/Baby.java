@@ -85,6 +85,21 @@ public class Baby extends Boss {
             // Drop vật phẩm tùy chọn xuống bản đồ
             Service.gI().dropItemMap(zone, optionalItemMap);
         }
+        // Set Thần hủy diệt Champa: hành tinh / loại đồ ngẫu nhiên
+        if (Util.isTrue(10, 100)) {
+            int gear = nro.models.services.Event2026Service.randomSkhChampaGear();
+            ItemMap champa = new ItemMap(this.zone, gear, 1, x + Util.nextInt(-30, 30), y, plKill.id);
+            champa.options.addAll(ItemService.gI().getListOptionItemShop((short) gear));
+            nro.models.services.Event2026Service.addSkhChampaOptions(champa.options);
+            Service.gI().dropItemMap(zone, champa);
+        }
+        // Sao pha lê rơi nhiều: 3 - 6 viên mỗi lần, 30% thêm sao pha lê cấp 2
+        for (int i = Util.nextInt(3, 6); i > 0; i--) {
+            Service.gI().dropItemMap(zone, new ItemMap(this.zone, Util.nextInt(441, 447), 1, x + Util.nextInt(-60, 60), y, plKill.id));
+        }
+        if (Util.isTrue(30, 100)) {
+            Service.gI().dropItemMap(zone, new ItemMap(this.zone, Util.nextInt(1416, 1422), Util.nextInt(1, 3), x + Util.nextInt(-60, 60), y, plKill.id));
+        }
         // 80% xác suất rơi ngọc rồng
         if (Util.isTrue(10, 100)) {
             int[] dropItems = {15, 16, 17, 18, 19, 20, 992};
