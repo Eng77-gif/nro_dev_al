@@ -1082,3 +1082,15 @@ Code mới: `services/AnnounceService.java`.
   - Tạo / xóa giftcode và thêm / xóa quà trong hộp: server nạp lại ngay.
   - Đặt / xóa NPC ở Đảo Kamê, bật / tắt sự kiện, gọi boss, tỉ lệ EXP, nạp lại shop.
   - SQL chặn câu sửa dữ liệu.
+
+## Đợt 45: Client J2ME (Dragonboy247 v7.0) cho server riêng
+- Thư mục `tools/j2me-client/`:
+  - `NRO_J2ME.jar`: đã trỏ về 36.50.135.16:14445.
+  - `patch_client.py`: đổi IP / port / tên server.
+  - `HUONG_DAN.md`: hướng dẫn cài và cấu hình J2ME Loader cho mượt.
+- Chuỗi trong client mã hóa bằng khóa `hunghero` (ký tự − i%9 − khóa[i%8]). Công cụ thay 8 chuỗi danh sách server / IP mặc định, không biên dịch lại class. 755/759 file giữ nguyên.
+- **Đã đối chiếu tĩnh với server:**
+  - Gói `setClientType` gửi đúng thứ tự trường, phiên bản 2.4.6 (server tính 246).
+  - Gói đăng nhập khớp.
+- **Chưa chạy thử client thật:** không được phép chạy jar của bên thứ ba trong môi trường làm việc.
+- Tính năng Firebase "Điều khiển từ xa" của mod mặc định tắt.
