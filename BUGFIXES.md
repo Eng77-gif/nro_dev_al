@@ -922,3 +922,9 @@ Chỉ số Ngọc rồng xanh (ngẫu nhiên mỗi lần khảm):
 - Còn 0 ngọc xanh, 1000 hồng ngọc: sau pha lê hóa và cường hóa lỗ 10 còn 850 hồng ngọc.
 - Mở 2 hộp chọn đúng viên.
 - Nhận mốc 1 món, lưu lại sau khi thoát.
+
+## Đợt 38: Nâng cấp vật phẩm chỉ tới +9
+- `MAX_LEVEL_ITEM` từ 13 về 9 theo yêu cầu.
+- Đồ +8 vẫn nâng được lên +9. Đồ +9 báo "đã đạt cấp tối đa".
+- Kiểm tra DB: không có người chơi nào giữ đồ trên +9.
+- Bảng giá và tỉ lệ cho +10 trở lên vẫn để trong code nhưng không còn dùng tới.

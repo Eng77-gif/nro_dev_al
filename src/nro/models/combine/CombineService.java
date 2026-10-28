@@ -20,7 +20,7 @@ import nro.models.services.InventoryService;
 public class CombineService {
     
     public static final byte MAX_STAR_ITEM = 10;
-    public static final byte MAX_LEVEL_ITEM = 13;
+    public static final byte MAX_LEVEL_ITEM = 9;
     public static final int DANG_SINH_LE = 8999;
     
     private static final byte OPEN_TAB_COMBINE = 0;
