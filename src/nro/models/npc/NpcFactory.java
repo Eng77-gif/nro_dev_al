@@ -367,6 +367,8 @@ public class NpcFactory {
                                 Service.gI().sendThongBao(player, "Lựa chọn không hợp lệ.");
                         }
                     }
+                    case nro.models.services.CapsuleVoService.MANH_CAPSULE_VO, nro.models.services.CapsuleVoService.PHIEU_DOI_CAPSULE ->
+                        nro.models.services.CapsuleVoService.gI().confirm(player, player.idMark.getIndexMenu(), select);
                     case nro.models.services.SaoPhaLe10Service.HOP_DA_9, nro.models.services.SaoPhaLe10Service.HOP_NRX ->
                         nro.models.services.SaoPhaLe10Service.gI().openBox(player, player.idMark.getIndexMenu(), select);
                     case nro.models.services.Event2026Service.SKH_BEERUS_BOX ->

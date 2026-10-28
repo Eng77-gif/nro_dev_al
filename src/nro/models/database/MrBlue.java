@@ -587,66 +587,26 @@ public class MrBlue {
             int timeCuongNo2 = Integer.parseInt(String.valueOf(dataArray.get(7)));
             int timeAnDanh = Integer.parseInt(String.valueOf(dataArray.get(8)));
             int timeAnDanh2 = Integer.parseInt(String.valueOf(dataArray.get(9)));
-            if (dataArray.size() > 10) {
-                timeOpenPower = Integer.parseInt(String.valueOf(dataArray.get(10)));
-            }
-            if (dataArray.size() > 11) {
-                timeMayDo = Integer.parseInt(String.valueOf(dataArray.get(11)));
-            }
-            if (dataArray.size() > 12) {
-                timeKhoBauX2 = Integer.parseInt(String.valueOf(dataArray.get(12)));
-            }
-            if (dataArray.size() > 13) {
-            }
-            if (dataArray.size() > 14) {
-                timeMeal = Integer.parseInt(String.valueOf(dataArray.get(14)));
-            }
-            if (dataArray.size() > 15) {
-                iconMeal = Integer.parseInt(String.valueOf(dataArray.get(15)));
-            }
-            if (dataArray.size() > 16) {
-                timeUseTDLT = Integer.parseInt(String.valueOf(dataArray.get(16)));
-            }
-            if (dataArray.size() > 17) {
-                timeUseCMS = Integer.parseInt(String.valueOf(dataArray.get(17)));
-            }
-            if (dataArray.size() > 18) {
-                timeUseGTPT = Integer.parseInt(String.valueOf(dataArray.get(18)));
-            }
-            if (dataArray.size() > 19) {
-                timeUseDK = Integer.parseInt(String.valueOf(dataArray.get(19)));
-            }
-            if (dataArray.size() > 20) {
-                timeUseRX = Integer.parseInt(String.valueOf(dataArray.get(20)));
-            }
-            if (dataArray.size() > 21) {
-                timeMeal2 = Integer.parseInt(String.valueOf(dataArray.get(21)));
-            }
-            if (dataArray.size() > 22) {
-                iconMeal2 = Integer.parseInt(String.valueOf(dataArray.get(22)));
-            }
-            if (dataArray.size() > 23) {
-            }
-            if (dataArray.size() > 24) {
-                timeUseNCD = Integer.parseInt(String.valueOf(dataArray.get(24)));
-            }
-            if (dataArray.size() > 25) {
-                timeBuaSanta = Integer.parseInt(String.valueOf(dataArray.get(25)));
-            }
-            if (dataArray.size() > 26) {
-                timeKilis = (int) Long.parseLong(String.valueOf(dataArray.get(26)));
-            }
-            if (dataArray.size() > 27) {
-                timeNuocMia1 = (int) Long.parseLong(String.valueOf(dataArray.get(27)));
-            }
-            if (dataArray.size() > 28) {
-                timeNuocMia2 = (int) Long.parseLong(String.valueOf(dataArray.get(28)));
-            }
-            if (dataArray.size() > 29) {
-                timeNuocMia3 = (int) Long.parseLong(String.valueOf(dataArray.get(28)));
-            }
-            if (dataArray.size() > 30) {
-            }
+            // thứ tự ô phải khớp PlayerDAO.updatePlayer (data_item_time)
+            timeOpenPower = (int) itemTimeAt(dataArray, 10);
+            timeMayDo = (int) itemTimeAt(dataArray, 11);
+            timeCoBonLa = itemTimeAt(dataArray, 12);
+            timeKhoBauX2 = (int) itemTimeAt(dataArray, 13);
+            timeBuaSanta = (int) itemTimeAt(dataArray, 14);
+            timeMeal = (int) itemTimeAt(dataArray, 15);
+            iconMeal = (int) itemTimeAt(dataArray, 16);
+            timeUseTDLT = (int) itemTimeAt(dataArray, 17);
+            timeUseCMS = (int) itemTimeAt(dataArray, 18);
+            timeUseGTPT = (int) itemTimeAt(dataArray, 19);
+            timeUseDK = (int) itemTimeAt(dataArray, 20);
+            timeUseRX = (int) itemTimeAt(dataArray, 21);
+            timeMeal2 = (int) itemTimeAt(dataArray, 22);
+            iconMeal2 = (int) itemTimeAt(dataArray, 23);
+            timeUseNCD = (int) itemTimeAt(dataArray, 25);
+            timeNuocMia1 = itemTimeAt(dataArray, 26);
+            timeNuocMia2 = itemTimeAt(dataArray, 27);
+            timeNuocMia3 = itemTimeAt(dataArray, 28);
+            timeKilis = itemTimeAt(dataArray, 29);
 
             player.itemTime.lastTimeBoHuyet = System.currentTimeMillis() - (ItemTime.TIME_ITEM - timeBoHuyet);
             player.itemTime.lastTimeBoKhi = System.currentTimeMillis() - (ItemTime.TIME_ITEM - timeBoKhi);
@@ -698,10 +658,17 @@ public class MrBlue {
             player.itemTime.iconMeal2 = iconMeal2;
             player.itemTime.isEatMeal2 = timeMeal2 != 0;
             player.itemTime.isUseNCD = timeUseNCD != 0;
-            player.itemTime.isUseKilis = timeKilis != 0;
-            player.itemTime.isUseNuocMia1 = timeNuocMia1 != 0;
-            player.itemTime.isUseNuocMia2 = timeNuocMia2 != 0;
-            player.itemTime.isUseNuocMia3 = timeNuocMia3 != 0;
+            player.itemTime.isUseCoBonLa = timeCoBonLa > 0;
+            player.itemTime.timeLengthCoBonLa = ItemTime.TIME_CO_BON_LA;
+            player.itemTime.isUseKilis = timeKilis > 0;
+            player.itemTime.lastTimeUseKilis = System.currentTimeMillis();
+            player.itemTime.timeLengthKilis = Math.max(0, timeKilis);
+            player.itemTime.isUseNuocMia1 = timeNuocMia1 > 0;
+            player.itemTime.isUseNuocMia2 = timeNuocMia2 > 0;
+            player.itemTime.isUseNuocMia3 = timeNuocMia3 > 0;
+            player.itemTime.lastTimeUseNuocMia1 = System.currentTimeMillis() - (ItemTime.TIME_NUOC_MIA1 - timeNuocMia1);
+            player.itemTime.lastTimeUseNuocMia2 = System.currentTimeMillis() - (ItemTime.TIME_NUOC_MIA2 - timeNuocMia2);
+            player.itemTime.lastTimeUseNuocMia3 = System.currentTimeMillis() - (ItemTime.TIME_NUOC_MIA3 - timeNuocMia3);
             dataArray.clear();
 
             //data nhiệm vụ
@@ -1355,5 +1322,17 @@ public class MrBlue {
         } catch (NumberFormatException e) {
         }
         return ops;
+    }
+
+    /** Ô thứ index của data_item_time, 0 nếu thiếu (dữ liệu cũ ngắn hơn). */
+    private static long itemTimeAt(JSONArray arr, int index) {
+        if (arr == null || arr.size() <= index) {
+            return 0;
+        }
+        try {
+            return Long.parseLong(String.valueOf(arr.get(index)));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 }

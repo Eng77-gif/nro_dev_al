@@ -21,6 +21,8 @@ public class TaiTaoCapsuleKichHoat {
 
     private static final int KHOANG_TAI_CHE_ID = 1656;
     private static final int CAPSULE_ID = 1634;
+    /** Capsule vỡ bản sự kiện (2111) dùng thay được cho 1634 */
+    private static final int CAPSULE_ID_2 = 2111;
 
     private static final int REQUIRED_KHOANG = 3;
     private static final int REQUIRED_CAPSULE = 1;
@@ -37,7 +39,7 @@ public class TaiTaoCapsuleKichHoat {
         for (Item item : player.combineNew.itemsCombine) {
             if (item.template.id == KHOANG_TAI_CHE_ID) {
                 countKhoang += item.quantity;
-            } else if (item.template.id == CAPSULE_ID) {
+            } else if ((item.template.id == CAPSULE_ID || item.template.id == CAPSULE_ID_2)) {
                 countVatLieu2 += item.quantity;
             }
         }
@@ -79,7 +81,7 @@ public class TaiTaoCapsuleKichHoat {
         for (Item item : player.combineNew.itemsCombine) {
             if (item.template.id == KHOANG_TAI_CHE_ID) {
                 countKhoang += item.quantity;
-            } else if (item.template.id == CAPSULE_ID) {
+            } else if ((item.template.id == CAPSULE_ID || item.template.id == CAPSULE_ID_2)) {
                 countCapsule += item.quantity;
             }
         }
@@ -96,7 +98,8 @@ public class TaiTaoCapsuleKichHoat {
 
         player.inventory.gold -= GOLD_TAI_TAO;
         removeItem(player, KHOANG_TAI_CHE_ID, REQUIRED_KHOANG);
-        removeItem(player, CAPSULE_ID, REQUIRED_CAPSULE);
+        int left = removeItem(player, CAPSULE_ID, REQUIRED_CAPSULE);
+        removeItem(player, CAPSULE_ID_2, left);
 
         if (Util.isTrue(RATIO_TAI_TAO, 100)) {
             int itemId = 1655;
@@ -117,7 +120,7 @@ public class TaiTaoCapsuleKichHoat {
         CombineService.gI().reOpenItemCombine(player);
     }
 
-    private static void removeItem(Player player, int itemId, int quantityToRemove) {
+    private static int removeItem(Player player, int itemId, int quantityToRemove) {
         List<Item> items = new ArrayList<>(player.combineNew.itemsCombine);
         for (Item item : items) {
             if (item != null && item.template != null && quantityToRemove > 0) {
@@ -128,6 +131,7 @@ public class TaiTaoCapsuleKichHoat {
                 }
             }
         }
+        return quantityToRemove;
     }
 
 }

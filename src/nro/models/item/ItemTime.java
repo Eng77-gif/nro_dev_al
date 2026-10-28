@@ -228,7 +228,7 @@ public class ItemTime {
             }
         }
         if (isUseKilis) {
-            if (Util.canDoWithTime(lastTimeUseKilis, TIME_KILIS)) {
+            if (Util.canDoWithTime(lastTimeUseKilis, timeLengthKilis)) { // bùa Osin: 10 phút mỗi lần, cộng dồn tối đa 60 phút
                 isUseKilis = false;
             }
         }

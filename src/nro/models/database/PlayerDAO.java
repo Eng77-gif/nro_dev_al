@@ -623,7 +623,7 @@ public class PlayerDAO {
                 dataArray.add((player.itemTime.isUseNuocMia1 ? (ItemTime.TIME_NUOC_MIA1 - (System.currentTimeMillis() - player.itemTime.lastTimeUseNuocMia1)) : 0));
                 dataArray.add((player.itemTime.isUseNuocMia2 ? (ItemTime.TIME_NUOC_MIA2 - (System.currentTimeMillis() - player.itemTime.lastTimeUseNuocMia2)) : 0));
                 dataArray.add((player.itemTime.isUseNuocMia3 ? (ItemTime.TIME_NUOC_MIA3 - (System.currentTimeMillis() - player.itemTime.lastTimeUseNuocMia3)) : 0));
-                dataArray.add((player.itemTime.isUseKilis ? (ItemTime.TIME_KILIS - (System.currentTimeMillis() - player.itemTime.lastTimeUseKilis)) : 0));
+                dataArray.add((player.itemTime.isUseKilis ? Math.max(0, player.itemTime.lastTimeUseKilis + player.itemTime.timeLengthKilis - System.currentTimeMillis()) : 0));
                 dataArray.add(0);
                 dataArray.add(0);
                 String itemTime = dataArray.toJSONString();

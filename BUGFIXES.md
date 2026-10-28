@@ -950,3 +950,32 @@ Chỉ số Ngọc rồng xanh (ngẫu nhiên mỗi lần khảm):
   - +8 với Hiện Thực hiện "Cần 10 Đá Hiện Thực". Bấm thất bại thì trừ đúng 10 viên và rớt về +7.
   - +7 với Hiện Thực bị chặn.
   - Lỗ 9 khảm đá thường được.
+
+## Đợt 40: Capsule Vỡ, phân rã kích hoạt theo video; kiểm tra hành tinh thực vật, Kilis, đổi đệ
+**Tính năng theo video** ("Nhận quà top 10, chế tạo Capsule Vỡ, làm phôi SKH")
+- **Mảnh Cápsule Vỡ (1909):** đủ 999 mảnh thì bấm Sử dụng. Hỏi "Ngươi có muốn đổi 999 Mảnh Cápsule Vỡ lấy 1 Cápsule Vỡ không?", Đồng ý thì nhận Cápsule Vỡ (1634). Chưa đủ thì báo số đang có.
+- **Phiếu đổi Cápsule (1690):** đủ 99 phiếu thì đổi 1 Cápsule kích hoạt 1 món tự chọn (1655), hỏi như trên.
+- **Phân rã trang bị kích hoạt (Bà Hạt Mít):** chọn một hay nhiều món cùng lúc như video, mỗi món ra 1 Khoáng tái chế, 2 tỷ vàng/món. Trước chỉ được 1 món. Món không phải đồ kích hoạt thì báo tên món đó.
+- **Tái tạo Capsule kích hoạt:** nhận cả "Capsule vỡ" bản sự kiện (2111) ngoài Cápsule Vỡ (1634). Trước 2111 không dùng được gì.
+
+**Hành tinh thực vật (156 – 166)**
+- Quái **Cadic M** (quái duy nhất ở Sa mạc hoang vu 165, map úp Kilis): ảnh zoom x3 là hình con thỏ của quái khác. Ai chơi zoom x3 sẽ thấy quái lỗi. Đã dựng lại x3 từ bản x2. Quét 108 quái, không còn con nào bị như vậy.
+- Thử 12 cổng của Thánh địa (156 – 159) và Khu hang động → Làng Plant (160 – 163): đều đến đúng map, đúng chỗ.
+- Nhẫn thời không đi và về đúng.
+
+**Kilis / bình hút năng lượng / đổi đệ**
+- **Bùa hỗ trợ của Osin (5 ngọc, 10 phút):**
+  - Trước đây luôn tắt sau đúng 60 phút, không theo thời gian đã mua. Nay mua 10 phút được 10 phút, cộng dồn tối đa 60 phút.
+  - Trước đây thoát game là mất bùa. Nay lưu đúng thời gian còn lại.
+- **Lưu thời gian item (data_item_time):** server lưu 32 ô nhưng đọc lệch từ ô 12. Sau khi đăng nhập lại, thời gian bị tráo:
+  - Bùa Santa vào thức ăn.
+  - Thức ăn vào tự động luyện tập.
+  - Bùa Kilis vào nước mía.
+  - Nhiều bùa khác cũng bị lệch.
+  
+  Nay đọc đúng thứ tự lưu.
+- **Map tích Kilis:** trước là mọi map có id ≥ 165 (cả Thành cổ, Rừng nguyên sinh…). Nay chỉ Sa mạc hoang vu (165).
+- **Đã thử:**
+  - Mua bùa nhận icon 10 phút. Thoát game còn đúng thời gian.
+  - Đánh Cadic tích Kilis vào bình.
+  - Bình 3000 Kilis + đệ Mabư 40 tỷ sức mạnh: đổi được đệ (ra Uub), bình bị trừ. Bình 2999 Kilis bị từ chối.

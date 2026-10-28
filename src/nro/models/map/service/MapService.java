@@ -466,8 +466,9 @@ public class MapService {
         return mapId >= 131 && mapId <= 133;
     }
     
+    /** Sa mạc hoang vu: map hút năng lượng tà ác của Cadic (tích Kilis vào Bình hút năng lượng). */
     public boolean isMapCadic(int mapId) {
-        return mapId >= 165;
+        return mapId == 165;
     }
 
     public boolean isMapBossFinal(int mapId) {
